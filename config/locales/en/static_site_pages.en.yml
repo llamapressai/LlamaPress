@@ -1,0 +1,107 @@
+en:
+  static_site_pages: &static_site_pages
+    label: &label Static Site Pages
+    breadcrumbs:
+      label: *label
+    navigation:
+      label: *label
+      icon: fal fa-puzzle-piece
+    buttons: &buttons
+      new: Add New Static Site Page
+      create: Create Static Site Page
+      edit: Edit Static Site Page
+      update: Update Static Site Page
+      destroy: Remove Static Site Page
+      shorthand:
+        edit: Edit
+        destroy: Delete
+      confirmations:
+        # TODO customize for your use-case.
+        destroy: Are you sure you want to remove %{static_site_page_name}? This will also remove any child resources and can't be undone.
+    static_site_page:
+      buttons: *buttons
+    fields: &fields
+      id:
+        heading: Static Site Page ID
+      static_site_id:
+        heading: Static Site ID
+      content:
+        _: &content Content
+        label: *content
+        heading: *content
+        api_title: *content
+        api_description: *content
+      slug:
+        _: &slug Slug
+        label: *slug
+        heading: *slug
+        api_title: *slug
+        api_description: *slug
+      prompt:
+        _: &prompt Prompt
+        label: *prompt
+        heading: *prompt
+        api_title: *prompt
+        api_description: *prompt
+      # 🚅 super scaffolding will insert new fields above this line.
+      created_at:
+        _: &created_at Added
+        label: *created_at
+        heading: *created_at
+      updated_at:
+        _: &updated_at Updated
+        label: *updated_at
+        heading: *updated_at
+    api:
+      collection_actions: "Collection Actions for Static Site Pages"
+      index: "List Static Site Pages"
+      create: "Add a New Static Site Page"
+      member_actions: "Actions for an Individual Static Site Page"
+      show: "Retrieve a Static Site Page"
+      update: "Update a Static Site Page"
+      destroy: "Delete a Static Site Page"
+      fields: *fields
+    index:
+      section: "%{static_sites_possessive} Static Site Pages"
+      contexts:
+        static_site:
+          header: Static Site Pages
+          description: Below is a list of Static Site Pages that have been added for %{static_site_name}.
+          description_empty: No Static Site Pages have been added for %{static_site_name}.
+      fields: *fields
+      buttons: *buttons
+    show:
+      section: "%{static_site_page_name}"
+      header: Static Site Page Details
+      description: Below are the details we have for %{static_site_page_name}.
+      manage_description: You'll also find options for updating these details or removing %{static_site_page_name} from %{static_site_name} entirely.
+      fields: *fields
+      buttons: *buttons
+    form: &form
+      buttons: *buttons
+      fields: *fields
+    new:
+      section: "New Static Site Page for %{static_site_name}"
+      header: New Static Site Page Details
+      description: Please provide the details of the new Static Site Page you'd like to add to %{static_site_name}.
+      form: *form
+    edit:
+      section: "%{static_site_page_name}"
+      header: Edit Static Site Page Details
+      description: You can update the details or settings for %{static_site_page_name} below.
+      form: *form
+    notifications:
+      created: Static Site Page was successfully created.
+      updated: Static Site Page was successfully updated.
+      destroyed: Static Site Page was successfully destroyed.
+  account:
+    static_site_pages: *static_site_pages
+  activerecord:
+    attributes:
+      static_site_page:
+        content: *content
+        slug: *slug
+        prompt: *prompt
+        # 🚅 super scaffolding will insert new activerecord attributes above this line.
+        created_at: *created_at
+        updated_at: *updated_at

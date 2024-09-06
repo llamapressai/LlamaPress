@@ -1,0 +1,4 @@
+<%= render 'account/shared/page' do |page| %>
+  <% page.title t('.section') %>
+  <% page.body.render 'index', static_sites: @static_sites %>
+<% end %>

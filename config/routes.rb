@@ -66,6 +66,10 @@ Rails.application.routes.draw do
         namespace :integrations do
           # 🚅 super scaffolding will insert new integration installations above this line.
         end
+
+        resources :static_sites do
+          resources :static_site_pages
+        end
       end
     end
   end

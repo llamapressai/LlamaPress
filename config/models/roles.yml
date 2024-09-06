@@ -1,5 +1,7 @@
 default:
   models:
+    StaticSitePage: read
+    StaticSite: read
     Team: read
     Membership:
       - read
@@ -28,6 +30,8 @@ admin:
     - admin
     - editor
   models:
+    StaticSitePage: manage
+    StaticSite: manage
     Team: manage
     Membership: manage
     Scaffolding::AbsolutelyAbstract::CreativeConcept: manage

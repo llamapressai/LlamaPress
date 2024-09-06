@@ -1,0 +1,100 @@
+en:
+  static_sites: &static_sites
+    label: &label Static Sites
+    breadcrumbs:
+      label: *label
+    navigation:
+      label: *label
+      icon: ti ti-world
+    buttons: &buttons
+      new: Add New Static Site
+      create: Create Static Site
+      edit: Edit Static Site
+      update: Update Static Site
+      destroy: Remove Static Site
+      shorthand:
+        edit: Edit
+        destroy: Delete
+      confirmations:
+        # TODO customize for your use-case.
+        destroy: Are you sure you want to remove %{static_site_name}? This will also remove any child resources and can't be undone.
+    static_site:
+      buttons: *buttons
+    fields: &fields
+      id:
+        heading: Static Site ID
+      team_id:
+        heading: Team ID
+      name:
+        _: &name Name
+        label: *name
+        heading: *name
+        api_title: *name
+        api_description: *name
+      slug:
+        _: &slug Slug
+        label: *slug
+        heading: *slug
+        api_title: *slug
+        api_description: *slug
+      # 🚅 super scaffolding will insert new fields above this line.
+      created_at:
+        _: &created_at Added
+        label: *created_at
+        heading: *created_at
+      updated_at:
+        _: &updated_at Updated
+        label: *updated_at
+        heading: *updated_at
+    api:
+      collection_actions: "Collection Actions for Static Sites"
+      index: "List Static Sites"
+      create: "Add a New Static Site"
+      member_actions: "Actions for an Individual Static Site"
+      show: "Retrieve a Static Site"
+      update: "Update a Static Site"
+      destroy: "Delete a Static Site"
+      fields: *fields
+    index:
+      section: "%{teams_possessive} Static Sites"
+      contexts:
+        team:
+          header: Static Sites
+          description: Below is a list of Static Sites that have been added for %{team_name}.
+          description_empty: No Static Sites have been added for %{team_name}.
+      fields: *fields
+      buttons: *buttons
+    show:
+      section: "%{static_site_name}"
+      header: Static Site Details
+      description: Below are the details we have for %{static_site_name}.
+      manage_description: You'll also find options for updating these details or removing %{static_site_name} from %{team_name} entirely.
+      fields: *fields
+      buttons: *buttons
+    form: &form
+      buttons: *buttons
+      fields: *fields
+    new:
+      section: "New Static Site for %{team_name}"
+      header: New Static Site Details
+      description: Please provide the details of the new Static Site you'd like to add to %{team_name}.
+      form: *form
+    edit:
+      section: "%{static_site_name}"
+      header: Edit Static Site Details
+      description: You can update the details or settings for %{static_site_name} below.
+      form: *form
+    notifications:
+      created: Static Site was successfully created.
+      updated: Static Site was successfully updated.
+      destroyed: Static Site was successfully destroyed.
+  account:
+    static_sites: *static_sites
+  activerecord:
+    attributes:
+      static_site:
+        name: *name
+        slug: *slug
+        # 🚅 super scaffolding will insert new activerecord attributes above this line.
+        created_at: *created_at
+        updated_at: *updated_at

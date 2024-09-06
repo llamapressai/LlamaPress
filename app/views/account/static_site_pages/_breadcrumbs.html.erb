@@ -1,0 +1,8 @@
+<% static_site_page ||= @static_site_page %>
+<% static_site ||= @static_site || static_site_page&.static_site %>
+<%= render 'account/static_sites/breadcrumbs', static_site: static_site %>
+<%= render 'account/shared/breadcrumb', label: t('.label'), url: [:account, static_site, :static_site_pages] %>
+<% if static_site_page&.persisted? %>
+  <%= render 'account/shared/breadcrumb', label: static_site_page.label_string, url: [:account, static_site_page] %>
+<% end %>
+<%= render 'account/shared/breadcrumbs/actions', only_for: 'static_site_pages' %>

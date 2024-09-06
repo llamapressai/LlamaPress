@@ -1,0 +1,27 @@
+<% static_site = @static_site || @static_site %>
+<% context ||= static_site %>
+<% collection ||= :static_site_pages %>
+<% hide_actions ||= false %>
+<% hide_back ||= false %>
+
+<% with_attribute_settings object: static_site_page do %>
+  <tr data-id="<%= static_site_page.id %>">
+    <%= render "shared/tables/checkbox", object: static_site_page %>
+    <td><%= render 'shared/attributes/text', attribute: :content, url: [:account, static_site_page] %></td>
+    <td><%= render 'shared/attributes/text', attribute: :slug %></td>
+    <td><%= render 'shared/attributes/text', attribute: :prompt %></td>
+    <%# 🚅 super scaffolding will insert new fields above this line. %>
+    <td><%= render 'shared/attributes/date_and_time', attribute: :created_at %></td>
+    <td class="buttons">
+      <% unless hide_actions %>
+        <% if can? :edit, static_site_page %>
+          <%= link_to t('.buttons.shorthand.edit'), [:edit, :account, static_site_page], class: 'button-secondary button-smaller' %>
+        <% end %>
+        <% if can? :destroy, static_site_page %>
+          <%= button_to t('.buttons.shorthand.destroy'), [:account, static_site_page], method: :delete, data: { confirm: t('.buttons.confirmations.destroy', model_locales(static_site_page)) }, class: 'button-secondary button-smaller' %>
+        <% end %>
+        <%# 🚅 super scaffolding will insert new action model buttons above this line. %>
+      <% end %>
+    </td>
+  </tr>
+<% end %>
