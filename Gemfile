@@ -165,6 +165,9 @@ group :development do
 
   # For colorizing text in command line scripts.
   gem "colorize"
+
+  # For running processes in the background.
+  gem "overmind"
 end
 
 group :test do
