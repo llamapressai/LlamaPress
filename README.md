@@ -70,6 +70,9 @@ Once installed just run `mise install` from the root of the project.
 # Install dependencies (ruby, postgres, etc.)
 mise install
 
+# Bundle the dependencies
+bundle install
+
 # Setup the database
 bundle exec rails db:setup
 
