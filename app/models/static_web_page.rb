@@ -2,8 +2,10 @@ class StaticWebPage < ApplicationRecord
   belongs_to :static_web_site, optional: true
   belongs_to :organization
 
+  before_create :ensure_static_web_site
+
   # Ensure the static web page has a static web site. If not, create one so the user doesn't have to.
-  def ensure_static_web_site(organization)
+  def ensure_static_web_site
     return if static_web_site.present?
 
     self.static_web_site = organization.static_web_sites.first || create_new_static_web_site(organization)
@@ -12,13 +14,13 @@ class StaticWebPage < ApplicationRecord
   private
 
   # Create a new static web site for the organization
-  def create_new_static_web_site(organization)
-    name = generate_unique_name(organization)
+  def create_new_static_web_site
+    name = generate_unique_name
     StaticWebSite.create!(name: name, organization: organization)
   end
 
   # Generate a unique name for the static web site
-  def generate_unique_name(organization)
+  def generate_unique_name
     base_name = organization.name.presence || self.slug || 'LlamaPress Site'
     name = base_name
     index = 1

@@ -3,7 +3,7 @@ class StaticWebPagesController < ApplicationController
 
   # GET /static_web_pages or /static_web_pages.json
   def index
-    @static_web_pages = StaticWebPage.all
+    @static_web_pages = current_organization.static_web_pages
   end
 
   # GET /static_web_pages/1 or /static_web_pages/1.json
@@ -12,8 +12,7 @@ class StaticWebPagesController < ApplicationController
 
   # GET /static_web_pages/new
   def new
-    @static_web_page = StaticWebPage.new
-    @static_web_page.ensure_static_web_site(current_organization)
+    @static_web_page = current_organization.static_web_pages.build
   end
 
   # GET /static_web_pages/1/edit
@@ -22,7 +21,7 @@ class StaticWebPagesController < ApplicationController
 
   # POST /static_web_pages or /static_web_pages.json
   def create
-    @static_web_page = StaticWebPage.new(static_web_page_params)
+    @static_web_page = current_organization.static_web_pages.build(static_web_page_params)
 
     respond_to do |format|
       if @static_web_page.save
