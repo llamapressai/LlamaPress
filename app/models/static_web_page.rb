@@ -1,10 +1,10 @@
 class StaticWebPage < ApplicationRecord
   belongs_to :static_web_site, optional: true
   belongs_to :organization
+  has_many :static_web_page_histories, dependent: :destroy
 
   before_create :ensure_static_web_site
-
-  has_many :static_web_page_histories, dependent: :destroy
+  after_initialize :set_default_html_content, if: :new_record?
 
   # Ensure the static web page has a static web site. If not, create one so the user doesn't have to.
   def ensure_static_web_site
@@ -25,6 +25,11 @@ class StaticWebPage < ApplicationRecord
     static_web_page_history.user_message = "Restore to previous version"
     static_web_page_history.static_web_page_id = self.id
     static_web_page_history.save
+  end
+
+  # Set the default html content for the static web page
+  def set_default_html_content
+    self.content = StaticWebPagesHelper.starting_html_content()
   end
 
   private
