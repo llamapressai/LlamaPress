@@ -89,14 +89,14 @@ rails db:seed
 rails s
 ```
 
-### Create config/local_env.yml and set up your openai and claude api keys
+### Create `config/local_env.yml` and set up your openai and claude api keys
 [local_env.yml](config/local_env.yml)
 ```
 OPENAI_API_TOKEN: "sk-<your openai key>"
 CLAUDE_API_TOKEN: "sk-ant-api03-<your claude key>"
 ```
 
-## put the llamabot library in lib. Full path: lib/llama_bot
+## put the llamabot library in lib. Full path: `lib/llama_bot`
 [llama_bot](lib/llama_bot)
 
 ## Run the server
