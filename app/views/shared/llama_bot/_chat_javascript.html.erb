@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoadingIndicator();
         let selectedElement = document.getElementById("selectedElementContent").innerHTML;
         try {
-            const response = await fetch('/chatbot/message.json', {
+            const response = await fetch('/llama_bot/message.json', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,10 @@
 Rails.application.routes.draw do
-  resources :static_web_pages
+  resources :static_web_pages do
+    member do
+      get 'histories'
+      post 'restore'
+    end
+  end
   resources :static_web_sites
   resources :static_web_page_histories
   devise_for :users, controllers: { registrations: 'users/registrations' }
@@ -17,4 +22,6 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "static_web_pages#index"
+
+  post "llama_bot/message" => "llama_bot#message", as: :llama_bot_message
 end

@@ -4,11 +4,27 @@ class StaticWebPage < ApplicationRecord
 
   before_create :ensure_static_web_site
 
+  has_many :static_web_page_histories, dependent: :destroy
+
   # Ensure the static web page has a static web site. If not, create one so the user doesn't have to.
   def ensure_static_web_site
     return if static_web_site.present?
 
     self.static_web_site = organization.static_web_sites.first || create_new_static_web_site(organization)
+  end
+
+  def restore(static_web_page_history)
+    self.save_history
+    self.content = static_web_page_history.content
+    self.save
+  end
+
+  def save_history()
+    static_web_page_history = StaticWebPageHistory.new
+    static_web_page_history.content = self.content
+    static_web_page_history.user_message = "Restore to previous version"
+    static_web_page_history.static_web_page_id = self.id
+    static_web_page_history.save
   end
 
   private

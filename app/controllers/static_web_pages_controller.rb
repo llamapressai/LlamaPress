@@ -62,6 +62,33 @@ class StaticWebPagesController < ApplicationController
     end
   end
 
+  def histories
+    @static_web_page = StaticWebPage.find(params[:id])
+    @static_web_page_histories = @static_web_page.static_web_page_histories.order(created_at: :desc)
+    respond_to do |format|
+      format.html # Renders the default history.html.erb view
+      format.json do
+        encoded_histories = @static_web_page_histories.map do |history|
+          history_data = history.as_json
+          history_data['content'] = Base64.strict_encode64(history.content)
+          history_data
+        end
+        encoded_histories_json_object = { web_page_histories: encoded_histories }
+        render json: encoded_histories_json_object
+      end
+    end
+  end
+
+  def restore
+    @static_web_page_history = StaticWebPageHistory.find(params[:static_web_page_history_id])
+    @static_web_page.restore(@static_web_page_history)
+    
+    respond_to do |format|
+      format.html { redirect_to static_web_page_path(@static_web_page), notice: "Static web page was successfully restored." }
+      format.json { render json: { message: "Static web page restored successfully", static_web_page: @static_web_page }, status: :ok }
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_static_web_page
