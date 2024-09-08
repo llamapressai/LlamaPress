@@ -36,3 +36,6 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+lib/llama_bot.rb
+config/local_env.yml
