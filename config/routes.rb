@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  resources :static_web_page_histories
+  resources :static_web_pages
+  resources :static_websites
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
   resources :organizations

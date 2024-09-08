@@ -1,0 +1,2 @@
+module StaticWebPageHistoriesHelper
+end
