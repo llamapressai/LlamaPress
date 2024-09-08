@@ -13,6 +13,7 @@ class StaticWebPagesController < ApplicationController
   # GET /static_web_pages/new
   def new
     @static_web_page = StaticWebPage.new
+    @static_web_page.ensure_static_web_site(current_organization)
   end
 
   # GET /static_web_pages/1/edit
