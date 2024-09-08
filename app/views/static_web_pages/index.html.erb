@@ -39,17 +39,14 @@
         </div>
         <div class="p-6 border-t-2 border-gray-700">
           <div class="flex items-center mb-3">
+          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
             <%# if web_page.organization.logo.attached? %>
               <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
             <%# else %>
-              <div class="w-12 h-12 mr-3 bg-gray-600 rounded-full flex items-center justify-center">
-                <span class="text-gray-300 text-lg"><%= web_page.organization.name %></span>
-              </div>
             <%# end %>
             <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
           </div>
           <p class="text-lg text-gray-300 mb-2"><%= web_page.organization.name %></p>
-          <p class="text-sm text-gray-400"><%= web_page.slug %></p>
         </div>
       <% end %>
     <% end %>

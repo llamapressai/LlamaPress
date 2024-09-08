@@ -26,3 +26,7 @@ rails db:seed
 
 # run the server
 rails s
+
+# sign into the account
+username: kody@llamapress.ai
+password: 123456
