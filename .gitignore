@@ -39,3 +39,6 @@
 
 lib/llama_bot/*
 config/local_env.yml
+
+#ignore byebug history
+.byebug_history
