@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_08_005144) do
+ActiveRecord::Schema[7.2].define(version: 2024_09_08_034920) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -25,6 +25,36 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_08_005144) do
     t.string "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "static_web_page_histories", force: :cascade do |t|
+    t.text "content"
+    t.bigint "static_web_page_id", null: false
+    t.text "prompt"
+    t.text "user_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["static_web_page_id"], name: "index_static_web_page_histories_on_static_web_page_id"
+  end
+
+  create_table "static_web_pages", force: :cascade do |t|
+    t.bigint "static_web_site_id", null: false
+    t.text "content"
+    t.string "slug"
+    t.string "prompt"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["static_web_site_id"], name: "index_static_web_pages_on_static_web_site_id"
+  end
+
+  create_table "static_web_sites", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name"
+    t.string "slug"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_static_web_sites_on_organization_id"
+    t.index ["slug"], name: "index_static_web_sites_on_slug", unique: true
   end
 
   create_table "users", force: :cascade do |t|
@@ -45,5 +75,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_08_005144) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "static_web_page_histories", "static_web_pages"
+  add_foreign_key "static_web_pages", "static_web_sites"
+  add_foreign_key "static_web_sites", "organizations"
   add_foreign_key "users", "organizations"
 end
