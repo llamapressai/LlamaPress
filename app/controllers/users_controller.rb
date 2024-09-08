@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  layout 'llama_bot'
   before_action :set_user, only: %i[ show edit update destroy ]
 
   # GET /users or /users.json
@@ -14,6 +13,7 @@ class UsersController < ApplicationController
   # GET /users/new
   def new
     @user = User.new
+    @user.build_organization
   end
 
   # GET /users/1/edit

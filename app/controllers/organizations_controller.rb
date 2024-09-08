@@ -1,5 +1,4 @@
 class OrganizationsController < ApplicationController
-  layout 'llama_bot'
   before_action :set_organization, only: %i[ show edit update destroy ]
 
   # GET /organizations or /organizations.json
