@@ -11,11 +11,16 @@ module LlamaScaffold
     end
 
     def set_default_layout
-      inject_into_class(
-        File.join("app/controllers", class_path, "#{controller_file_name}_controller.rb"),
-        "#{controller_class_name}Controller",
-        "  layout 'llama_bot'\n"
-      )
+      #TODO: Do we want to have a different layout for this llama_scaffold, than for the entire application? 
+      # Discuss with Danish.
+
+      # The below code will inject the layout into the controller of the new model.
+
+      # inject_into_class(
+      #   File.join("app/controllers", class_path, "#{controller_file_name}_controller.rb"),
+      #   "#{controller_class_name}Controller",
+      #   "  layout 'static_website'\n"
+      # )
     end
 
     private
