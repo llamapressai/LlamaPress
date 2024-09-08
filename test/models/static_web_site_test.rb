@@ -1,6 +1,6 @@
 require "test_helper"
 
-class StaticWebsiteTest < ActiveSupport::TestCase
+class StaticWebSiteTest < ActiveSupport::TestCase
   # test "the truth" do
   #   assert true
   # end

@@ -1,12 +1,12 @@
-class CreateStaticWebsites < ActiveRecord::Migration[7.2]
+class CreateStaticWebSites < ActiveRecord::Migration[7.2]
   def change
-    create_table :static_websites do |t|
+    create_table :static_web_sites do |t|
       t.references :organization, null: false, foreign_key: true
       t.string :name
       t.string :slug
 
       t.timestamps
     end
-    add_index :static_websites, :slug, unique: true
+    add_index :static_web_sites, :slug, unique: true
   end
 end

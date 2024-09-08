@@ -1,10 +1,10 @@
-<%= form_with(model: static_website, class: "contents") do |form| %>
-  <% if static_website.errors.any? %>
+<%= form_with(model: static_web_site, class: "contents") do |form| %>
+  <% if static_web_site.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
-      <h2><%= pluralize(static_website.errors.count, "error") %> prohibited this static_website from being saved:</h2>
+      <h2><%= pluralize(static_web_site.errors.count, "error") %> prohibited this static_web_site from being saved:</h2>
 
       <ul>
-        <% static_website.errors.each do |error| %>
+        <% static_web_site.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
       </ul>
