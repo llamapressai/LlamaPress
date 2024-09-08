@@ -1,3 +1,3 @@
 class StaticWebPage < ApplicationRecord
-  belongs_to :static_site
+  belongs_to :static_web_site
 end

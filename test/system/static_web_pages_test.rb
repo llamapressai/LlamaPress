@@ -17,7 +17,7 @@ class StaticWebPagesTest < ApplicationSystemTestCase
     fill_in "Content", with: @static_web_page.content
     fill_in "Prompt", with: @static_web_page.prompt
     fill_in "Slug", with: @static_web_page.slug
-    fill_in "Static site", with: @static_web_page.static_site_id
+    fill_in "Static web site", with: @static_web_page.static_web_site_id
     click_on "Create Static web page"
 
     assert_text "Static web page was successfully created"
@@ -31,7 +31,7 @@ class StaticWebPagesTest < ApplicationSystemTestCase
     fill_in "Content", with: @static_web_page.content
     fill_in "Prompt", with: @static_web_page.prompt
     fill_in "Slug", with: @static_web_page.slug
-    fill_in "Static site", with: @static_web_page.static_site_id
+    fill_in "Static web site", with: @static_web_page.static_web_site_id
     click_on "Update Static web page"
 
     assert_text "Static web page was successfully updated"

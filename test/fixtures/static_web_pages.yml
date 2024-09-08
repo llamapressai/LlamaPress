@@ -1,13 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  static_site: one
+  static_web_site: one
   content: MyText
   slug: MyString
   prompt: MyString
 
 two:
-  static_site: two
+  static_web_site: two
   content: MyText
   slug: MyString
   prompt: MyString

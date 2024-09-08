@@ -17,7 +17,7 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create static_web_page" do
     assert_difference("StaticWebPage.count") do
-      post static_web_pages_url, params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: @static_web_page.slug, static_site_id: @static_web_page.static_site_id } }
+      post static_web_pages_url, params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: @static_web_page.slug, static_web_site_id: @static_web_page.static_web_site_id } }
     end
 
     assert_redirected_to static_web_page_url(StaticWebPage.last)
@@ -34,7 +34,7 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update static_web_page" do
-    patch static_web_page_url(@static_web_page), params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: @static_web_page.slug, static_site_id: @static_web_page.static_site_id } }
+    patch static_web_page_url(@static_web_page), params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: @static_web_page.slug, static_web_site_id: @static_web_page.static_web_site_id } }
     assert_redirected_to static_web_page_url(@static_web_page)
   end
 
