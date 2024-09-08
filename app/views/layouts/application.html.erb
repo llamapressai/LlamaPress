@@ -43,6 +43,7 @@
           <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Icon" class="h-8 w-8 mr-2" data-llama="app/views/layouts/llama_bot.html.erb">
           <a href="/llama_bot" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
         </div>
+        <% if current_user %>
         <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
           <div class="hidden md:flex space-x-4 mr-4" data-llama="app/views/layouts/llama_bot.html.erb">
             <a href="/llama_bot" class="text-white hover:text-gray-300" title="Home" data-llama="app/views/layouts/llama_bot.html.erb">
@@ -73,6 +74,7 @@
             </svg>
           </button>
         </div>
+        <% end %>
       </div>
       <div id="mobile-menu" class="md:hidden hidden mt-2" data-llama="app/views/layouts/llama_bot.html.erb">
         <a href="/llama_bot" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
