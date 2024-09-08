@@ -76,8 +76,11 @@ Once installed just run `mise install` from the root of the project.
 # Install dependencies (ruby, postgres, node, yarn, redis, etc.)
 mise install
 
-# Start postgres and redis
+# Start postgres
 pg_ctl start
+
+# Create the database
+rails db:create
 
 # Run the migration
 rails db:migrate
