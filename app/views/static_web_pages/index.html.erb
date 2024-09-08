@@ -26,7 +26,7 @@
   <h1 class="text-2xl font-bold text-gray-800 mb-6">Web Pages</h1>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <% @web_pages&.order(updated_at: :desc)&.each do |web_page| %>
+    <% @static_web_pages&.order(updated_at: :desc)&.each do |web_page| %>
       <%= link_to web_page, class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
         <div class="aspect-w-16 aspect-h-24 bg-gray-700">
           <% if web_page.content.present? %>
@@ -39,16 +39,16 @@
         </div>
         <div class="p-6 border-t-2 border-gray-700">
           <div class="flex items-center mb-3">
-            <% if web_page.business.logo.attached? %>
-              <%= image_tag web_page.business.logo, class: "h-12 mr-3 object-cover" %>
-            <% else %>
+            <%# if web_page.organization.logo.attached? %>
+              <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
+            <%# else %>
               <div class="w-12 h-12 mr-3 bg-gray-600 rounded-full flex items-center justify-center">
-                <span class="text-gray-300 text-lg"><%= web_page.business.name.first.upcase %></span>
+                <span class="text-gray-300 text-lg"><%= web_page.organization.name %></span>
               </div>
-            <% end %>
-            <h2 class="font-bold text-xl text-white"><%= web_page.title %></h2>
+            <%# end %>
+            <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
           </div>
-          <p class="text-lg text-gray-300 mb-2"><%= web_page.business.name %></p>
+          <p class="text-lg text-gray-300 mb-2"><%= web_page.organization.name %></p>
           <p class="text-sm text-gray-400"><%= web_page.slug %></p>
         </div>
       <% end %>
