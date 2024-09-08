@@ -8,6 +8,11 @@ class StaticWebPagesController < ApplicationController
 
   # GET /static_web_pages/1 or /static_web_pages/1.json
   def show
+    content = @static_web_page.content
+
+    # Inject the chat partial
+    content += inject_chat_partial(content)
+    render inline: content.html_safe, layout: 'static_web_page'
   end
 
   # GET /static_web_pages/new
@@ -66,5 +71,17 @@ class StaticWebPagesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def static_web_page_params
       params.require(:static_web_page).permit(:static_web_site_id, :content, :slug, :prompt)
+    end
+
+    def inject_chat_partial(content)
+      <<-HTML
+        <div id="chat-container">
+          <div id="chat-messages"></div>
+          <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Type your message...">
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      HTML
     end
 end
