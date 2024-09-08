@@ -45,4 +45,19 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to static_web_pages_url
   end
+
+  test "should create static web page without needing user to create static web site" do
+    organization = organizations(:one)
+    assert_difference("StaticWebPage.count") do
+      post static_web_pages_url, params: { static_web_page: { 
+        content: @static_web_page.content, 
+        prompt: @static_web_page.prompt, 
+        slug: "unique-slug-#{Time.now.to_i}", 
+        static_web_site_id: @static_web_page.static_web_site_id 
+      } }
+    end
+    
+    assert_response :redirect
+    assert_redirected_to static_web_page_url(StaticWebPage.last)
+  end
 end
