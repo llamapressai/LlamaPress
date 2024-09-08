@@ -1,0 +1,392 @@
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const chatIcon = document.getElementById('chatIcon');
+    const chatbotContainer = document.getElementById('chatbotContainer');
+    const closeButton = document.getElementById('closeButton');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+    const userInput = document.getElementById('userInput');
+    const sendButton = document.getElementById('sendButton');
+
+    const modal = document.getElementById('historyModal');
+    const closeModal = document.getElementById('closeModal');
+    const leftArrow = document.getElementById('leftArrow');
+    const rightArrow = document.getElementById('rightArrow');
+
+    closeModal.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    });
+
+    leftArrow.addEventListener('click', () => {
+        // Implement left navigation logic
+    });
+
+    rightArrow.addEventListener('click', () => {
+        // Implement right navigation logic
+    });
+
+    // Example: Open modal on button click
+    // const openHistoryModalButton = document.getElementById('openHistoryModalButton');
+    // openHistoryModalButton.addEventListener('click', openHistoryModal);
+
+    let isOpen = false;
+    let isLoading = false;
+    let messages = [];
+
+    function toggleChat() {
+        isOpen = !isOpen;
+        chatbotContainer.classList.toggle('hidden', !isOpen);
+    }
+
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `mb-2 p-2 rounded ${sender === 'bot' ? 'bg-blue-100 self-start' : 'bg-green-100 self-end'}`;
+        messageDiv.textContent = text;
+        chatbotMessages.appendChild(messageDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function showLoadingIndicator() {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'loadingIndicator';
+        loadingDiv.className = 'text-center p-2';
+        loadingDiv.textContent = 'Thinking...';
+        chatbotMessages.appendChild(loadingDiv);
+    }
+
+    function hideLoadingIndicator() {
+        const loadingDiv = document.getElementById('loadingIndicator');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+    }
+
+    async function sendMessage() {
+        if (userInput.value.trim() === '' || isLoading) return;
+
+        const userMessage = userInput.value;
+        addMessage(userMessage, 'user');
+        userInput.value = '';
+        isLoading = true;
+        showLoadingIndicator();
+        let selectedElement = document.getElementById("selectedElementContent").innerHTML;
+        try {
+            const response = await fetch('/chatbot/message.json', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    message: userMessage, 
+                    context: '<%=@view_path%>', 
+                    selectedElement: selectedElement, 
+                    webPageId: '<%=@static_web_page&.id%>'
+                })
+            });
+            const data = await response.json();
+            addMessage(data.response, 'bot');
+        } catch (error) {
+            console.error('Error sending message to ChatGPT:', error);
+        } finally {
+            isLoading = false;
+            hideLoadingIndicator();
+        }
+    }
+
+    chatIcon.addEventListener('click', toggleChat);
+    closeButton.addEventListener('click', toggleChat);
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function loadChatHistory() {
+        let webPageId = '<%=@static_web_page&.id%>';
+        if (webPageId) {
+            //TODO: fetch Chat History from /web_page_histories IF this web_page_id is present in the URL
+            fetch(`/static_web_pages/${webPageId}/histories.json`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    web_page_histories = data.web_page_histories;
+                    web_page_histories.forEach(history => {
+                        addWebPageHistoryToHistoryDrawer(history);
+                        //addMessage(history.text, history.sender);
+                    });
+                });
+        }
+    }
+
+    /**
+     * Add entry to web page history to the history drawer.
+     * @param {object} webPageHistory - The web page history to add.
+     */
+    function addWebPageHistoryToHistoryDrawer(webPageHistory) {
+        const historyDrawer = document.getElementById('historyDrawer');
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item cursor-pointer hover:bg-gray-100 p-2';
+        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
+        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
+        historyItem.textContent = new Date(webPageHistory.created_at).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit', hour12: false });
+        historyItem.onclick = function() {
+            const modal = document.getElementById('historyModal'); // Get modal element
+            const mainIframe = document.getElementById('mainIframe');
+            mainIframe.innerHTML = atob(webPageHistory.content);
+            document.getElementById('userPrompt').innerHTML = webPageHistory.user_message;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('restoreButton').setAttribute('llama-data-web-page-history-id', webPageHistory.id);
+        };
+        historyDrawer.appendChild(historyItem);
+    }
+
+    document.getElementById('restoreButton').addEventListener('click', function() {
+        console.log('restoreButton clicked');
+        // we need to do a POST with the webPageHistory.id to /static_web_pages/restore
+        let webPageId = '<%=@static_web_page&.id%>';
+        //QUESTION: how do I get this webpagehistory id?
+        // we save it to the restoreButton so that when the user clicks on the history item.. we have the ID.
+        
+        const webPageHistoryId = document.getElementById('restoreButton').getAttribute('llama-data-web-page-history-id');
+
+        fetch(`/static_web_pages/${webPageId}/restore.json?web_page_history_id=${webPageHistoryId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                web_page_history_id: webPageHistoryId
+            })
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Couldn\'t restore');
+            }
+        }).then(data => {
+            alert('Web page restored');
+            console.log('Web page restored:', data);
+            location.reload();
+        });
+    });
+
+    /**
+     * Return Summary of Prompt so user understand chat history better.
+     * @param {string} prompt - The original prompt from the user.
+     * @returns {string} - A summary of the prompt.
+     */
+    function summarizePrompt(prompt){
+        // Split the text into sentences
+        const sentences = prompt.split('.');
+        
+        // Take the first two sentences
+        const firstTwo = sentences.slice(0, 2);
+        
+        // Join them back together and trim whitespace
+        let summary = firstTwo.join('.').trim() + '.';
+        
+        // Truncate to a maximum of 50 words
+        const words = summary.split(/\s+/);
+        if (words.length > 50) {
+            summary = words.slice(0, 50).join(' ') + '...';
+        }
+        
+        return summary;
+    }
+
+    // Initial bot message
+    loadChatHistory();
+    addMessage('What do you want to build?', 'bot');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+});
+
+let inSelectionMode = false;
+let selectedElementHTML = null;
+
+function toggleSelectionMode() {
+    inSelectionMode = !inSelectionMode;
+    setExpandedToFalse(); // decrease chatbot size so that user can see more of the elements on the page.
+    document.body.classList.toggle('selection-mode');
+    console.log('Selection mode:', inSelectionMode ? 'ON' : 'OFF');
+}
+
+function handleElementSelection(event) {
+    if (!inSelectionMode) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const selectedElement = event.target;
+    console.log('Selected element:', selectedElement);
+
+    // Remove the selection class from any previously selected element
+    const previouslySelected = document.querySelector('.selected-element');
+    if (previouslySelected) {
+        previouslySelected.classList.remove('selected-element');
+    }
+
+    // Add selection class to the newly selected element
+    selectedElement.classList.add('selected-element');
+
+    // Here you can do whatever you want with the selected element
+    window.lastSelectedElement = selectedElement;
+
+    // Trigger a custom event
+    const customEvent = new CustomEvent('elementSelected', { detail: selectedElement });
+    document.dispatchEvent(customEvent);
+
+    // Turn off selection mode after selecting an element
+    toggleSelectionMode();
+}
+
+// Add necessary event listeners
+document.addEventListener('click', handleElementSelection, true);
+
+// Add some basic styles if they haven't been added yet
+if (!document.getElementById('selection-mode-styles')) {
+    const style = document.createElement('style');
+    style.id = 'selection-mode-styles';
+    style.textContent = `
+        .selection-mode * {
+            cursor: pointer !important;
+        }
+        .selection-mode *:hover {
+            outline: 2px solid red !important;
+        }
+        .selected-element {
+            position: relative;
+        }
+        .selected-element::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 4px solid #3B82F6;
+            background-color: rgba(59, 130, 246, 0.1);
+            pointer-events: none;
+            z-index: 9999;
+        }
+    `;
+    document.head.appendChild(style);
+}
+// Listen for custom elementSelected event
+document.addEventListener('elementSelected', (e) => {
+    selectedElementHTML = e.detail;
+    
+    let selectedElementContainer = document.getElementById('selectedElementContainer');
+    let selectedElementContent = document.getElementById('selectedElementContent');
+    if (selectedElementHTML != null && selectedElementContainer != null) {
+        selectedElementContainer.style.display = 'block';
+        selectedElementContent.innerHTML = selectedElementHTML.outerHTML;
+        setSelectedElementContainerBackground(selectedElementHTML);
+    }
+
+    console.log('Element selected event:', selectedElementHTML);
+});
+
+// Add this to the end of the script
+document.getElementById('closeSelectedElement').addEventListener('click', function() {
+    console.log('Selected element closed');
+    document.getElementById('selectedElementContainer').style.display = 'none';
+    document.getElementById('selectedElementContent').innerHTML = '';
+});
+
+let isExpanded = false; // Change this to true
+const chatbotContainer = document.getElementById('chatbotContainer');
+const expandButton = document.getElementById('expandButton');
+
+// Add this function to set the expanded size
+function setExpandedSize() {
+    isExpanded = true;
+    chatbotContainer.style.width = '800px';
+    chatbotContainer.style.height = '800px';
+}
+
+function setExpandedToFalse() {
+    isExpanded = false;
+    chatbotContainer.style.width = '480px';
+    chatbotContainer.style.height = '576px';
+}
+
+// Call this function immediately after the page loads
+
+expandButton.addEventListener('click', function() {
+    isExpanded = !isExpanded;
+    if (isExpanded) {
+        setExpandedSize();
+    } else {
+        chatbotContainer.style.width = '480px';
+        chatbotContainer.style.height = '576px';
+    }
+});
+
+// Add this function to your existing JavaScript // this is for readability of the selected snippet 
+function setSelectedElementContainerBackground(selectedElement) {
+    const container = document.getElementById('selectedElementContainer');
+    const content = document.getElementById('selectedElementContent');
+    
+    // Get the background color of the parent element
+    let bgColor = window.getComputedStyle(selectedElement.parentElement).backgroundColor;
+    
+    // If the background is transparent, try to find the nearest parent with a background
+    let parent = selectedElement.parentElement;
+    while (bgColor === 'rgba(0, 0, 0, 0)' && parent.parentElement) {
+        parent = parent.parentElement;
+        bgColor = window.getComputedStyle(parent).backgroundColor;
+    }
+    
+    // Set the background color of the container
+    container.style.backgroundColor = bgColor;
+    
+    // Adjust text color for better contrast
+    const rgb = bgColor.match(/\d+/g);
+    if (rgb) {
+        const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+        content.style.color = brightness > 125 ? 'black' : 'white';
+    }
+}
+
+// Add this near the end of the script
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleImagesButton = document.getElementById('toggleImagesForUserToSelect');
+    const imagesContainer = document.getElementById('imagesForUserToSelect');
+
+    // Initially hide the images container
+    imagesContainer.style.display = 'none';
+
+    toggleImagesButton.addEventListener('click', () => {
+        if (imagesContainer.style.display === 'none') {
+            imagesContainer.style.display = 'block';
+        } else {
+            imagesContainer.style.display = 'none';
+        }
+    });
+});
+
+document.getElementById('historyButton').addEventListener('click', function() {
+    // Toggle the history drawer
+    const historyDrawer = document.getElementById('historyDrawer');
+    if (historyDrawer.classList.contains('hidden')) {
+        historyDrawer.classList.remove('hidden');
+    } else {
+        historyDrawer.classList.add('hidden');
+    }
+});
+
+document.getElementById('closeHistoryDrawer').addEventListener('click', function() {
+    document.getElementById('historyDrawer').classList.add('hidden');
+});
+</script>

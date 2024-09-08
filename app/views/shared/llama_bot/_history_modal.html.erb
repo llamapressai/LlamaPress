@@ -1,0 +1,57 @@
+<div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg p-8 max-w-4xl w-full max-h-screen overflow-y-auto">
+    <div class="flex justify-end">
+      <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="relative">
+      <div class="flex justify-end mb-4">
+      </div>
+      
+      <div id="mainIframe" class="w-full h-96 border-2 border-gray-300 rounded-lg shadow-lg overflow-y-auto"></div>
+      <div id="userPrompt" class="mt-4 p-4 bg-gray-100 rounded-lg shadow-inner">
+        <blockquote class="relative">
+          <svg class="absolute top-0 left-0 transform -translate-x-6 -translate-y-8 h-16 w-16 text-gray-300" fill="currentColor" viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
+          </svg>
+          <p class="relative z-10 text-lg text-gray-600 italic">
+            "<span id="userQuote" class="font-medium text-gray-900"></span>"
+          </p>
+        </blockquote>
+        <footer class="mt-2 text-right">
+          <p class="text-sm font-semibold text-gray-600">— User's request</p>
+        </footer>
+      </div>
+      
+      <button id="leftArrow" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      
+      <button id="rightArrow" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-4 gap-4 mt-8">
+      <iframe class="w-full h-24 border-0" src=""></iframe>
+      <iframe class="w-full h-24 border-0" src=""></iframe>
+      <iframe class="w-full h-24 border-0" src=""></iframe>
+      <iframe class="w-full h-24 border-0" src=""></iframe>
+    </div>
+
+    <div class="mt-8 text-center">
+      <button id="restoreButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-300 ease-in-out" data-llama-js="app/views/shared/chatbot/_chatbot_javascript.html.erb#restoreButton">
+        Restore Selected Chat
+      </button>
+    </div>
+  </div>
+</div>
+

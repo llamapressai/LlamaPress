@@ -74,14 +74,6 @@ class StaticWebPagesController < ApplicationController
     end
 
     def inject_chat_partial(content)
-      <<-HTML
-        <div id="chat-container">
-          <div id="chat-messages"></div>
-          <form id="chat-form">
-            <input type="text" id="chat-input" placeholder="Type your message...">
-            <button type="submit">Send</button>
-          </form>
-        </div>
-      HTML
+      render_to_string(partial: 'shared/llama_bot/chat')
     end
 end
