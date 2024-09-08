@@ -1,28 +1,115 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= content_for(:title) || "Llama Press" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head data-llama="app/views/layouts/llama_bot.html.erb">
+  <!--<title>LlamaBot</title>-->
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+    <title>Llama Press - Build Anything with AI</title>
+    <link rel="icon" type="image/png" href="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .footer-banner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #4a4a4a;
+            color: white;
+            padding: 20px;
+            /* position: absolute; */
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .footer-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body data-llama="app/views/layouts/llama_bot.html.erb">
+  <nav class="bg-gray-800 p-4" data-llama="app/views/layouts/llama_bot.html.erb">
+    <div class="container mx-auto" data-llama="app/views/layouts/llama_bot.html.erb">
+      <div class="flex justify-between items-center" data-llama="app/views/layouts/llama_bot.html.erb">
+        <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
+          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Icon" class="h-8 w-8 mr-2" data-llama="app/views/layouts/llama_bot.html.erb">
+          <a href="/llama_bot" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
+        </div>
+        <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
+          <div class="hidden md:flex space-x-4 mr-4" data-llama="app/views/layouts/llama_bot.html.erb">
+            <a href="/llama_bot" class="text-white hover:text-gray-300" title="Home" data-llama="app/views/layouts/llama_bot.html.erb">
+              <i class="fas fa-home" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+            </a>
+            <a href="/web_pages" class="text-white hover:text-gray-300" title="Webpages" data-llama="app/views/layouts/llama_bot.html.erb">
+              <i class="fas fa-file-alt" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+            </a>
+            <a href="/source" class="text-white hover:text-gray-300" title="Source Code" data-llama="app/views/layouts/llama_bot.html.erb">
+              <i class="fas fa-code" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+            </a>
+            <a href="/llama_bots" class="text-white hover:text-gray-300" title="Activated Features" data-llama="app/views/layouts/llama_bot.html.erb">
+              <i class="fas fa-puzzle-piece" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+            </a>
+            <a href="/llama_bots/show_database" class="text-white hover:text-gray-300" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
+              <i class="fas fa-database" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+            </a>
+            <!-- Add more navbar links here -->
+          </div>
+          <a href="/web_pages" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-lg" data-llama="app/views/layouts/llama_bot.html.erb">
+            Templates
+          </a>
+        </div>
+        <div class="md:hidden" data-llama="app/views/layouts/llama_bot.html.erb">
+          <button id="menu-toggle" class="text-white focus:outline-none" data-llama="app/views/layouts/llama_bot.html.erb">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-llama="app/views/layouts/llama_bot.html.erb">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" data-llama="app/views/layouts/llama_bot.html.erb"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="mobile-menu" class="md:hidden hidden mt-2" data-llama="app/views/layouts/llama_bot.html.erb">
+        <a href="/llama_bot" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-home mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Home
+        </a>
+        <a href="/web_pages" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-file-alt mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Webpages
+        </a>
+        <a href="/source" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-code mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Source Code
+        </a>
+        <a href="/llama_bots" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-puzzle-piece mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Activated Features
+        </a>
+        <a href="/llama_bots/show_database" class="block text-white py-2 hover:bg-gray-700" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-database mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Show Database
+        </a>
+        <a href="/templates" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
+          <i class="fas fa-rocket mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Templates
+        </a>
+        <!-- Add more navbar links here -->
+      </div>
+    </div>
+  </nav>
 
-    <%= yield :head %>
+    <%# react_component('chatbot/ChatBot', props: { first_name: 'Tyson' }) %>
+  <div class="container mx-auto mt-5" data-llama="app/views/layouts/llama_bot.html.erb">
+    <%= yield %>
+  </div>
 
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
-
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <p class="notice"><%= notice %></p>
-      <p class="alert"><%= alert %></p>
-      <%= yield %>
-    </main>
-  </body>
+  <%# render partial: 'shared/chatbot/chatbot' %>
+  <%# render partial: 'shared/chatbot/history_modal' %>
+<footer class="footer-banner" data-llama="app/views/layouts/llama_bot.html.erb">
+        <div class="container mx-auto text-center" data-llama="app/views/layouts/llama_bot.html.erb">
+            <span class="footer-text" data-llama="app/views/layouts/llama_bot.html.erb">Built with LlamaPress</span>
+            <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="inline-block mr-2 h-14" data-llama="app/views/layouts/llama_bot.html.erb">
+        </div>
+    </footer>
+</body>
 </html>
