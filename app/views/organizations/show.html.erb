@@ -1,0 +1,15 @@
+<div class="mx-auto md:w-2/3 w-full flex" data-llama="app/views/organizations/show.html.erb">
+  <div class="mx-auto" data-llama="app/views/organizations/show.html.erb">
+    <% if notice.present? %>
+      <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice" data-llama="app/views/organizations/show.html.erb"><%= notice %></p>
+    <% end %>
+
+    <%= render @organization %>
+
+    <%= link_to "Edit this organization", edit_organization_path(@organization), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+    <%= link_to "Back to organizations", organizations_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+    <div class="inline-block ml-2" data-llama="app/views/organizations/show.html.erb">
+      <%= button_to "Destroy this organization", @organization, method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
+    </div>
+  </div>
+</div>
