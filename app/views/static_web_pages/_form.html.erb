@@ -1,7 +1,7 @@
 <%= form_with(model: static_web_page, class: "contents") do |form| %>
   <% if static_web_page.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
-      <h2><%= pluralize(static_web_page.errors.count, "error") %> prohibited this static_web_page from being saved:</h2>
+      <h2><%= pluralize(static_web_page.errors.count, "error") %> prohibited this Page from being saved:</h2>
 
       <ul>
         <% static_web_page.errors.each do |error| %>
@@ -12,23 +12,13 @@
   <% end %>
 
   <div class="my-5">
-    <%= form.label :static_web_site_id %>
-    <%= form.text_field :static_web_site_id, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :url %> <%# name it URL because my Mom doesn't know what a slug is.%>
+    <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
   <div class="my-5">
     <%= form.label :content %>
     <%= form.text_area :content, rows: 4, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
-  </div>
-
-  <div class="my-5">
-    <%= form.label :slug %>
-    <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
-  </div>
-
-  <div class="my-5">
-    <%= form.label :prompt %>
-    <%= form.text_field :prompt, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
   <div class="inline">
