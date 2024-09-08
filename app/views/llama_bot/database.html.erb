@@ -1,0 +1,98 @@
+<%  
+  @database_tables = ActiveRecord::Base.connection.tables
+  @foreign_keys = @database_tables.flat_map do |table|
+    ActiveRecord::Base.connection.foreign_keys(table)
+  end
+%>
+
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-4">Database Schema Visualization</h1>
+  
+  <canvas id="schema-graph" class="w-full border border-gray-300"></canvas>
+</div>
+
+<script>
+  const canvas = document.getElementById('schema-graph');
+  const ctx = canvas.getContext('2d');
+  
+  // Set canvas size dynamically
+  canvas.width = Math.max(800, window.innerWidth - 100);
+  canvas.height = Math.max(600, window.innerHeight - 200);
+
+  // Define tables and relationships
+  const tables = <%= @database_tables.to_json.html_safe %>;
+  const relationships = <%= @foreign_keys.map { |fk| { from: fk.from_table, to: fk.to_table, column: fk.options[:column] } }.to_json.html_safe %>;
+
+  // Calculate positions
+  const tablePositions = {};
+  const padding = 40;
+  const tableWidth = 150;
+  const tableHeight = 60;
+  const columns = Math.ceil(Math.sqrt(tables.length));
+  const rows = Math.ceil(tables.length / columns);
+
+  tables.forEach((table, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    tablePositions[table] = {
+      x: padding + col * (canvas.width / columns),
+      y: padding + row * (canvas.height / rows)
+    };
+  });
+
+  // Draw relationships first
+  ctx.beginPath();
+  relationships.forEach(rel => {
+    const from = tablePositions[rel.from];
+    const to = tablePositions[rel.to];
+    
+    if (from && to) {
+      ctx.moveTo(from.x + tableWidth / 2, from.y + tableHeight / 2);
+      ctx.lineTo(to.x + tableWidth / 2, to.y + tableHeight / 2);
+    }
+  });
+  ctx.stroke();
+
+  // Draw arrowheads and labels
+  relationships.forEach(rel => {
+    const from = tablePositions[rel.from];
+    const to = tablePositions[rel.to];
+    
+    if (from && to) {
+      // Draw arrowhead
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      ctx.save();
+      ctx.translate(to.x + tableWidth / 2, to.y + tableHeight / 2);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-10, -5);
+      ctx.lineTo(-10, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      
+      // Draw label
+      const labelX = (from.x + to.x) / 2 + tableWidth / 2;
+      const labelY = (from.y + to.y) / 2 + tableHeight / 2;
+      ctx.fillText(rel.column, labelX, labelY);
+    }
+  });
+
+  // Draw tables last
+  ctx.font = '12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  Object.entries(tablePositions).forEach(([table, position]) => {
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(position.x, position.y, tableWidth, tableHeight);
+    ctx.strokeRect(position.x, position.y, tableWidth, tableHeight);
+    
+    ctx.fillStyle = '#000';
+    ctx.fillText(table, position.x + tableWidth / 2, position.y + tableHeight / 2);
+  });
+
+  // Add this to log the relationships for debugging
+  console.log('Relationships:', relationships);
+</script>

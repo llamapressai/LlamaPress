@@ -1,0 +1,48 @@
+<div class="w-full bg-gray-50">
+  <% if notice.present? %>
+    <p class="py-3 px-4 bg-green-200 mb-5 text-green-700 font-semibold rounded-lg block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <div class="flex justify-between items-center py-6 px-4 bg-white shadow-md rounded-lg">
+    <h1 class="font-bold text-3xl text-gray-800">Llama Bot -- Plugin Store</h1>
+    <%#= link_to 'New llama bot feature', new_llama_bot_path, class: "rounded-lg py-2 px-4 bg-blue-500 hover:bg-blue-700 text-white font-semibold transition duration-300" %>
+  </div>
+
+  <!-- View Source Code Button -->
+  <div class="my-5 text-center">
+    <a href="/llama_bot/source" class="inline-block text-blue-600 hover:text-blue-800 underline flex items-center text-lg py-2 px-4 border border-blue-600 rounded hover:border-blue-800 hover:bg-blue-50 transition duration-300">
+      <i class="fa-solid fa-code text-xl mr-2"></i>View Source Code
+    </a>
+  </div>
+
+<!--  <div id="llama_bots" class="min-w-full p-4">-->
+    <%#= render @llama_bots %>
+<!--  </div>-->
+
+  <div class="mt-5 p-4">
+    <h2 class="font-bold text-2xl text-gray-700 mb-4">Your Features:</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <% controller_index_urls.each do |controller| %>
+        <div class="bg-white shadow rounded-lg overflow-hidden transition duration-300 hover:shadow-lg">
+          <div class="px-5 py-4">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-lg text-gray-800"><%= controller[:name] %></h3>
+              <span class="text-sm text-gray-600">by Username</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-gray-700 text-sm">
+                Feature description here. Can include what this plugin does or its benefits.
+              </div>
+            </div>
+          </div>
+          <div class="px-5 py-3 bg-gray-100 flex justify-between items-center">
+            <a href="<%= controller[:url] %>" class="text-blue-600 hover:text-blue-800 flex items-center"><i class="fas fa-external-link-alt mr-2"></i>Open</a>
+            <div class="flex items-center">
+              <i class="fas fa-star text-yellow-400 mr-1"></i><span>4.8</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

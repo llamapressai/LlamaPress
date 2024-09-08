@@ -60,3 +60,7 @@ group :test do
 end
 
 gem 'devise'
+
+# LlamaBot
+gem 'rouge'
+gem 'charlock_holmes'

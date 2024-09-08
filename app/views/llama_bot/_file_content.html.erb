@@ -1,0 +1,19 @@
+<%
+  require 'rouge'
+  begin
+    file_content = File.read(path)
+    detection = CharlockHolmes::EncodingDetector.detect(file_content)
+    utf8_content = CharlockHolmes::Converter.convert(file_content, detection[:encoding], 'UTF-8')
+  rescue => e
+    utf8_content = "Error reading file: #{e.message}"
+  end
+
+ # TODO: Syntax highlighting for LLamaBot
+  #formatter = Rouge::Formatters::HTML.new
+  #lexer = Rouge::Lexer.guess_by_filename(path)
+  #highlighted_content = formatter.format(lexer.lex(utf8_content))
+
+%>
+<div style="border: 1px solid #000; padding: 10px;">
+  <%= simple_format(utf8_content.gsub("\t", '&nbsp;&nbsp;&nbsp;&nbsp;').gsub(' ', '&nbsp;')) %>
+</div>

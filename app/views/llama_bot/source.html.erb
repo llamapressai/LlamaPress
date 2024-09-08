@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Source Code</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #4f4f4f;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 20px 0;
+      background-color: #f2ad56;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .button:hover {
+      background-color: #5b3300;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .directory, .file {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      background-color: white;
+    }
+    .directory {
+      font-weight: bold;
+      background-color: #e7f3e7;
+    }
+    .file {
+      cursor: pointer;
+    }
+    .file-content {
+      display: none;
+      margin-left: 20px;
+      padding: 10px;
+      border-left: 2px solid #ddd;
+      background-color: #f9f9f9;
+    }
+  </style>
+  <script>
+    function toggleFileContent(id) {
+      var content = document.getElementById(id);
+      if (content.style.display === "none") {
+        content.style.display = "block";
+      } else {
+        content.style.display = "none";
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Source Code</h1>
+  <a href="#" class="button" onclick="event.preventDefault(); alert('Coming soon!');">Download Source Code</a>
+  <ul>
+    <% @directory_structure.each_with_index do |item, index| %>
+      <% if item[:type] == 'directory' %>
+        <li class="directory"><i class="fas fa-folder"></i> <%= item[:path] %></li>
+      <% else %>
+        <li class="file" onclick="toggleFileContent('file-content-<%= index %>')"><i class="fas fa-file"></i> <%= item[:path] %></li>
+        <div id="file-content-<%= index %>" class="file-content">
+          <%= render partial: 'file_content', locals: { path: item[:path] } %>
+        </div>
+      <% end %>
+    <% end %>
+  </ul>
+</body>
+</html>
