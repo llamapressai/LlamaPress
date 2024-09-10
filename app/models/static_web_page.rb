@@ -10,7 +10,7 @@ class StaticWebPage < ApplicationRecord
   def ensure_static_web_site
     return if static_web_site.present?
 
-    self.static_web_site = organization.static_web_sites.first || create_new_static_web_site(organization)
+    self.static_web_site = organization.static_web_sites.first || create_new_static_web_site
   end
 
   def restore(static_web_page_history)
