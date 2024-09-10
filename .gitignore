@@ -38,6 +38,8 @@
 !/app/assets/builds/.keep
 
 lib/llama_bot/*
+app/lib/llama_bot/*
+
 config/local_env.yml
 
 #ignore byebug history
