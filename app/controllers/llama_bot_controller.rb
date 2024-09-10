@@ -1,4 +1,4 @@
-require Rails.root.join('lib', 'llama_bot', 'llama_bot.rb')
+# require Rails.root.join('lib', '', 'llama_bot.rb')
 class LlamaBotController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:message]
     
