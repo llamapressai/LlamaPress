@@ -1,7 +1,13 @@
 # require Rails.root.join('lib', '', 'llama_bot.rb')
 class LlamaBotController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:message]
-    
+
+    #/home
+    def home
+      #llama bot home page
+      @static_web_pages = current_organization.static_web_pages
+    end
+
     def message
       user_message = params[:message]
       context = params[:context]

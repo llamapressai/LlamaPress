@@ -21,8 +21,8 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   # Defines the root path route ("/")
-  root "static_web_pages#index"
-
+  root "static_web_pages#home"
+  get "home" => "llama_bot#home", as: :llama_bot_home
   post "llama_bot/message" => "llama_bot#message", as: :llama_bot_message
   get "llama_bot/source" => "llama_bot#source", as: :llama_bot_source
   get "llama_bot/models" => "llama_bot#models", as: :llama_bot_models

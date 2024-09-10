@@ -1,5 +1,19 @@
 class StaticWebPagesController < ApplicationController
   before_action :set_static_web_page, only: %i[ show edit update destroy ]
+  skip_before_action :authenticate_user!, only: [:home]
+
+  # This is the home page for the entire website.? Should it go here? 
+  # Where should this live? I think it makes sense to live here, because of inject_chat_partial
+  def home
+    @static_web_page = StaticWebPage.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
+    content = @static_web_page.content
+
+    # Only inject the chat partial if the user is logged in
+    if current_user.present?
+      content += inject_chat_partial(content)
+    end
+    render inline: content.html_safe, layout: 'static_web_page'
+  end
 
   # GET /static_web_pages or /static_web_pages.json
   def index
