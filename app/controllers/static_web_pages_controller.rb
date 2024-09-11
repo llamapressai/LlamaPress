@@ -5,7 +5,18 @@ class StaticWebPagesController < ApplicationController
   # This is the home page for the entire website.? Should it go here? 
   # Where should this live? I think it makes sense to live here, because of inject_chat_partial
   def home
-    @static_web_page = StaticWebPage.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
+    domain = request.env["HTTP_HOST"].dup
+    domain.slice! "www."
+    Rails.logger.info("Domain request for: " + domain)
+
+    @static_web_site = current_organization.static_web_sites.find_by(slug: domain)
+
+    if @static_web_site.present? #if the domain matches a static web site, then we use that static web site's home page
+      @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
+    else #otherwise just find the first static web page that has slug of '/'
+      @static_web_page = current_organization.static_web_pages.find_by(slug: '/')
+    end
+    
     content = @static_web_page.content
 
     # Only inject the chat partial if the user is logged in
