@@ -15,6 +15,11 @@ class LlamaBotController < ApplicationController
       webPageId = params[:webPageId]
       
       llama_bot_response = LlamaBot::LlamaBot.completion(user_message, context, selectedElement, webPageId)
+
+      # Things needed: 
+      # 1. Stop Button (user can press LlamaBot Javascript button to stop the bot).
+      # 2. Discuss with Danish - contenteditable so that users can edit content they select with llamabot.
+        # 2a. Something to take HTML from llamabot js client and save to the webpage.
       
       render json: { response: llama_bot_response }
     end

@@ -1,6 +1,7 @@
 class StaticWebPagesController < ApplicationController
   before_action :set_static_web_page, only: %i[ show edit update destroy ]
   skip_before_action :authenticate_user!, only: [:home]
+  skip_before_action :verify_authenticity_token, only: [:restore] 
 
   # This is the home page for the entire website.? Should it go here? 
   # Where should this live? I think it makes sense to live here, because of inject_chat_partial
