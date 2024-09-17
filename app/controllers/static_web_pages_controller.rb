@@ -14,8 +14,8 @@ class StaticWebPagesController < ApplicationController
 
     if @static_web_site.present? #if the domain matches a static web site, then we use that static web site's home page
       @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
-    else #otherwise just find the first static web page that has slug of '/'
-      @static_web_page = StaticWebPage.find_by(slug: '/')
+    else
+      redirect_to new_user_session_path #redirect to the sign in page if the domain doesn't match any static web site.
     end
 
     content = @static_web_page.content
