@@ -1,20 +1,14 @@
 class StaticWebPagesController < ApplicationController
   before_action :set_static_web_page, only: %i[ show edit update destroy ]
-  skip_before_action :authenticate_user!, only: [:home]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
   skip_before_action :verify_authenticity_token, only: [:restore] 
 
   # GET /
   # Find and render the root page depending on the domain.
   # If no root page is found, redirect to the llama press home page.
   def home
-    domain = request.env["HTTP_HOST"].dup
-    domain.slice! "www."
-    Rails.logger.info("Domain request for: " + domain)
-
-    @static_web_site = StaticWebSite.find_by(slug: domain)
-
-    if @static_web_site.present?
-      @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/')
+    if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
+      @static_web_page = current_site.static_web_pages.find_by(slug: '/')
       if @static_web_page.nil?
         redirect_to llama_bot_home_path and return
       end
@@ -25,6 +19,19 @@ class StaticWebPagesController < ApplicationController
     content = @static_web_page.content
     content += inject_chat_partial(content) if current_user.present?
     render inline: content.html_safe, layout: 'static_web_page'
+  end
+
+  def resolve_slug
+    #Handle duplicate slugs. Default to current_site's version, but if it can't find current_site's version, try the global version.
+    @static_web_page = current_site&.static_web_pages&.friendly&.find(params[:path]) || StaticWebPage.find_by(slug: params[:path])
+    
+    if @static_web_page.nil?
+      redirect_to llama_bot_home_path and return
+    end
+    
+    content = @static_web_page.content
+    content += inject_chat_partial(content) if current_user.present?
+    render inline: content.html_safe, layout: 'static_web_page' 
   end
 
   # GET /static_web_pages or /static_web_pages.json

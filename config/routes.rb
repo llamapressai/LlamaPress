@@ -28,4 +28,9 @@ Rails.application.routes.draw do
   get "llama_bot/models" => "llama_bot#models", as: :llama_bot_models
   get "llama_bot/database" => "llama_bot#database", as: :llama_bot_database
   get "llama_bot/templates" => "llama_bot#templates", as: :llama_bot_templates
+
+  # Catch-all route at the end
+  get '*path', to: 'static_web_pages#resolve_slug', constraints: lambda { |request|
+    !request.path.start_with?('/rails/') && !request.path.start_with?('/cable')
+  }
 end

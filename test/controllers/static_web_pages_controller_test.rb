@@ -82,4 +82,29 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
 
     @static_web_page.update(slug: original_slug)  # Restore the original slug
   end
+
+  test "should resolve slug" do
+    @site1 = static_web_sites(:one)
+    @site2 = static_web_sites(:two)
+    @page1 = static_web_pages(:one)
+    @page2 = static_web_pages(:two)
+
+    # Ensure unique slugs for this test
+
+    # Test resolving slug for the current site
+    host! @site1.slug
+    get "/#{@page1.slug}"
+    assert_response :success
+    assert_equal @page1, assigns(:static_web_page)
+
+    # Test handling pages across different sites
+    host! @site2.slug
+    get "/#{@page2.slug}"
+    assert_response :success
+    assert_equal @page2, assigns(:static_web_page)
+
+    # Test redirecting when no matching page is found
+    get '/non-existent-page'
+    assert_response :not_found
+  end
 end
