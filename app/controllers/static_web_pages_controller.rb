@@ -16,6 +16,7 @@ class StaticWebPagesController < ApplicationController
       @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
     else
       redirect_to new_user_session_path #redirect to the sign in page if the domain doesn't match any static web site.
+      return
     end
 
     content = @static_web_page.content
