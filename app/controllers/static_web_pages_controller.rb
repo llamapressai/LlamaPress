@@ -123,7 +123,7 @@ class StaticWebPagesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def static_web_page_params
-      params.require(:static_web_page).permit(:static_web_site_id, :content, :slug, :prompt)
+      params.require(:static_web_page).permit(:static_web_site_id, :content, :slug, :prompt, :organization_id)
     end
 
     def inject_chat_partial(content)

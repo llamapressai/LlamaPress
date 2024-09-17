@@ -1,7 +1,10 @@
 require "test_helper"
 
 class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
   setup do
+    @user = users(:one)
+    sign_in @user
     @static_web_page = static_web_pages(:one)
   end
 
@@ -34,7 +37,8 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update static_web_page" do
-    patch static_web_page_url(@static_web_page), params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: @static_web_page.slug, static_web_site_id: @static_web_page.static_web_site_id } }
+    patch static_web_page_url(@static_web_page), params: { static_web_page: { content: @static_web_page.content, prompt: @static_web_page.prompt, slug: "@static_web_page.slug#{Time.now.to_i}", static_web_site_id: @static_web_page.static_web_site_id, organization_id: @static_web_page.organization_id } }
+    #TODO: Fix and discuss - organization_id issues with static_web_page.
     assert_redirected_to static_web_page_url(@static_web_page)
   end
 

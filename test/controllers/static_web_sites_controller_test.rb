@@ -1,7 +1,10 @@
 require "test_helper"
 
 class StaticWebSitesControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
   setup do
+    @user = users(:one)
+    sign_in @user
     @static_web_site = static_web_sites(:one)
   end
 
@@ -17,7 +20,7 @@ class StaticWebSitesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create static_web_site" do
     assert_difference("StaticWebSite.count") do
-      post static_web_sites_url, params: { static_web_site: { name: @static_web_site.name, organization_id: @static_web_site.organization_id, slug: @static_web_site.slug } }
+      post static_web_sites_url, params: { static_web_site: { name: @static_web_site.name, organization_id: @static_web_site.organization_id, slug: "@static_web_site.slug#{Time.now.to_i}" } }
     end
 
     assert_redirected_to static_web_site_url(StaticWebSite.last)
@@ -34,7 +37,7 @@ class StaticWebSitesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update static_web_site" do
-    patch static_web_site_url(@static_web_site), params: { static_web_site: { name: @static_web_site.name, organization_id: @static_web_site.organization_id, slug: @static_web_site.slug } }
+    patch static_web_site_url(@static_web_site), params: { static_web_site: { name: @static_web_site.name, organization_id: @static_web_site.organization_id, slug: "@static_web_site.slug#{Time.now.to_i}" } }
     assert_redirected_to static_web_site_url(@static_web_site)
   end
 

@@ -1,7 +1,10 @@
 require "test_helper"
 
 class StaticWebPageHistoriesControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
   setup do
+    @user = users(:one)
+    sign_in @user
     @static_web_page_history = static_web_page_histories(:one)
   end
 

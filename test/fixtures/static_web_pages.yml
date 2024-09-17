@@ -3,11 +3,11 @@
 one:
   static_web_site: one
   content: MyText
-  slug: MyString
+  slug: MyString1
   prompt: MyString
 
 two:
   static_web_site: two
   content: MyText
-  slug: MyString
+  slug: MyString2
   prompt: MyString
