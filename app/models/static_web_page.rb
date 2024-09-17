@@ -1,10 +1,13 @@
 class StaticWebPage < ApplicationRecord
+  extend FriendlyId
   belongs_to :static_web_site, optional: true
   belongs_to :organization
   has_many :static_web_page_histories, dependent: :destroy
 
   before_create :ensure_static_web_site
   after_initialize :set_default_html_content, if: :new_record?
+
+  friendly_id :slug, use: :slugged
 
   # Ensure the static web page has a static web site. If not, create one so the user doesn't have to.
   def ensure_static_web_site

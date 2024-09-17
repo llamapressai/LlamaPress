@@ -118,7 +118,7 @@ class StaticWebPagesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_static_web_page
-      @static_web_page = StaticWebPage.find(params[:id])
+      @static_web_page = StaticWebPage.friendly.find(params[:id]) || StaticWebPage.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

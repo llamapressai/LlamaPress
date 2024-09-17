@@ -64,4 +64,22 @@ class StaticWebPagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :redirect
     assert_redirected_to static_web_page_url(StaticWebPage.last)
   end
+
+  test "should find static_web_page by friendly id" do
+    friendly_id = @static_web_page.slug
+    get static_web_page_url(friendly_id)
+    assert_response :success
+    assert_equal @static_web_page, assigns(:static_web_page)
+  end
+
+  test "should find static_web_page by id when friendly id fails" do
+    original_slug = @static_web_page.slug
+    @static_web_page.update(slug: nil)  # Force friendly_id to fail
+    
+    get static_web_page_url(@static_web_page.id)
+    assert_response :success
+    assert_equal @static_web_page, assigns(:static_web_page)
+
+    @static_web_page.update(slug: original_slug)  # Restore the original slug
+  end
 end

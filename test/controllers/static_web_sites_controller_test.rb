@@ -48,4 +48,15 @@ class StaticWebSitesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to static_web_sites_url
   end
+
+  test "should get current_site from application controller" do
+    # Create a static web site with a known slug. (Rails defaults to example.com in it's test setup for requests)
+    site = StaticWebSite.create!(name: "Test Site", slug: "example.com", organization: organizations(:one))
+        
+    # Make a request to any action in the controller to see if current_site is set correctly
+    get static_web_sites_url
+
+    # Assert that the current_site is set correctly
+    assert_equal site, @controller.current_site
+  end
 end

@@ -7,6 +7,14 @@ class ApplicationController < ActionController::Base
     current_user.try :organization
   end
 
+  def current_site
+    domain = request.env["HTTP_HOST"].dup
+    domain.slice! "www."
+    Rails.logger.info("Domain request for: " + domain)
+
+    StaticWebSite.find_by(slug: domain)
+  end
+
   def set_context
     @context = request.path
     @view_path = resolve_view_path

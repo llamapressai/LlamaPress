@@ -57,6 +57,8 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "rails-controller-testing"
+  gem "mocha"
   gem 'byebug', platforms: %i[ mri mingw x64_mingw ]
 end
 
@@ -65,3 +67,4 @@ gem 'devise'
 # LlamaBot
 gem 'rouge'
 gem 'charlock_holmes'
+gem 'friendly_id'
