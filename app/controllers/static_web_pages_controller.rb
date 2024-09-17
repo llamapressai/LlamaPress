@@ -3,8 +3,9 @@ class StaticWebPagesController < ApplicationController
   skip_before_action :authenticate_user!, only: [:home]
   skip_before_action :verify_authenticity_token, only: [:restore] 
 
-  # This is the home page for the entire website.? Should it go here? 
-  # Where should this live? I think it makes sense to live here, because of inject_chat_partial
+  # GET /
+  # Find and render the root page depending on the domain.
+  # If no root page is found, redirect to the llama press home page.
   def home
     domain = request.env["HTTP_HOST"].dup
     domain.slice! "www."
@@ -12,19 +13,17 @@ class StaticWebPagesController < ApplicationController
 
     @static_web_site = StaticWebSite.find_by(slug: domain)
 
-    if @static_web_site.present? #if the domain matches a static web site, then we use that static web site's home page
-      @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/') #TODO: There can only be one of these per entire llamapress instance, otherwise we might run into issues.
-    else
-      redirect_to new_user_session_path #redirect to the sign in page if the domain doesn't match any static web site.
-      return
+    if @static_web_site.present?
+      @static_web_page = @static_web_site.static_web_pages.find_by(slug: '/')
+      if @static_web_page.nil?
+        redirect_to llama_bot_home_path and return
+      end
+    else # if no site is found for this domain, just go to the llamabot dashboard.
+      redirect_to llama_bot_home_path and return 
     end
 
     content = @static_web_page.content
-
-    # Only inject the chat partial if the user is logged in
-    if current_user.present?
-      content += inject_chat_partial(content)
-    end
+    content += inject_chat_partial(content) if current_user.present?
     render inline: content.html_safe, layout: 'static_web_page'
   end
 
