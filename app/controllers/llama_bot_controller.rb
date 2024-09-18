@@ -1,4 +1,4 @@
-# require Rails.root.join('lib', '', 'llama_bot.rb')
+require Rails.root.join('lib', 'llama_bot.rb')
 class LlamaBotController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:message]
 
@@ -15,7 +15,7 @@ class LlamaBotController < ApplicationController
       selectedElement = params[:selectedElement].present? && !params[:selectedElement].empty? ? params[:selectedElement] : nil
       webPageId = params[:webPageId]
       
-      llama_bot_response = LlamaBot::LlamaBot.completion(user_message, context, selectedElement, webPageId)
+      llama_bot_response = LlamaBot.completion(user_message, context, selectedElement, webPageId)
 
       # Things needed: 
       # 1. Stop Button (user can press LlamaBot Javascript button to stop the bot).
