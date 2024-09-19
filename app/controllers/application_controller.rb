@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
     domain.slice! "www."
     Rails.logger.info("Domain request for: " + domain)
 
-    StaticWebSite.find_by(slug: domain)
+    Site.find_by(slug: domain)
   end
 
   def set_context

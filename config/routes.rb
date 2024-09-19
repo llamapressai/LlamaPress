@@ -1,12 +1,12 @@
 Rails.application.routes.draw do
-  resources :static_web_pages do
+  resources :pages do
     member do
       get 'histories'
       post 'restore'
     end
   end
-  resources :static_web_sites
-  resources :static_web_page_histories
+  resources :sites
+  resources :page_histories
   devise_for :users, controllers: { registrations: 'users/registrations' }
   resources :users
   resources :organizations
@@ -21,7 +21,7 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   # Defines the root path route ("/")
-  root "static_web_pages#home"
+  root "pages#home"
   get "home" => "llama_bot#home", as: :llama_bot_home
   post "llama_bot/message" => "llama_bot#message", as: :llama_bot_message
   get "llama_bot/source" => "llama_bot#source", as: :llama_bot_source
@@ -30,7 +30,7 @@ Rails.application.routes.draw do
   get "llama_bot/templates" => "llama_bot#templates", as: :llama_bot_templates
 
   # Catch-all route at the end
-  get '*path', to: 'static_web_pages#resolve_slug', constraints: lambda { |request|
+  get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && !request.path.start_with?('/cable')
   }
 end

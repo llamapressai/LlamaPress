@@ -31,16 +31,16 @@ user = User.create!(
   password: "123456"
 )
 
-# Create StaticWebSite
-static_web_site = StaticWebSite.create!(
+# Create Site
+site = Site.create!(
   organization: organization,
   name: "Soma School of Massage",
   slug: "/soma"
 )
 
-# Create StaticWebPage
-static_web_page = StaticWebPage.create!(
-  static_web_site: static_web_site,
+# Create Page
+page = Page.create!(
+  site: site,
   slug: "soma-school-of-massage",
   organization: organization,
   content: <<~HTML,
@@ -288,16 +288,16 @@ static_web_page = StaticWebPage.create!(
   HTML
 )
 
-# Create StaticWebSite
-static_web_site = StaticWebSite.create!(
+# Create Site
+site = Site.create!(
     organization: organization,
     name: "Signature Roofing",
     slug: "/signature-roofing"
   )
 
-# Create StaticWebPage
-static_web_page = StaticWebPage.create!(
-  static_web_site: static_web_site,
+# Create Page
+page = Page.create!(
+  site: site,
   slug: "signature-roofing",
   organization: organization,
   content: <<~HTML,

@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  site: one
+  content: MyText
+  slug: MyString1
+  prompt: MyString
+
+two:
+  site: two
+  content: MyText
+  slug: MyString2
+  prompt: MyString

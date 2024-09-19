@@ -1,0 +1,2 @@
+module PageHistoriesHelper
+end

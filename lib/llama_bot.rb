@@ -25,7 +25,7 @@ module LlamaBot
 
         def handle_improve_design(response)
             improved_html = response['message']
-            web_page = StaticWebPage.find_by(id: response['query_params']['web_page_id'])
+            web_page = Page.find_by(id: response['query_params']['web_page_id'])
             web_page.update(content: improved_html)
             return "Got it! Here is the improved design you asked for: #{improved_html}. Refresh your browser to see the new design."
         end        
@@ -86,7 +86,7 @@ module LlamaBot
             file_path = context || "app/views/llama_bot/home.html.erb"
 
             should_we_edit_html_in_webpage_database = file_path.include?("web_pages/show") && !web_page_id&.empty?
-            @web_page = web_page_id&.empty? ? nil : StaticWebPage.find_by(id: web_page_id)
+            @web_page = web_page_id&.empty? ? nil : Page.find_by(id: web_page_id)
             
             # Load the HTML content from the database or the file system
             file_contents = should_we_edit_html_in_webpage_database ? @web_page&.content : File.read(file_path)

@@ -5,8 +5,8 @@ class LlamaBotController < ApplicationController
     #/home
     def home
       #llama bot home page
-      @static_web_sites = current_organization.static_web_sites
-      @static_web_pages = current_organization.static_web_pages
+      @sites = current_organization.sites
+      @pages = current_organization.pages
     end
 
     def message

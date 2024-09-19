@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     message: userMessage, 
                     context: '<%=@view_path%>', 
                     selectedElement: selectedElement, 
-                    webPageId: '<%=@static_web_page&.id%>'
+                    webPageId: '<%=@page&.id%>'
                 })
             });
             const data = await response.json();
@@ -101,10 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function loadChatHistory() {
-        let webPageId = '<%=@static_web_page&.id%>';
+        let webPageId = '<%=@page&.id%>';
         if (webPageId) {
             //TODO: fetch Chat History from /web_page_histories IF this web_page_id is present in the URL
-            fetch(`/static_web_pages/${webPageId}/histories.json`)
+            fetch(`/pages/${webPageId}/histories.json`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -146,14 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('restoreButton').addEventListener('click', function() {
         console.log('restoreButton clicked');
-        // we need to do a POST with the webPageHistory.id to /static_web_pages/restore
-        let webPageId = '<%=@static_web_page&.id%>';
+        // we need to do a POST with the webPageHistory.id to /pages/restore
+        let webPageId = '<%=@page&.id%>';
         //QUESTION: how do I get this webpagehistory id?
         // we save it to the restoreButton so that when the user clicks on the history item.. we have the ID.
         
         const webPageHistoryId = document.getElementById('restoreButton').getAttribute('llama-data-web-page-history-id');
 
-        fetch(`/static_web_pages/${webPageId}/restore.json?web_page_history_id=${webPageHistoryId}`, {
+        fetch(`/pages/${webPageId}/restore.json?web_page_history_id=${webPageHistoryId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
