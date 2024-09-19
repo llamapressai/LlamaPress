@@ -11,10 +11,7 @@
     </div>
   <% end %>
 
-  <div class="my-5">
-    <%= form.label :organization_id %>
-    <%= form.text_field :organization_id, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
-  </div>
+  <%= form.hidden_field :organization_id, value: current_user.organization.id %>
 
   <div class="my-5">
     <%= form.label :name %>
@@ -22,7 +19,7 @@
   </div>
 
   <div class="my-5">
-    <%= form.label :slug %>
+    <%= form.label :slug, "Domain (e.g: example.com)" %>
     <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 

@@ -50,6 +50,12 @@ class PagesController < ApplicationController
 
   # GET /pages/new
   def new
+    if params[:site_id].present?
+      @site = Site.find(params[:site_id])
+    else
+      @site = current_site
+    end
+
     @page = current_organization.pages.build
   end
 

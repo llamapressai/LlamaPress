@@ -64,7 +64,7 @@ module LlamaBot
                 'file_contents' => file_contents
             }.compact
             
-            response = JSON.parse(make_post_request("https://bot.llamapress.ai/completion", params))
+            response = JSON.parse(make_post_request("#{ENV['LLAMA_BOT_URI']}/completion", params))
             return response
         end
 
@@ -85,7 +85,7 @@ module LlamaBot
         def fetch_file_contents(context, web_page_id=nil)
             file_path = context || "app/views/llama_bot/home.html.erb"
 
-            should_we_edit_html_in_webpage_database = file_path.include?("web_pages/show") && !web_page_id&.empty?
+            should_we_edit_html_in_webpage_database = file_path.include?("pages/show") && !web_page_id&.empty?
             @web_page = web_page_id&.empty? ? nil : Page.find_by(id: web_page_id)
             
             # Load the HTML content from the database or the file system

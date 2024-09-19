@@ -19,7 +19,7 @@
 
     <main class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center mb-2">LLamaPress</h1>
-        <h2 class="text-2xl text-center text-gray-600 mb-4">An Open Sourced SaaS Builder for Non-Technical Builders</h2>
+        <h2 class="text-2xl text-center text-gray-600 mb-4">An AI Replacement for Wordpress</h2>
 
 <div class="container mx-auto px-4">
 
@@ -29,7 +29,7 @@
         <% root_web_page = web_site.pages.find_by(slug: '/') || web_site.pages.first %>
       <%= link_to web_site, class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
         <div class="aspect-w-16 aspect-h-24 bg-gray-700">
-          <% if root_web_page.content.present? %>
+          <% if root_web_page&.content.present? %>
             <iframe srcdoc="<%= CGI.escapeHTML(root_web_page.content).html_safe %>" class="w-full h-full" sandbox="allow-scripts"></iframe>
           <% else %>
             <div class="flex items-center justify-center h-full text-gray-400">
@@ -54,7 +54,7 @@
 
   <br>
 
-  <%= link_to 'New Web Page', new_page_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+  <%= link_to 'New Web Site', new_site_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
 </div>        
 
         <article class="bg-white rounded-lg shadow-lg p-8 mb-8">

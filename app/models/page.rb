@@ -32,7 +32,9 @@ class Page < ApplicationRecord
 
   # Set the default html content for the web page
   def set_default_html_content
-    self.content = PagesHelper.starting_html_content()
+    if self.content.blank?
+      self.content = PagesHelper.starting_html_content()
+    end
   end
 
   private

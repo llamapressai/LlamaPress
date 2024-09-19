@@ -11,11 +11,19 @@
   </div>
 
   <div id="sites" class="min-w-full">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> 
     <% @sites.each do |site| %>
-      <%= render site %>
-      <p>
-        <%= link_to "Show this web site", site, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-      </p>
+      <%= link_to site, class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
+        <div class="aspect-w-16 aspect-h-24 bg-gray-700">
+          <div class="p-6 border-t-2 border-gray-700">
+            <div class="flex items-center mb-3">
+              <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
+              <h2 class="font-bold text-xl text-white"><%= site.slug %></h2>
+            </div>
+            <p class="text-lg text-gray-300 mb-2"><%= site.name %></p>
+          </div>
+        </div>
+      <% end %>
     <% end %>
   </div>
 </div>
