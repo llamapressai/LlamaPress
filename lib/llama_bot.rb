@@ -64,15 +64,20 @@ module LlamaBot
                 'file_contents' => file_contents
             }.compact
             
-            response = JSON.parse(make_get_request(ENV['LLAMA_BOT_URI'], params))
+            response = JSON.parse(make_post_request(ENV['LLAMA_BOT_URI'], params))
             return response
         end
 
-        # Make a GET request to the LlamaBot API
-        def make_get_request(base_url, params)
+        # Make a POST request to the LlamaBot API
+        def make_post_request(base_url, params)
             uri = URI.parse(base_url + '/completion')
-            uri.query = URI.encode_www_form(params)
-            response = Net::HTTP.get_response(uri)
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = uri.scheme == 'https'
+            
+            request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
+            request.body = params.to_json
+            
+            response = http.request(request)
             response.body
         end
 
