@@ -70,7 +70,7 @@ module LlamaBot
 
         # Make a GET request to the LlamaBot API
         def make_get_request(base_url, params)
-            uri = URI.parse(base_url)
+            uri = URI.parse(base_url + '/completion')
             uri.query = URI.encode_www_form(params)
             response = Net::HTTP.get_response(uri)
             response.body
