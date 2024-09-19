@@ -64,13 +64,13 @@ module LlamaBot
                 'file_contents' => file_contents
             }.compact
             
-            response = JSON.parse(make_post_request(ENV['LLAMA_BOT_URI'], params))
+            response = JSON.parse(make_post_request("https://bot.llamapress.ai/completion", params))
             return response
         end
 
         # Make a POST request to the LlamaBot API
         def make_post_request(base_url, params)
-            uri = URI.parse(base_url + '/completion')
+            uri = URI.parse(base_url)
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = uri.scheme == 'https'
             
