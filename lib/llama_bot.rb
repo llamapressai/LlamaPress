@@ -8,49 +8,54 @@ module LlamaBot
             file_contents = fetch_file_contents(context, web_page_id)
             response = llama_bot_completion(user_message, context, file_contents, selected_element, web_page_id)
             message_to_user = response['message']
-            handle_decision!(response)
+            handle_response!(response)
             return message_to_user
         end
 
-        def handle_decision!(response)
+        # Actions:
+        # Writing code to the filesystem or database
+        # Run commands in terminal
+        # Respond naturally
+        def handle_response!(response)
             Rails.logger.info("RESPONSE: #{response}")
             Rails.logger.info("DECISION: #{response['decision']}")
-            case response['decision']
-            when "IMPROVE_DESIGN"
-                handle_improve_design(response)
-            when "GENERATE_SCAFFOLD_COMMAND"
-                handle_scaffold_command(response)
+            Rails.logger.info("ACTION: #{response['action']}")
+            Rails.logger.info("PAYLOAD: #{response['paylod']}")
+
+            case response['action']
+            when "WRITE_CODE"
+                handle_write_code(response)
+            when "RUN_COMMANDS"
+                handle_run_commands(response)
+            else 
+                return response['message']
             end
         end
 
-        def handle_improve_design(response)
-            improved_html = response['message']
-            web_page = Page.find_by(id: response['query_params']['web_page_id'])
-            web_page.update(content: improved_html)
-            return "Got it! Here is the improved design you asked for: #{improved_html}. Refresh your browser to see the new design."
-        end        
+        def handle_write_code(response)
+            code_to_write = response['payload']['code']
+            destination = response['payload']['destination']
+            should_we_write_page_to_database =  response["query_params"]["context"].include? "pages/show"
+            
+            if should_we_write_page_to_database
+                web_page = Page.find_by(id: response['query_params']['web_page_id'])
+                web_page.update(content: code_to_write)
+            else
+                File.write(destination, code_to_write)
+            end
 
-        def handle_scaffold_command(response)
-            scaffold_command = response['message']
-            Rails.logger.info("SCAFFOLD COMMAND!: #{scaffold_command}")
-      
-            # Execute the scaffold command
-            scaffold_command = scaffold_command.gsub("scaffold", "llama_scaffold")
+            return "Got it! Here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
+        end
+
+        def handle_run_commands(response)
+            commands_to_run = response['payload']
             output = ""
-            IO.popen(scaffold_command) do |io|
-              output = io.read
+            commands_to_run.each do |command|
+                IO.popen(command) do |io|
+                    output = io.read
+                end
             end
-            
-            Rails.logger.info("SCAFFOLD OUTPUT!: #{output}")
-            
-            Rails.logger.info("Now, need to run rails db:migrate! #{output}")
-            
-            output = ""
-            IO.popen("rails db:migrate") do |io|
-              output = io.read
-            end
-      
-            return "Got it! Here is the scaffold command you need to run in your terminal: #{scaffold_command}. I ran the scaffold command for you. Here is the output from the terminal: #{output}. Refresh your browser to see the new page on the left navbar."
+            return "Got it! Here is the command you asked for: #{command_to_run}. Here is the output from the terminal: #{output}."
         end
 
         private
