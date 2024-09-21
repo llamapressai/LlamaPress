@@ -21,7 +21,6 @@ module LlamaBot
             Rails.logger.info("DECISION: #{response['decision']}")
             Rails.logger.info("ACTION: #{response['action']}")
             Rails.logger.info("PAYLOAD: #{response['paylod']}")
-
             case response['action']
             when "WRITE_CODE"
                 handle_write_code(response)
@@ -48,14 +47,14 @@ module LlamaBot
         end
 
         def handle_run_commands(response)
-            commands_to_run = response['payload']
+            commands_to_run = response['payload']['commands']
             output = ""
             commands_to_run.each do |command|
                 IO.popen(command) do |io|
                     output = io.read
                 end
             end
-            return "Got it! Here is the command you asked for: #{command_to_run}. Here is the output from the terminal: #{output}."
+            return "Got it! Here is the command you asked for: #{commands_to_run}. Here is the output from the terminal: #{output}."
         end
 
         private
