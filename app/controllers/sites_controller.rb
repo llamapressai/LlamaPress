@@ -24,7 +24,6 @@ class SitesController < ApplicationController
     @site = Site.new(site_params)
 
     respond_to do |format|
-      byebug
       if @site.save
         format.html { redirect_to site_url(@site), notice: "web site was successfully created." }
         format.json { render :show, status: :created, location: @site }
