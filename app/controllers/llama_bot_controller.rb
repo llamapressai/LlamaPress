@@ -14,7 +14,6 @@ class LlamaBotController < ApplicationController
       context = params[:context]
       selectedElement = params[:selectedElement].present? && !params[:selectedElement].empty? ? params[:selectedElement] : nil
       webPageId = params[:webPageId]
-      
       llama_bot_response = LlamaBot.completion(user_message, context, selectedElement, webPageId)
 
       # Things needed: 

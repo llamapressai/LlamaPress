@@ -9,6 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @keyframes thinkingpulse {
+            0%,
+            100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
         body {
             font-family: 'Poppins', sans-serif;
         }
@@ -32,6 +41,9 @@
             width: 24px;
             height: 24px;
             font-size: 24px;
+        }
+        .thinking-pulse {
+          animation: thinkingpulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
     </style>
 </head>
