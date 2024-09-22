@@ -105,7 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
             const data = await response.json();
-            window.location.reload();
+
+            // Only reload the window if we got a page replacement
+            // in the return
+            const dtIndex = data?.response?.indexOf("<!DOCTYPE") ?? -1;
+            if (dtIndex >= 0 && dtIndex < 50) {
+                window.location.reload();
+            }
             addMessage(data.response, 'bot');
         } catch (error) {
             console.error('Error sending message to ChatGPT:', error);
@@ -229,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    menuToggle.addEventListener('click', () => {
+    menuToggle?.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
     });
 });
