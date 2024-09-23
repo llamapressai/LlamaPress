@@ -8,7 +8,7 @@ class PagesController < ApplicationController
   # If no root page is found, redirect to the llama press home page.
   def home
     if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
-      @page = current_site.pages.find_by(slug: '/')
+      @page = current_site.pages.find_by(slug: '/') #TODO: This root page is handled by the this slug. 
       if @page.nil?
         redirect_to llama_bot_home_path and return
       end
