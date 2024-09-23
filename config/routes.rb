@@ -22,6 +22,11 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "pages#home"
+  
+  # Mirror wordpress routes for admin
+  get "admin" => "llama_bot#home" 
+  get "wp-admin" => "llama_bot#home" 
+
   get "home" => "llama_bot#home", as: :llama_bot_home
   post "llama_bot/message" => "llama_bot#message", as: :llama_bot_message
   get "llama_bot/source" => "llama_bot#source", as: :llama_bot_source
