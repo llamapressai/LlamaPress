@@ -65,7 +65,12 @@ class PagesController < ApplicationController
 
   # POST /pages or /pages.json
   def create
-    @page = current_organization.pages.build(page_params)
+    if params[:site_id].present? #associate it with the right site if it's passed in
+      @site = Site.find(params[:site_id])
+      @page = @site.pages.build(page_params)
+    else
+      @page = current_organization.pages.build(page_params) #otherwise this will default to the current site, or first site found in this organization.
+    end
 
     respond_to do |format|
       if @page.save
