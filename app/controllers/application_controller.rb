@@ -8,10 +8,14 @@ class ApplicationController < ActionController::Base
   end
 
   def current_site
-    domain = request.env["HTTP_HOST"].dup
-    domain.slice! "www."
-    Rails.logger.info("Domain request for: " + domain)
+    if ENV["OVERRIDE_DOMAIN"].present? #This is used for development, use OVERRIDE_DOMAIN to test different sites
+      domain = ENV["OVERRIDE_DOMAIN"]
+    else
+      domain = request.env["HTTP_HOST"].dup
+      domain.slice! "www."
+    end
 
+    Rails.logger.info("Domain request for: " + domain)
     Site.find_by(slug: domain)
   end
 
