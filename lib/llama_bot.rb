@@ -69,7 +69,7 @@ module LlamaBot
             }.compact
                         
             begin
-                response = JSON.parse(make_post_request("#{ENV['LLAMA_BOT_URI']}/completion", params))
+                response = JSON.parse(make_post_request("#{ENV['LLAMABOT_API_URL']}/completion", params))
             rescue JSON::ParserError => e
                 Rails.logger.error("JSON parsing error: #{e.message}")
                 return { 'error' => 'Invalid JSON response from LlamaBot API' }
