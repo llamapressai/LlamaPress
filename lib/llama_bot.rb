@@ -81,6 +81,8 @@ module LlamaBot
         def make_post_request(base_url, params)
             uri = URI.parse(base_url)
             http = Net::HTTP.new(uri.host, uri.port)
+            http.open_timeout = 10  # seconds
+            http.read_timeout = 180 # seconds (increase as needed)
             http.use_ssl = uri.scheme == 'https'
             
             request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
