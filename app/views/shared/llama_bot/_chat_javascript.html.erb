@@ -90,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.value = '';
         isLoading = true;
         showLoadingIndicator();
-        let selectedElement = document.getElementById("selectedElementContent").innerHTML;
+        let selectedElement = document.getElementById("selectedElementContent");
+        let selectedElementInnerHtml = selectedElement.innerHTML.replace('selected-element', ''); //remove this class so the LLM doesn't save it after it's used.
+
         try {
             const response = await fetch('/llama_bot/message.json', {
                 method: 'POST',
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ 
                     message: userMessage, 
                     context: '<%=@view_path%>', 
-                    selectedElement: selectedElement, 
+                    selectedElement: selectedElementInnerHtml, 
                     webPageId: '<%=@page&.id%>'
                 })
             });
