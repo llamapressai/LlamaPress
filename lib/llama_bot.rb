@@ -39,7 +39,11 @@ module LlamaBot
             if should_we_write_page_to_database
                 web_page = Page.find_by(id: response['query_params']['web_page_id'])
                 web_page.update(content: code_to_write)
-            else
+                web_page_history = PageHistory.create(page_id: web_page.id, content: code_to_write, prompt: response['query_params']['user_message'], user_message: response['query_params']['user_message'])
+            else #If we're in sandbox mode, reject.
+                if ENV['SANDBOX_MODE'] == 'true'
+                    return "Sorry, but we're in sandbox mode. You can't write code to the filesystem in sandbox mode."
+                end
                 File.write(destination, code_to_write)
             end
 
@@ -47,6 +51,10 @@ module LlamaBot
         end
 
         def handle_run_commands(response)
+            # if we're in sandbox mode, reject.
+            if ENV['SANDBOX_MODE'] == 'true'
+                return "Sorry, but we're in sandbox mode. You can't run commands in sandbox mode."
+            end
             commands_to_run = response['payload']['commands']
             output = ""
             commands_to_run.each do |command|
@@ -81,6 +89,8 @@ module LlamaBot
         def make_post_request(base_url, params)
             uri = URI.parse(base_url)
             http = Net::HTTP.new(uri.host, uri.port)
+            http.open_timeout = 10  # seconds
+            http.read_timeout = 180 # seconds (increase as needed)
             http.use_ssl = uri.scheme == 'https'
             
             request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')

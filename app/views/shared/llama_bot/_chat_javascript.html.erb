@@ -90,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.value = '';
         isLoading = true;
         showLoadingIndicator();
-        let selectedElement = document.getElementById("selectedElementContent").innerHTML;
+        let selectedElement = document.getElementById("selectedElementContent");
+        let selectedElementInnerHtml = selectedElement.innerHTML.replace('selected-element', ''); //remove this class so the LLM doesn't save it after it's used.
+
         try {
             const response = await fetch('/llama_bot/message.json', {
                 method: 'POST',
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ 
                     message: userMessage, 
                     context: '<%=@view_path%>', 
-                    selectedElement: selectedElement, 
+                    selectedElement: selectedElementInnerHtml, 
                     webPageId: '<%=@page&.id%>'
                 })
             });
@@ -143,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     web_page_histories = data.web_page_histories;
                     web_page_histories.forEach(history => {
                         addWebPageHistoryToHistoryDrawer(history);
-                        //addMessage(history.text, history.sender);
                     });
                 });
         }
@@ -156,10 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function addWebPageHistoryToHistoryDrawer(webPageHistory) {
         const historyDrawer = document.getElementById('historyDrawer');
         const historyItem = document.createElement('div');
-        historyItem.className = 'history-item cursor-pointer hover:bg-gray-100 p-2';
-        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
-        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
-        historyItem.textContent = new Date(webPageHistory.created_at).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit', hour12: false });
+        historyItem.className = 'history-item cursor-pointer hover:bg-gray-100 p-2'; 
+        prompt = webPageHistory.prompt || webPageHistory.user_message;
+        historyItem.textContent = summarizePrompt(prompt);
         historyItem.onclick = function() {
             const modal = document.getElementById('historyModal'); // Get modal element
             const mainIframe = document.getElementById('mainIframe');
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const webPageHistoryId = document.getElementById('restoreButton').getAttribute('llama-data-web-page-history-id');
 
-        fetch(`/pages/${webPageId}/restore.json?web_page_history_id=${webPageHistoryId}`, {
+        fetch(`/pages/${webPageId}/restore.json?page_history_id=${webPageHistoryId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -208,6 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} - A summary of the prompt.
      */
     function summarizePrompt(prompt){
+        //if null, return empty string
+        if (prompt == null) {
+            return "";
+        }
         // Split the text into sentences
         const sentences = prompt.split('.');
         
