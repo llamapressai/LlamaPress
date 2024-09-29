@@ -39,6 +39,7 @@ module LlamaBot
             if should_we_write_page_to_database
                 web_page = Page.find_by(id: response['query_params']['web_page_id'])
                 web_page.update(content: code_to_write)
+                web_page_history = PageHistory.create(page_id: web_page.id, content: code_to_write, prompt: response['query_params']['user_message'], user_message: response['query_params']['user_message'])
             else
                 File.write(destination, code_to_write)
             end

@@ -23,11 +23,7 @@ class Page < ApplicationRecord
   end
 
   def save_history()
-    page_history = PageHistory.new
-    page_history.content = self.content
-    page_history.user_message = "Restore to previous version"
-    page_history.page_id = self.id
-    page_history.save
+    page_history = self.page_histories.create(content: self.content, user_message: "Restore to previous version")
   end
 
   # Set the default html content for the web page
