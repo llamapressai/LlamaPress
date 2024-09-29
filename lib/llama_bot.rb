@@ -40,7 +40,10 @@ module LlamaBot
                 web_page = Page.find_by(id: response['query_params']['web_page_id'])
                 web_page.update(content: code_to_write)
                 web_page_history = PageHistory.create(page_id: web_page.id, content: code_to_write, prompt: response['query_params']['user_message'], user_message: response['query_params']['user_message'])
-            else
+            else #If we're in sandbox mode, reject.
+                if ENV['SANDBOX_MODE'] == 'true'
+                    return "Sorry, but we're in sandbox mode. You can't write code to the filesystem in sandbox mode."
+                end
                 File.write(destination, code_to_write)
             end
 
@@ -48,6 +51,10 @@ module LlamaBot
         end
 
         def handle_run_commands(response)
+            # if we're in sandbox mode, reject.
+            if ENV['SANDBOX_MODE'] == 'true'
+                return "Sorry, but we're in sandbox mode. You can't run commands in sandbox mode."
+            end
             commands_to_run = response['payload']['commands']
             output = ""
             commands_to_run.each do |command|
