@@ -96,8 +96,21 @@ module LlamaBot
             request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
             request.body = params.to_json
             
-            response = http.request(request)
-            response.body
+            begin
+                response = http.request(request)
+                
+                case response
+                when Net::HTTPSuccess
+                    response.body
+                else
+                    Rails.logger.error("LlamaBot API error: #{response.code} - #{response.message}")
+                    Rails.logger.error("Response body: #{response.body}")
+                    raise "LlamaBot API error: #{response.code} - #{response.message}"
+                end
+            rescue StandardError => e
+                Rails.logger.error("Error making request to LlamaBot API: #{e.message}")
+                raise "Failed to communicate with LlamaBot API: #{e.message}"
+            end
         end
 
         # Fetch the relevent file contents from the database or the file system
