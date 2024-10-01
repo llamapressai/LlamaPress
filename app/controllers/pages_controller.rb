@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
-  skip_before_action :verify_authenticity_token, only: [:restore] 
+  skip_before_action :verify_authenticity_token, only: [:restore, :update] 
 
   # GET /
   # Find and render the root page depending on the domain.

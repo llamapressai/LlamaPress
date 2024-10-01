@@ -1,4 +1,4 @@
-<div class="fixed bottom-4 right-4 z-50" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+<div class="fixed bottom-4 right-4 z-50" data-llama="app/views/shared/_llama_bot_chat.html.erb exclude_when_saving_contenteditable_edits">
     <!-- Chat icon -->
     <div id="chatIcon" class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_llama_bot_chat.html.erb">
         <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="h-12 w-12" data-llama="app/views/shared/_llama_bot_chat.html.erb">
@@ -93,3 +93,6 @@
 
 <%= render partial: 'shared/llama_bot/history_modal' %>
 <%= render partial: 'shared/llama_bot/chat_javascript' %>
+<% if current_user.present? && @page.present? %>
+    <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %>
+<% end %>
