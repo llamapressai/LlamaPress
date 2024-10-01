@@ -79,6 +79,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to update Tailwind classes
+    function updateTailwindClasses(img, width, height) {
+        const widthClass = `w-${Math.round(width / 4) * 4}`;
+        const heightClass = `h-${Math.round(height / 4) * 4}`;
+        
+        img.classList.forEach(className => {
+            if (className.startsWith('w-')) img.classList.remove(className);
+            if (className.startsWith('h-')) img.classList.remove(className);
+        });
+        
+        img.classList.add(widthClass, heightClass);
+    }
+
+    // Image resizing functionality
+    let isResizing = false;
+    let currentImage = null;
+    let startX, startY, startWidth, startHeight;
+
+    document.body.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'IMG') {
+            isResizing = true;
+            currentImage = e.target;
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = currentImage.clientWidth;
+            startHeight = currentImage.clientHeight;
+            e.preventDefault();
+        }
+    });
+
+    document.body.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const width = startWidth + (e.clientX - startX);
+        const height = startHeight + (e.clientY - startY);
+        currentImage.style.width = `${width}px`;
+        currentImage.style.height = `${height}px`;
+        updateTailwindClasses(currentImage, width, height);
+    });
+
+    document.body.addEventListener('mouseup', () => {
+        isResizing = false;
+        currentImage = null;
+    });
+
     // Event listener for when editing starts
     document.body.addEventListener('focus', (event) => {
         if (event.target.isContentEditable) {
