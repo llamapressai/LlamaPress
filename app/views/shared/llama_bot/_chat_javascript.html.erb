@@ -126,8 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
     chatIcon.addEventListener('click', toggleChat);
     closeButton.addEventListener('click', toggleChat);
     sendButton.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (e.shiftKey || e.altKey || e.metaKey) {
+                // Allow new line on Shift+Enter, Option(Alt)+Enter, or Command(Meta)+Enter
+                return;
+            }
+            e.preventDefault(); // Prevent default Enter behavior
+            sendMessage();
+        }
     });
 
     function loadChatHistory() {
