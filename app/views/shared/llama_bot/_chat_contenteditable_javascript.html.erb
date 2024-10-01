@@ -1,7 +1,13 @@
 <script data-llama="exclude_when_saving_contenteditable_edits">
 document.addEventListener('DOMContentLoaded', () => {
-    // Make the entire body editable
+    // Make the entire body editable, except for elements with the specific data-llama attribute
     document.body.contentEditable = true;
+
+    // Find all elements with the data-llama attribute and make them non-editable
+    const nonEditableElements = document.querySelectorAll('[data-llama*="exclude_when_saving_contenteditable_edits"]');
+    nonEditableElements.forEach(element => {
+        element.contentEditable = false;
+    });
 
     let isEditing = false;
     let originalContent = '';
@@ -27,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cleanedContent = cleanedContent.replace('contenteditable="true"', '');
 
             // Use a more modern confirmation dialog
-            if (confirm('Do you want to save these changes?')) {
+            if (confirm('Save these changes?')) {
                 // Show a loading indicator
                 const loadingIndicator = document.createElement('div');
                 loadingIndicator.textContent = 'Saving...';
