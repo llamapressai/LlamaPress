@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_17_152225) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_04_230224) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -69,6 +69,14 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_17_152225) do
     t.index ["slug"], name: "index_sites_on_slug", unique: true
   end
 
+  create_table "submissions", force: :cascade do |t|
+    t.jsonb "data"
+    t.bigint "site_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["site_id"], name: "index_submissions_on_site_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "phone"
     t.string "first_name"
@@ -91,5 +99,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_17_152225) do
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"
   add_foreign_key "sites", "organizations"
+  add_foreign_key "submissions", "sites"
   add_foreign_key "users", "organizations"
 end
