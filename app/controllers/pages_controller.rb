@@ -1,5 +1,6 @@
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore]
+  before_action :set_site, only: %i[ new ]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
   skip_before_action :verify_authenticity_token, only: [:restore, :update] 
 
@@ -62,13 +63,7 @@ class PagesController < ApplicationController
 
   # GET /pages/new
   def new
-    if params[:site_id].present?
-      @site = Site.find(params[:site_id])
-    else
-      @site = current_site
-    end
-
-    @page = current_organization.pages.build
+    @page = Page.new(site: @site)
   end
 
   # GET /pages/1/edit
@@ -149,6 +144,14 @@ class PagesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_page
       @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
+    end
+
+    def set_site
+      if page_params[:site_id].present?
+        @site = Site.find(params[:site_id])
+      else
+        @site = current_site || @page.site || current_organization.sites.first
+      end
     end
 
     # Only allow a list of trusted parameters through.

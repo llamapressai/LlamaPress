@@ -9,7 +9,7 @@ class Organization < ApplicationRecord
 
     def create_default_site_and_page
         @site = Site.create(
-            slug: 'home',
+            slug: self.users&.first&.email,
             organization: self,
             name: "#{self.users&.first&.email}'s Page"
         )
