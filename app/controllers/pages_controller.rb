@@ -12,12 +12,22 @@ class PagesController < ApplicationController
       if @page.nil?
         redirect_to llama_bot_home_path and return
       end
-    else # if no site is found for this domain, just go to the llamabot dashboard.
-      redirect_to llama_bot_home_path and return 
+    else # if no site is found for this domain, go to the default home page. 
+      if current_user.present?
+        if current_user.organization.pages.count == 0
+          redirect_to llama_bot_home_path and return
+        else 
+          @page = current_user.organization.pages.first
+          redirect_to page_path(@page) and return
+        end
+      else
+        redirect_to new_user_registration_path and return 
+      end
     end
 
     content = @page.content
     content += inject_chat_partial(content) if current_user.present?
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -31,6 +41,7 @@ class PagesController < ApplicationController
     
     content = @page.content
     content += inject_chat_partial(content) if current_user.present?
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page' 
   end
 
@@ -45,6 +56,7 @@ class PagesController < ApplicationController
 
     # Inject the chat partial
     content += inject_chat_partial(content)
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -146,5 +158,9 @@ class PagesController < ApplicationController
 
     def inject_chat_partial(content)
       render_to_string(partial: 'shared/llama_bot/chat')
+    end
+
+    def inject_analytics_partial()
+      render_to_string(partial: 'shared/llama_bot/analytics')
     end
 end
