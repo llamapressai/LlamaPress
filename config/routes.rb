@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :submissions
   resources :pages do
     member do
       get 'histories'
