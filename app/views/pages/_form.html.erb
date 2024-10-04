@@ -24,10 +24,32 @@
 
   <div class="my-5">
     <%= form.label :content, "HTML Content" %>
-    <%= form.text_area :content, rows: 250, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.text_area :content, rows: 200, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full", style: "width: 100%; max-width: 800px;" %>
   </div>
 
   <div class="inline">
     <%= form.submit "Save Page", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
   </div>  
 <% end %>
+
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/htmlmixed/htmlmixed.min.js" %>
+<%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css" %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var editor = CodeMirror.fromTextArea(document.getElementById('page_content'), {
+      mode: 'htmlmixed',
+      lineNumbers: true,
+      theme: 'default',
+      viewportMargin: Infinity,
+      lineWrapping: true
+    });
+    editor.setSize("100%", "auto");
+    
+    // Refresh the editor after a short delay to ensure proper sizing
+    setTimeout(function() {
+      editor.refresh();
+    }, 100);
+  });
+</script>
