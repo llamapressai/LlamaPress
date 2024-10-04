@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :snippets
   resources :pages do
     member do
       get 'histories'
