@@ -44,6 +44,14 @@ module PagesHelper
                     </div>
                 </header>
 
+                <section class="bg-white rounded-lg shadow-lg p-8 mb-12 text-center" data-aos="fade-up">
+                    <h3 class="text-2xl font-bold mb-6">How LlamaPress Works</h3>
+                    <div class="flex justify-center">
+                        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/1ws6omjel5kus3akeqoflvp8eje4" alt="LlamaPress Workflow" class="w-full max-w-4xl rounded-lg shadow-md" data-aos="zoom-in">
+                    </div>
+                    <p class="mt-6 text-gray-600 max-w-2xl mx-auto">LlamaPress simplifies your digital marketing journey with AI-powered tools and expert guidance.</p>
+                </section>
+
                 <main class="container mx-auto px-4 py-16">
                     <article class="bg-white rounded-lg shadow-lg p-8 mb-12" data-aos="fade-up">
                         <p class="mb-4">Small businesses often struggle to compete with larger companies that have deep marketing budgets. LlamaPress is here to level the playing field by providing an open-source, AI-driven platform that helps you build your website and marketing funnels — all focused on one goal: bringing in more leads to grow your business.</p>
