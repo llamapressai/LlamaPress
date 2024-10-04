@@ -1,19 +1,19 @@
 <div class="fixed bottom-4 right-4 z-50" data-llama="app/views/shared/_llama_bot_chat.html.erb exclude_when_saving_contenteditable_edits">
     <!-- Chat icon -->
-    <div id="chatIcon" class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="h-12 w-12" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+    <div id="chatIcon" class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="h-8 w-8 md:h-12 md:w-12" data-llama="app/views/shared/_llama_bot_chat.html.erb">
     </div>
     
     <!-- Chat bubble -->
-    <div class="absolute bottom-20 right-0 bg-gray-800 rounded-lg p-3 shadow-lg" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-        <p class="text-white text-sm whitespace-nowrap" data-llama="app/views/shared/_llama_bot_chat.html.erb">What do you want to build?</p>
+    <div class="absolute bottom-16 md:bottom-20 right-0 bg-gray-800 rounded-lg p-2 md:p-3 shadow-lg" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+        <p class="text-white text-xs md:text-sm whitespace-nowrap" data-llama="app/views/shared/_llama_bot_chat.html.erb">What do you want to build?</p>
         <!-- Bubble tail -->
-        <div class="absolute bottom-0 right-6 transform translate-y-1/2 rotate-45 w-3 h-3 bg-gray-800" data-llama="app/views/shared/_llama_bot_chat.html.erb"></div>
+        <div class="absolute bottom-0 right-4 md:right-6 transform translate-y-1/2 rotate-45 w-2 h-2 md:w-3 md:h-3 bg-gray-800" data-llama="app/views/shared/_llama_bot_chat.html.erb"></div>
     </div>
 
     <!-- Chatbot window -->
-    <div id="chatbotContainer" class="fixed bottom-24 right-4 w-[480px] h-[576px] border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col hidden transition-all duration-300 ease-in-out" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-400 text-white p-4 flex justify-between items-center rounded-t-2xl shadow-md" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+    <div id="chatbotContainer" class="fixed bottom-16 md:bottom-24 right-2 md:right-4 w-[90vw] md:w-[480px] h-[80vh] md:h-[576px] border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col hidden transition-all duration-300 ease-in-out" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 md:p-4 flex justify-between items-center rounded-t-2xl shadow-md" data-llama="app/views/shared/_llama_bot_chat.html.erb">
             <div class="flex items-center space-x-3" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                 <a href="/home" class="text-white hover:text-blue-200 transition-colors duration-200" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_llama_bot_chat.html.erb">
@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="flex flex-col" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-            <div class="p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+            <div class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                 <button onclick="toggleSelectionMode()" class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200" title="Select element" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-llama="app/views/shared/_llama_bot_chat.html.erb" />
@@ -83,11 +83,11 @@
                     <div id="selectedElementContent" class="text-sm overflow-auto w-full h-full" style="max-width: 500px; max-height: 180px;" data-llama="app/views/shared/_llama_bot_chat.html.erb"></div>
                 </div>
             </div>
-            <div class="p-4 border-t border-gray-300 flex flex-col" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-                <textarea id="userInput" placeholder="Type your message..." class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black" rows="3" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+            <div class="p-2 md:p-4 border-t border-gray-300 flex flex-col" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+                <textarea id="userInput" placeholder="Type your message..." class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black text-sm md:text-base" rows="2 md:rows-3" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                 Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and crazy!
                 </textarea>
-                <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 self-end" data-llama="app/views/shared/_llama_bot_chat.html.erb">Send</button>
+                <button id="sendButton" class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 self-end text-sm md:text-base" data-llama="app/views/shared/_llama_bot_chat.html.erb">Send</button>
             </div>
         </div>
     </div>

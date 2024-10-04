@@ -343,36 +343,77 @@ document.getElementById('closeSelectedElement').addEventListener('click', functi
     document.getElementById('selectedElementContent').innerHTML = '';
 });
 
-let isExpanded = false; // Change this to true
+let isExpanded = false;
 const chatbotContainer = document.getElementById('chatbotContainer');
 const expandButton = document.getElementById('expandButton');
 
-// Add this function to set the expanded size
 function setExpandedSize() {
     isExpanded = true;
-    chatbotContainer.style.width = '800px';
-    chatbotContainer.style.height = '800px';
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    if (screenWidth < 768) { // Mobile devices
+        chatbotContainer.style.width = '80%';
+        chatbotContainer.style.height = '90%';
+        chatbotContainer.style.maxWidth = 'none';
+        chatbotContainer.style.maxHeight = 'none';
+    } else if (screenWidth < 1024) { // Tablets
+        chatbotContainer.style.width = '80%';
+        chatbotContainer.style.height = '80%';
+        chatbotContainer.style.maxWidth = '600px';
+        chatbotContainer.style.maxHeight = '800px';
+    } else { // Desktops
+        chatbotContainer.style.width = '800px';
+        chatbotContainer.style.height = '800px';
+        chatbotContainer.style.maxWidth = '80%';
+        chatbotContainer.style.maxHeight = '80%';
+    }
 }
 
-function setExpandedToFalse() {
+function setCollapsedSize() {
     isExpanded = false;
-    chatbotContainer.style.width = '480px';
-    chatbotContainer.style.height = '576px';
-}
+    const screenWidth = window.innerWidth;
 
-// Call this function immediately after the page loads
-
-expandButton.addEventListener('click', function() {
-    isExpanded = !isExpanded;
-    if (isExpanded) {
-        setExpandedSize();
+    if (screenWidth < 768) { // Mobile devices
+        chatbotContainer.style.width = '100%';
+        chatbotContainer.style.height = '50%';
+        chatbotContainer.style.maxWidth = 'none';
+        chatbotContainer.style.maxHeight = 'none';
     } else {
         chatbotContainer.style.width = '480px';
         chatbotContainer.style.height = '576px';
+        chatbotContainer.style.maxWidth = '80%';
+        chatbotContainer.style.maxHeight = '80%';
     }
+}
+
+function toggleExpand() {
+    if (isExpanded) {
+        setCollapsedSize();
+    } else {
+        setExpandedSize();
+    }
+}
+
+// Call this function initially and on window resize
+function updateChatbotSize() {
+    if (isExpanded) {
+        setExpandedSize();
+    } else {
+        setCollapsedSize();
+    }
+}
+
+// Add event listeners
+expandButton.addEventListener('click', toggleExpand);
+window.addEventListener('resize', updateChatbotSize);
+
+// Initial setup
+document.addEventListener('DOMContentLoaded', () => {
+    setCollapsedSize(); // Start with collapsed size
 });
 
-// Add this function to your existing JavaScript // this is for readability of the selected snippet 
+// Add this function to the end of the script
 function setSelectedElementContainerBackground(selectedElement) {
     const container = document.getElementById('selectedElementContainer');
     const content = document.getElementById('selectedElementContent');
