@@ -1,6 +1,5 @@
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore]
-  before_action :set_site, only: %i[ new ]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
   skip_before_action :verify_authenticity_token, only: [:restore, :update] 
 
@@ -63,7 +62,7 @@ class PagesController < ApplicationController
 
   # GET /pages/new
   def new
-    @page = Page.new(site: @site)
+    @page = current_organization.pages.build
   end
 
   # GET /pages/1/edit
