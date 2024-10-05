@@ -1,5 +1,6 @@
 class SnippetsController < ApplicationController
   before_action :set_snippet, only: %i[ show edit update destroy ]
+  before_action :set_site, only: %i[ new edit ]
 
   # GET /snippets or /snippets.json
   def index
@@ -12,7 +13,7 @@ class SnippetsController < ApplicationController
 
   # GET /snippets/new
   def new
-    @snippet = Snippet.new
+    @snippet = @site.snippets.new
   end
 
   # GET /snippets/1/edit
@@ -61,6 +62,16 @@ class SnippetsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_snippet
       @snippet = Snippet.find(params[:id])
+    end
+
+    def set_site
+      if params[:site_id].present?
+        @site = Site.find(params[:site_id])
+      elsif current_site.present?
+        @site = current_site
+      else
+        @site = current_organization.sites.first
+      end
     end
 
     # Only allow a list of trusted parameters through.
