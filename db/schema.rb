@@ -77,7 +77,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_04_232632) do
     t.datetime "updated_at", null: false
     t.index ["site_id"], name: "index_snippets_on_site_id"
   end
-  
+
   create_table "submissions", force: :cascade do |t|
     t.jsonb "data"
     t.bigint "site_id", null: false
