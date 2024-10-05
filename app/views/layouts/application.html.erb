@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 <head data-llama="app/views/layouts/llama_bot.html.erb">
   <!--<title>LlamaBot</title>-->
   <%= csrf_meta_tags %>
@@ -8,6 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @keyframes thinkingpulse {
             0%,
@@ -45,6 +47,15 @@
         .thinking-pulse {
           animation: thinkingpulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        @media (max-width: 768px) {
+          .footer-banner {
+            flex-direction: column;
+            text-align: center;
+          }
+          .footer-text {
+            margin-bottom: 10px;
+          }
+        }
     </style>
     <% if Rails.env.production? && ENV['CLARITY_TRACKING_ID'].present? %>
       <script type="text/javascript">
@@ -56,7 +67,7 @@
       </script>
     <% end %>
 </head>
-<body data-llama="app/views/layouts/llama_bot.html.erb">
+<body class="flex flex-col min-h-screen" data-llama="app/views/layouts/llama_bot.html.erb">
   <nav class="bg-gray-800 p-4" data-llama="app/views/layouts/llama_bot.html.erb">
     <div class="container mx-auto" data-llama="app/views/layouts/llama_bot.html.erb">
       <div class="flex justify-between items-center" data-llama="app/views/layouts/llama_bot.html.erb">
@@ -65,33 +76,28 @@
           <a href="/" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
         </div>
         <% if current_user %>
-        <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
-          <div class="hidden md:flex space-x-4 mr-4" data-llama="app/views/layouts/llama_bot.html.erb">
-            <a href="/home" class="text-white hover:text-gray-300" title="Home" data-llama="app/views/layouts/llama_bot.html.erb">
-              <i class="fas fa-home" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-            </a>
-            <a href="/pages" class="text-white hover:text-gray-300" title="Webpages" data-llama="app/views/layouts/llama_bot.html.erb">
-              <i class="fas fa-file-alt" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-            </a>
-            <a href="/llama_bot/source" class="text-white hover:text-gray-300" title="Source Code" data-llama="app/views/layouts/llama_bot.html.erb">
-              <i class="fas fa-code" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-            </a>
-            <a href="/llama_bot/models" class="text-white hover:text-gray-300" title="Activated Features" data-llama="app/views/layouts/llama_bot.html.erb">
-              <i class="fas fa-puzzle-piece" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-            </a>
-            <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
-              <i class="fas fa-database" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-            </a>
-            <!-- Add more navbar links here -->
-          </div>
-          <a href="/pages" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-lg" data-llama="app/views/layouts/llama_bot.html.erb">
-            Templates
+        <div class="hidden md:flex items-center space-x-4">
+          <a href="/home" class="text-white hover:text-gray-300" title="Home" data-llama="app/views/layouts/llama_bot.html.erb">
+            <i class="fas fa-home" data-llama="app/views/layouts/llama_bot.html.erb"></i>
           </a>
+          <a href="/pages" class="text-white hover:text-gray-300" title="Webpages" data-llama="app/views/layouts/llama_bot.html.erb">
+            <i class="fas fa-file-alt" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+          </a>
+          <a href="/llama_bot/source" class="text-white hover:text-gray-300" title="Source Code" data-llama="app/views/layouts/llama_bot.html.erb">
+            <i class="fas fa-code" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+          </a>
+          <a href="/llama_bot/models" class="text-white hover:text-gray-300" title="Activated Features" data-llama="app/views/layouts/llama_bot.html.erb">
+            <i class="fas fa-puzzle-piece" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+          </a>
+          <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
+            <i class="fas fa-database" data-llama="app/views/layouts/llama_bot.html.erb"></i>
+          </a>
+          <!-- Add more navbar links here -->
         </div>
-        <div class="md:hidden" data-llama="app/views/layouts/llama_bot.html.erb">
-          <button id="menu-toggle" class="text-white focus:outline-none" data-llama="app/views/layouts/llama_bot.html.erb">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" data-llama="app/views/layouts/llama_bot.html.erb">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" data-llama="app/views/layouts/llama_bot.html.erb"></path>
+        <div class="md:hidden">
+          <button id="menu-toggle" class="text-white focus:outline-none">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             </svg>
           </button>
         </div>
@@ -122,18 +128,29 @@
   </nav>
 
     <%# react_component('chatbot/ChatBot', props: { first_name: 'Tyson' }) %>
-  <!--<div class="container mx-auto mt-5" data-llama="app/views/layouts/llama_bot.html.erb">-->
+  <main class="flex-grow">
     <%= yield %>
-  <!--</div>-->
+  </main>
 
   <% if current_user %>
     <%= render partial: 'shared/llama_bot/chat' %>
   <% end %>
-<footer class="footer-banner" data-llama="app/views/layouts/llama_bot.html.erb">
+<footer class="footer-banner mt-auto" data-llama="app/views/layouts/llama_bot.html.erb">
         <div class="container mx-auto text-center" data-llama="app/views/layouts/llama_bot.html.erb">
             <span class="footer-text" data-llama="app/views/layouts/llama_bot.html.erb">Built with LlamaPress</span>
-            <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="inline-block mr-2 h-14" data-llama="app/views/layouts/llama_bot.html.erb">
+            <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="inline-block mt-2 h-14" data-llama="app/views/layouts/llama_bot.html.erb">
         </div>
     </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      menuToggle.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+      });
+    });
+  </script>
 </body>
 </html>
