@@ -1,4 +1,4 @@
-<script>
+<script data-llama="exclude_when_saving_contenteditable_edits">
 document.addEventListener('DOMContentLoaded', () => {
     const chatIcon = document.getElementById('chatIcon');
     const chatbotContainer = document.getElementById('chatbotContainer');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </path>
         </svg>
         </div>
-        <span class="thinking-pulse">Thinking...</span>
+        <span class="thinking-pulse">Thinking... (this may take a while)</span>
         </div>`.trim();
     return spinner.firstElementChild;
     }
@@ -90,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.value = '';
         isLoading = true;
         showLoadingIndicator();
-        let selectedElement = document.getElementById("selectedElementContent").innerHTML;
+        let selectedElement = document.getElementById("selectedElementContent");
+        let selectedElementInnerHtml = selectedElement.innerHTML.replace('selected-element', ''); //remove this class so the LLM doesn't save it after it's used.
+
         try {
             const response = await fetch('/llama_bot/message.json', {
                 method: 'POST',
@@ -100,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ 
                     message: userMessage, 
                     context: '<%=@view_path%>', 
-                    selectedElement: selectedElement, 
+                    selectedElement: selectedElementInnerHtml, 
                     webPageId: '<%=@page&.id%>'
                 })
             });
@@ -124,8 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
     chatIcon.addEventListener('click', toggleChat);
     closeButton.addEventListener('click', toggleChat);
     sendButton.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (e.shiftKey || e.altKey || e.metaKey) {
+                // Allow new line on Shift+Enter, Option(Alt)+Enter, or Command(Meta)+Enter
+                return;
+            }
+            e.preventDefault(); // Prevent default Enter behavior
+            sendMessage();
+        }
     });
 
     function loadChatHistory() {
@@ -143,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     web_page_histories = data.web_page_histories;
                     web_page_histories.forEach(history => {
                         addWebPageHistoryToHistoryDrawer(history);
-                        //addMessage(history.text, history.sender);
                     });
                 });
         }
@@ -156,10 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function addWebPageHistoryToHistoryDrawer(webPageHistory) {
         const historyDrawer = document.getElementById('historyDrawer');
         const historyItem = document.createElement('div');
-        historyItem.className = 'history-item cursor-pointer hover:bg-gray-100 p-2';
-        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
-        //historyItem.textContent = `${webPageHistory.user_message} - ${new Date(webPageHistory.created_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false })}`;
-        historyItem.textContent = new Date(webPageHistory.created_at).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', month: '2-digit', day: '2-digit', hour12: false });
+        historyItem.className = 'history-item cursor-pointer hover:bg-gray-100 p-2'; 
+        prompt = webPageHistory.prompt || webPageHistory.user_message;
+        historyItem.textContent = summarizePrompt(prompt);
         historyItem.onclick = function() {
             const modal = document.getElementById('historyModal'); // Get modal element
             const mainIframe = document.getElementById('mainIframe');
@@ -181,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const webPageHistoryId = document.getElementById('restoreButton').getAttribute('llama-data-web-page-history-id');
 
-        fetch(`/pages/${webPageId}/restore.json?web_page_history_id=${webPageHistoryId}`, {
+        fetch(`/pages/${webPageId}/restore.json?page_history_id=${webPageHistoryId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -208,6 +215,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} - A summary of the prompt.
      */
     function summarizePrompt(prompt){
+        //if null, return empty string
+        if (prompt == null) {
+            return "";
+        }
         // Split the text into sentences
         const sentences = prompt.split('.');
         
@@ -332,36 +343,77 @@ document.getElementById('closeSelectedElement').addEventListener('click', functi
     document.getElementById('selectedElementContent').innerHTML = '';
 });
 
-let isExpanded = false; // Change this to true
+let isExpanded = false;
 const chatbotContainer = document.getElementById('chatbotContainer');
 const expandButton = document.getElementById('expandButton');
 
-// Add this function to set the expanded size
 function setExpandedSize() {
     isExpanded = true;
-    chatbotContainer.style.width = '800px';
-    chatbotContainer.style.height = '800px';
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    if (screenWidth < 768) { // Mobile devices
+        chatbotContainer.style.width = '80%';
+        chatbotContainer.style.height = '90%';
+        chatbotContainer.style.maxWidth = 'none';
+        chatbotContainer.style.maxHeight = 'none';
+    } else if (screenWidth < 1024) { // Tablets
+        chatbotContainer.style.width = '80%';
+        chatbotContainer.style.height = '80%';
+        chatbotContainer.style.maxWidth = '600px';
+        chatbotContainer.style.maxHeight = '800px';
+    } else { // Desktops
+        chatbotContainer.style.width = '800px';
+        chatbotContainer.style.height = '800px';
+        chatbotContainer.style.maxWidth = '80%';
+        chatbotContainer.style.maxHeight = '80%';
+    }
 }
 
-function setExpandedToFalse() {
+function setCollapsedSize() {
     isExpanded = false;
-    chatbotContainer.style.width = '480px';
-    chatbotContainer.style.height = '576px';
-}
+    const screenWidth = window.innerWidth;
 
-// Call this function immediately after the page loads
-
-expandButton.addEventListener('click', function() {
-    isExpanded = !isExpanded;
-    if (isExpanded) {
-        setExpandedSize();
+    if (screenWidth < 768) { // Mobile devices
+        chatbotContainer.style.width = '100%';
+        chatbotContainer.style.height = '50%';
+        chatbotContainer.style.maxWidth = 'none';
+        chatbotContainer.style.maxHeight = 'none';
     } else {
         chatbotContainer.style.width = '480px';
         chatbotContainer.style.height = '576px';
+        chatbotContainer.style.maxWidth = '80%';
+        chatbotContainer.style.maxHeight = '80%';
     }
+}
+
+function toggleExpand() {
+    if (isExpanded) {
+        setCollapsedSize();
+    } else {
+        setExpandedSize();
+    }
+}
+
+// Call this function initially and on window resize
+function updateChatbotSize() {
+    if (isExpanded) {
+        setExpandedSize();
+    } else {
+        setCollapsedSize();
+    }
+}
+
+// Add event listeners
+expandButton.addEventListener('click', toggleExpand);
+window.addEventListener('resize', updateChatbotSize);
+
+// Initial setup
+document.addEventListener('DOMContentLoaded', () => {
+    setCollapsedSize(); // Start with collapsed size
 });
 
-// Add this function to your existing JavaScript // this is for readability of the selected snippet 
+// Add this function to the end of the script
 function setSelectedElementContainerBackground(selectedElement) {
     const container = document.getElementById('selectedElementContainer');
     const content = document.getElementById('selectedElementContent');

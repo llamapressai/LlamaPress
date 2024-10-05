@@ -39,7 +39,11 @@ module LlamaBot
             if should_we_write_page_to_database
                 web_page = Page.find_by(id: response['query_params']['web_page_id'])
                 web_page.update(content: code_to_write)
-            else
+                web_page_history = PageHistory.create(page_id: web_page.id, content: code_to_write, prompt: response['query_params']['user_message'], user_message: response['query_params']['user_message'])
+            else #If we're in sandbox mode, reject.
+                if ENV['SANDBOX_MODE'] == 'true'
+                    return "Sorry, but we're in sandbox mode. You can't write code to the filesystem in sandbox mode."
+                end
                 File.write(destination, code_to_write)
             end
 
@@ -47,6 +51,10 @@ module LlamaBot
         end
 
         def handle_run_commands(response)
+            # if we're in sandbox mode, reject.
+            if ENV['SANDBOX_MODE'] == 'true'
+                return "Sorry, but we're in sandbox mode. You can't run commands in sandbox mode."
+            end
             commands_to_run = response['payload']['commands']
             output = ""
             commands_to_run.each do |command|
@@ -69,7 +77,7 @@ module LlamaBot
             }.compact
                         
             begin
-                response = JSON.parse(make_post_request("#{ENV['LLAMA_BOT_URI']}/completion", params))
+                response = JSON.parse(make_post_request("#{ENV['LLAMABOT_API_URL']}/completion", params))
             rescue JSON::ParserError => e
                 Rails.logger.error("JSON parsing error: #{e.message}")
                 return { 'error' => 'Invalid JSON response from LlamaBot API' }
@@ -88,8 +96,21 @@ module LlamaBot
             request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
             request.body = params.to_json
             
-            response = http.request(request)
-            response.body
+            begin
+                response = http.request(request)
+                
+                case response
+                when Net::HTTPSuccess
+                    response.body
+                else
+                    Rails.logger.error("LlamaBot API error: #{response.code} - #{response.message}")
+                    Rails.logger.error("Response body: #{response.body}")
+                    raise "LlamaBot API error: #{response.code} - #{response.message}"
+                end
+            rescue StandardError => e
+                Rails.logger.error("Error making request to LlamaBot API: #{e.message}")
+                raise "Failed to communicate with LlamaBot API: #{e.message}"
+            end
         end
 
         # Fetch the relevent file contents from the database or the file system

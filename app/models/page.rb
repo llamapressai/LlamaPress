@@ -1,10 +1,10 @@
 class Page < ApplicationRecord
   extend FriendlyId
-  belongs_to :site, optional: true
+  belongs_to :site
   belongs_to :organization
   has_many :page_histories, dependent: :destroy
 
-  before_create :ensure_site
+  before_validation :ensure_site, on: :create
   after_initialize :set_default_html_content, if: :new_record?
 
   friendly_id :slug, use: :slugged
@@ -12,6 +12,7 @@ class Page < ApplicationRecord
   # Ensure the web page has a web site. If not, create one so the user doesn't have to.
   def ensure_site
     return if site.present?
+    return unless organization.present?
 
     self.site = organization.sites.first || create_new_site
   end
@@ -23,11 +24,7 @@ class Page < ApplicationRecord
   end
 
   def save_history()
-    page_history = PageHistory.new
-    page_history.content = self.content
-    page_history.user_message = "Restore to previous version"
-    page_history.page_id = self.id
-    page_history.save
+    page_history = self.page_histories.create(content: self.content, user_message: "Restore to previous version")
   end
 
   # Set the default html content for the web page
@@ -42,7 +39,7 @@ class Page < ApplicationRecord
   # Create a new web site for the organization
   def create_new_site
     name = generate_unique_name
-    Site.create!(name: name, organization: organization)
+    organization.sites.create!(name: name)
   end
 
   # Generate a unique name for the web site
@@ -51,7 +48,7 @@ class Page < ApplicationRecord
     name = base_name
     index = 1
 
-    while Site.exists?(name: name)
+    while organization.sites.exists?(name: name)
       name = "#{base_name} #{index}"
       index += 1
     end

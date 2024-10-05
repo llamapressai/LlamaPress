@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
-  before_action :set_page, only: %i[ show edit update destroy ]
+  before_action :set_page, only: %i[ show edit update destroy restore]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
-  skip_before_action :verify_authenticity_token, only: [:restore] 
+  skip_before_action :verify_authenticity_token, only: [:restore, :update] 
 
   # GET /
   # Find and render the root page depending on the domain.
@@ -12,12 +12,22 @@ class PagesController < ApplicationController
       if @page.nil?
         redirect_to llama_bot_home_path and return
       end
-    else # if no site is found for this domain, just go to the llamabot dashboard.
-      redirect_to llama_bot_home_path and return 
+    else # if no site is found for this domain, go to the default home page. 
+      if current_user.present?
+        if current_user.organization.pages.count == 0
+          redirect_to llama_bot_home_path and return
+        else 
+          @page = current_user.organization.pages.first
+          redirect_to page_path(@page) and return
+        end
+      else
+        redirect_to new_user_registration_path and return 
+      end
     end
 
     content = @page.content
     content += inject_chat_partial(content) if current_user.present?
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -31,6 +41,7 @@ class PagesController < ApplicationController
     
     content = @page.content
     content += inject_chat_partial(content) if current_user.present?
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page' 
   end
 
@@ -45,17 +56,12 @@ class PagesController < ApplicationController
 
     # Inject the chat partial
     content += inject_chat_partial(content)
+    content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
 
   # GET /pages/new
   def new
-    if params[:site_id].present?
-      @site = Site.find(params[:site_id])
-    else
-      @site = current_site
-    end
-
     @page = current_organization.pages.build
   end
 
@@ -65,7 +71,12 @@ class PagesController < ApplicationController
 
   # POST /pages or /pages.json
   def create
-    @page = current_organization.pages.build(page_params)
+    if params[:site_id].present? #associate it with the right site if it's passed in
+      @site = Site.find(params[:site_id])
+      @page = @site.pages.build(page_params)
+    else
+      @page = current_organization.pages.build(page_params) #otherwise this will default to the current site, or first site found in this organization.
+    end
 
     respond_to do |format|
       if @page.save
@@ -134,6 +145,14 @@ class PagesController < ApplicationController
       @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
     end
 
+    def set_site
+      if page_params[:site_id].present?
+        @site = Site.find(params[:site_id])
+      else
+        @site = current_site || @page.site || current_organization.sites.first
+      end
+    end
+
     # Only allow a list of trusted parameters through.
     def page_params
       params.require(:page).permit(:site_id, :content, :slug, :prompt, :organization_id)
@@ -141,5 +160,9 @@ class PagesController < ApplicationController
 
     def inject_chat_partial(content)
       render_to_string(partial: 'shared/llama_bot/chat')
+    end
+
+    def inject_analytics_partial()
+      render_to_string(partial: 'shared/llama_bot/analytics')
     end
 end
