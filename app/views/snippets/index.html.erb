@@ -10,8 +10,9 @@
     <%= link_to "New snippet", new_snippet_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %>
   </div>
 
-  <div id="snippets" class="min-w-full">
+  <div id="snippets" class="min-w-full border-2 border-gray-300">
     <% @snippets.each do |snippet| %>
+      <%= raw snippet.content %>
       <%= render snippet %>
       <p>
         <%= link_to "Show this snippet", snippet, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>

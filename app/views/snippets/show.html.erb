@@ -5,6 +5,8 @@
     <% end %>
 
     <%= render @snippet %>
+    <!--# render raw html of snippet.-->
+    <%= raw @snippet.content %>
 
     <%= link_to "Edit this snippet", edit_snippet_path(@snippet), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
     <%= link_to "Back to snippets", snippets_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
