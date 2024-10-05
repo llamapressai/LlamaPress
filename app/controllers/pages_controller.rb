@@ -52,7 +52,7 @@ class PagesController < ApplicationController
 
   # GET /pages/1 or /pages/1.json
   def show
-    content = @page.content
+    content = @page.render_content
 
     # Inject the chat partial
     content += inject_chat_partial(content)

@@ -1,4 +1,6 @@
 class Page < ApplicationRecord
+  include Rails.application.routes.url_helpers
+
   extend FriendlyId
   belongs_to :site
   belongs_to :organization
@@ -8,6 +10,46 @@ class Page < ApplicationRecord
   after_initialize :set_default_html_content, if: :new_record?
 
   friendly_id :slug, use: :slugged
+
+  def render_content
+    content = self.content
+    content = render_snippets(content)
+    return content
+  end
+
+  def render_snippets(content)
+    # a snippet is something like {{snippet:header}} or {{snippet:footer}}
+    # for each {{ in the content, see if there is a matching snippet
+    # if so, replace the {{snippet:name}} with the snippet content
+
+    # make this work by snippet id, and by snippet name
+    # if the snippet name is not found, then don't replace it
+    # if the snippet id is not found, then don't replace it
+    # if the snippet id is found, then replace it
+    # if the snippet name is found, then replace it
+
+    content.gsub!(/\{\{snippet_id:(.*?)\}\}/) do |match|
+      snippet_identifier = $1
+      snippet = Snippet.find_by(id: snippet_identifier)
+      snippet.content if snippet.present?
+    end
+
+    content.gsub!(/\{\{snippet_name:(.*?)\}\}/) do |match|
+      snippet_identifier = $1&.strip
+      snippet = Snippet.find_by(name: snippet_identifier)
+      snippet.content if snippet.present?
+    end
+
+    return content
+  end
+
+  def inject_chat_partial
+    render_to_string(partial: 'shared/llama_bot/chat')
+  end
+
+  def inject_analytics_partial
+    render_to_string(partial: 'shared/llama_bot/analytics')
+  end
 
   # Ensure the web page has a web site. If not, create one so the user doesn't have to.
   def ensure_site
@@ -54,5 +96,9 @@ class Page < ApplicationRecord
     end
 
     name
+  end
+
+  def controller
+    @controller ||= ActionController::Base.new
   end
 end
