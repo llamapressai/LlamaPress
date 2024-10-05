@@ -93,6 +93,6 @@
 
 <%= render partial: 'shared/llama_bot/history_modal' %>
 <%= render partial: 'shared/llama_bot/chat_javascript' %>
-<% if current_user.present? && @page.present? %>
+<% if current_user.present? && controller_name == 'pages' && action_name == 'show' %>
     <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %>
 <% end %>

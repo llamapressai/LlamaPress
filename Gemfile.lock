@@ -107,6 +107,7 @@ GEM
       railties (>= 4.1.0)
       responders
       warden (~> 1.2.3)
+    diffy (3.4.2)
     drb (2.2.1)
     erubi (1.13.0)
     friendly_id (5.5.1)
@@ -337,6 +338,7 @@ DEPENDENCIES
   charlock_holmes
   debug
   devise
+  diffy
   friendly_id
   importmap-rails
   jbuilder

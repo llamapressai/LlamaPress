@@ -91,6 +91,9 @@ class PagesController < ApplicationController
 
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
+    #how can I compare page.content to page_params[:content], and generate a title describign diffs?
+    diffs = Diffy::Diff.new(@page.content, page_params[:content]).to_s
+    @page.save_history("#{diffs}")
     respond_to do |format|
       if @page.update(page_params)
         format.html { redirect_to page_url(@page), notice: "web page was successfully updated." }

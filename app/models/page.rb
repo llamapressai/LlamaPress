@@ -65,8 +65,9 @@ class Page < ApplicationRecord
     self.save
   end
 
-  def save_history()
-    page_history = self.page_histories.create(content: self.content, user_message: "Restore to previous version")
+  def save_history(user_message = nil)
+    user_message ||= "Restore to previous version"
+    page_history = self.page_histories.create(content: self.content, user_message: user_message)
   end
 
   # Set the default html content for the web page
