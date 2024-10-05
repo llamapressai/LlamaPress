@@ -20,13 +20,22 @@
 
   <div class="inline">
     <%= form.submit "Save", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    <button type="button" id="reset-content" class="rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2">Reset Content</button>
+    <button type="button" id="preview-content" class="rounded-lg py-3 px-5 bg-green-600 text-white inline-block font-medium cursor-pointer ml-2">Preview</button>
   </div>
-  <button type="button" id="reset-content" class="rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2">Reset Content</button>
+
+  <div id="preview-container" class="my-5 hidden">
+    <h3 class="text-xl font-bold mb-2">Preview:</h3>
+    <div id="preview-content" class="border border-gray-400 p-4 rounded-md"></div>
+  </div>
+
+  
 
   <div class="my-5">
     <%= form.label :content, "HTML Content" %>
     <%= form.text_area :content, rows: 200, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full", style: "width: 100%; max-width: 800px;" %>
   </div>
+
 
   <div class="inline">
     <%= form.submit "Save Page", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
@@ -36,16 +45,25 @@
 
 <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js" %>
 <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/htmlmixed/htmlmixed.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/css/css.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/javascript/javascript.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/xml/xml.min.js" %>
 <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css" %>
+<%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/monokai.min.css" %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var editor = CodeMirror.fromTextArea(document.getElementById('page_content'), {
       mode: 'htmlmixed',
       lineNumbers: true,
-      theme: 'default',
+      theme: 'monokai',
       viewportMargin: Infinity,
-      lineWrapping: true
+      lineWrapping: true,
+      autoCloseTags: true,
+      autoCloseBrackets: true,
+      matchBrackets: true,
+      indentUnit: 2,
+      tabSize: 2,
     });
     editor.setSize("100%", "auto");
     
@@ -212,6 +230,21 @@
 </body>
 </html>`;
       editor.setValue(defaultContent);
+    });
+
+    // Preview button functionality
+    document.getElementById('preview-content').addEventListener('click', function() {
+      var content = editor.getValue();
+      var previewContainer = document.getElementById('preview-container');
+      var previewContent = document.getElementById('preview-container');
+      if (previewContainer.classList.contains('hidden')) {
+        previewContainer.classList.remove('hidden');
+        previewContent.innerHTML = content;
+        // Scroll to the preview
+        previewContainer.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        previewContainer.classList.add('hidden');
+      }
     });
   });
 </script>
