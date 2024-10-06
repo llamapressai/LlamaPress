@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
-  before_action :authenticate_user!, :set_context
+  before_action :authenticate_user!, :set_context, :set_site
 
   def current_organization
     current_user.try :organization
@@ -12,6 +12,8 @@ class ApplicationController < ActionController::Base
     else
       domain = request.env["HTTP_HOST"].dup
       domain.slice! "www."
+      domain.slice! "http://"
+      domain.slice! "https://"
     end
 
     Rails.logger.info("Domain request for: " + domain)
@@ -44,5 +46,16 @@ class ApplicationController < ActionController::Base
     "app/views/#{controller}/#{action}.html.erb"
   rescue ActionController::RoutingError
     nil
+  end
+
+  def current_site(domain)
+    @site = Site.find_by(domain: sanitize_domain(domain))
+  end
+
+  def sanitize_domain(domain)
+    domain.slice! "www."
+    domain.slice! "http://"
+    domain.slice! "https://"
+    domain
   end
 end
