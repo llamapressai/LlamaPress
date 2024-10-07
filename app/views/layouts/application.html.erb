@@ -73,7 +73,7 @@
       <div class="flex justify-between items-center" data-llama="app/views/layouts/llama_bot.html.erb">
         <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
           <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Icon" class="h-8 w-8 mr-2" data-llama="app/views/layouts/llama_bot.html.erb">
-          <a href="/" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
+          <a href="/home" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
         </div>
         <% if current_user %>
         <div class="hidden md:flex items-center space-x-4">
@@ -92,6 +92,9 @@
           <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
             <i class="fas fa-database" data-llama="app/views/layouts/llama_bot.html.erb"></i>
           </a>
+          <%= link_to user_path(current_user), class: "text-white hover:text-gray-300", title: "View Profile" do %>
+            <i class="fas fa-user"></i>
+          <% end %>
           <!-- Add more navbar links here -->
         </div>
         <div class="md:hidden">

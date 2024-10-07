@@ -14,6 +14,7 @@ class Page < ApplicationRecord
   def render_content
     content = self.content
     content = render_snippets(content)
+    content = render_llama_contenteditable_tags(content)
     return content
   end
 
@@ -41,6 +42,23 @@ class Page < ApplicationRecord
     end
 
     return content
+  end
+
+  # LlamaPress allows the user can edit the document by clicking in the page, and typing changes. 
+  # The javascript code in _chat_contenteditable_javascript.html.erb will save those changes to the database using a POST request.
+  # This method adds data-llama-editable attributes to all nodes in the HTML document. These attributes prevent ALL the html code that's in the document from being saved into the page database.
+  # This is needed because modern browser plugins inject extra things into the page, and we need to exclude those from being saved, otherwise they will be saved to the database.
+  def render_llama_contenteditable_tags(content)
+    # Parse the content as a full HTML document
+    document = Nokogiri::HTML::Document.parse(content)
+
+    # Add data-llama-editable attribute to all elements in the html page
+    document.css('html *').each do |node|
+      node.set_attribute('data-llama-editable', 'true')
+    end    
+
+    # Return the full HTML document as a string
+    return document.to_html
   end
 
   def inject_chat_partial

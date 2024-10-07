@@ -21,7 +21,13 @@
 
   <p class="my-5" data-llama="app/views/users/_user.html.erb">
     <strong class="block font-medium mb-1" data-llama="app/views/users/_user.html.erb">Organization:</strong>
-    <%= user.organization_id %>
+    <%= user.organization.name %>
   </p>
 
+  <p class="my-5" data-llama="app/views/users/_user.html.erb">
+    <strong class="block font-medium mb-1" data-llama="app/views/users/_user.html.erb">Default site:</strong>
+    <a class="text-blue-500" href="<%= user.default_site.present? ? site_path(user.default_site) : "#" %>">
+      <%= "#{user.default_site&.name} (#{user.default_site&.slug})" || "None" %>
+    </a>
+  </p>
 </div>

@@ -19,18 +19,35 @@ document.addEventListener('DOMContentLoaded', () => {
         // Only save if content has changed
         if (currentContent !== originalContent) {
 
+            // Clone the entire document
             const clonedDoc = document.cloneNode(true);
-        
-            // Update the selector to use attribute contains selector
+
+            // Remove nodes that should be excluded
             const nodesToExclude = clonedDoc.querySelectorAll('[data-llama*="exclude_when_saving_contenteditable_edits"]');
             nodesToExclude.forEach(node => {
                 node.remove();
             });
 
+            // Find all nodes that are not marked as editable
+            const nonEditableNodes = clonedDoc.querySelectorAll(':not([data-llama-editable="true"])');
+            nonEditableNodes.forEach(node => {
+                if (node.tagName !== 'HTML' && node.tagName !== 'BODY') {
+                    node.remove();
+                }
+            });
+
+            // Clean up remaining nodes
+            const editableNodes = clonedDoc.querySelectorAll('[data-llama-editable="true"]');
+            editableNodes.forEach(node => {
+                node.removeAttribute('data-llama-editable');
+                node.removeAttribute('contenteditable');
+            });
+
             // Get the cleaned HTML content
             let cleanedContent = clonedDoc.documentElement.outerHTML;
-            //also, remove the contenteditable="true" attribute from the body
-            cleanedContent = cleanedContent.replace('contenteditable="true"', '');
+
+            // Remove the contenteditable attribute from the html page so it doesn't get saved to the database.
+            cleanedContent = cleanedContent.replace(/\s*contenteditable="true"/g, '');
 
             // Use a more modern confirmation dialog
             //if (confirm('Save these changes?')) {

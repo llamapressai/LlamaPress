@@ -8,8 +8,6 @@
 
     <%= link_to "Edit this user", edit_user_path(@user), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
     <%= link_to "Back to users", users_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
-    <div class="inline-block ml-2" data-llama="app/views/users/show.html.erb">
-      <%= button_to "Destroy this user", @user, method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 font-medium" %>
-    </div>
+    <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "ml-2 rounded-lg py-3 px-5 bg-red-100 inline-block font-medium" %>
   </div>
 </div>
