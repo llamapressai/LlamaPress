@@ -274,7 +274,8 @@
 
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
-    // toggleExpand(); // decrease chatbot size so that user can see more of the elements on the page.
+    const chatbotContainer = document.getElementById("chatbotContainer");
+    chatbotContainer.classList.toggle("hidden");
     document.body.classList.toggle("selection-mode");
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
   }
