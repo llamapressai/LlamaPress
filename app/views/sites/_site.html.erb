@@ -63,4 +63,21 @@
     <% end %>
   </div>
 
+  <h2 class="text-2xl font-bold mt-8 mb-4">Submissions</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% site.submissions&.order(created_at: :desc)&.each do |submission| %>
+      <div class="p-6 border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800">
+        <h3 class="font-bold text-xl text-white mb-2">Submission #<%= submission.id %></h3>
+        <p class="text-sm text-gray-300 mb-2">
+          Submitted: <%= time_ago_in_words(submission.created_at) %> ago
+        </p>
+        <div class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
+          <% submission.data.each do |key, value| %>
+            <p class="text-sm text-gray-300"><strong><%= key %>:</strong> <%= value %></p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
 </div>
