@@ -275,9 +275,9 @@
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
     const chatbotContainer = document.getElementById("chatbotContainer");
-    chatbotContainer.classList.toggle("hidden");
     document.body.classList.toggle("selection-mode");
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
+    chatbotContainer.classList.toggle("hidden");
   }
 
   function handleElementSelection(event) {
