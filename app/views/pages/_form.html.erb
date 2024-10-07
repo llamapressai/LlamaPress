@@ -16,7 +16,7 @@
     <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
-  <%= form.hidden_field :site_id, value: @site_id %>
+  <%= form.hidden_field :site_id, value: page.site_id || @site_id || current_user.default_site_id || current_site&.id%>
 
   <div class="inline">
     <%= form.submit "Save", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
