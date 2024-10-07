@@ -6,6 +6,8 @@ class User < ApplicationRecord
   belongs_to :organization
   accepts_nested_attributes_for :organization
 
+  belongs_to :default_site, class_name: "Site", optional: true
+
   # If you want to allow the user to optionally create an org, add:
   before_validation :create_default_organization, on: :create
 

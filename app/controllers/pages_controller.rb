@@ -1,12 +1,16 @@
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
-  skip_before_action :verify_authenticity_token, only: [:restore, :update] 
+  skip_before_action :verify_authenticity_token, only: [:restore, :update]
 
   # GET /
   # Find and render the root page depending on the domain.
   # If no root page is found, redirect to the llama press home page.
   def home
+
+    #If the user is signed in, and they have a default site, redirect to that site's home page.
+
+    #If no user, no site, no page, no domain.
     if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
       @page = current_site.pages.first
       if @page.nil?
@@ -63,6 +67,7 @@ class PagesController < ApplicationController
   # GET /pages/new
   def new
     @page = current_organization.pages.build
+    @site_id = params[:site_id].present? ? params[:site_id] : current_site.id
   end
 
   # GET /pages/1/edit

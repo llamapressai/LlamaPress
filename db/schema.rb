@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_04_232632) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_07_180243) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -98,6 +98,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_04_232632) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.bigint "default_site_id"
+    t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["phone"], name: "index_users_on_phone"
@@ -111,4 +113,5 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_04_232632) do
   add_foreign_key "snippets", "sites"
   add_foreign_key "submissions", "sites"
   add_foreign_key "users", "organizations"
+  add_foreign_key "users", "sites", column: "default_site_id"
 end

@@ -92,6 +92,9 @@
           <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
             <i class="fas fa-database" data-llama="app/views/layouts/llama_bot.html.erb"></i>
           </a>
+          <%= link_to user_path(current_user), class: "text-white hover:text-gray-300", title: "View Profile" do %>
+            <i class="fas fa-user"></i>
+          <% end %>
           <!-- Add more navbar links here -->
         </div>
         <div class="md:hidden">
