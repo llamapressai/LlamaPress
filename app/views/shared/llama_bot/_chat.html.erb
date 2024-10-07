@@ -69,9 +69,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-llama="app/views/shared/_llama_bot_chat.html.erb" />
                     </svg>
                 </button>
-                <button id="toggleImagesForUserToSelect" class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200" title="Insert image" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+                <button id="toggleImagesForUserToSelect" class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200" title="Insert image" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" data-llama="app/views/shared/_llama_bot_chat.html.erb" />
+                    </svg>
+                </button>
+                <button id="toggleCodeSnippets" class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200" title="Show code snippets" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" data-llama="app/views/shared/_llama_bot_chat.html.erb" />
                     </svg>
                 </button>
                 <div id="selectedElementContainer" class="flex-grow rounded-md mx-2 p-2 flex items-center justify-center hidden relative" style="max-width: 500px; max-height: 180px;" llama-tag="app/views/shared/_llama_bot_chat.html.erb" data-llama="app/views/shared/_llama_bot_chat.html.erb">
@@ -83,6 +88,36 @@
                     <div id="selectedElementContent" class="text-sm overflow-auto w-full h-full" style="max-width: 500px; max-height: 180px;" data-llama="app/views/shared/_llama_bot_chat.html.erb"></div>
                 </div>
             </div>
+            
+            <!-- New div for code snippets -->
+            <div id="codeSnippetsContainer" class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
+                <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
+                <% if current_user&.organization&.snippets&.any? %>
+                    <ul class="space-y-2"> 
+                        <% current_user.organization.snippets.each do |snippet| %>
+                            <li class="bg-white p-2 rounded shadow">
+                                <h4 class="font-medium"><%= snippet.name %></h4>
+                                <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
+                                <span class="text-sm bg-gray-100 p-2 mt-1 rounded"><%= raw snippet.content %></span>
+                                <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
+                                <!-- TODO: Move copyToClipboard to Javascript File -->
+                                <script>
+                                function copyToClipboard(text) {
+                                  navigator.clipboard.writeText(text).then(function() {
+                                    console.log('Copying to clipboard was successful!');
+                                  }, function(err) {
+                                    console.error('Could not copy text: ', err);
+                                  });
+                                }
+                                </script>
+                            </li>
+                        <% end %>
+                    </ul>
+                <% else %>
+                    <p class="text-gray-600">No code snippets available.</p>
+                <% end %>
+            </div>
+            
             <div class="p-2 md:p-4 border-t border-gray-300 flex flex-col" data-llama="app/views/shared/_llama_bot_chat.html.erb">
                 <textarea id="userInput" placeholder="Type your message..." class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black text-sm md:text-base" rows="2 md:rows-3" data-llama="app/views/shared/_llama_bot_chat.html.erb">Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and crazy!</textarea>
                 <button id="sendButton" class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 self-end text-sm md:text-base" data-llama="app/views/shared/_llama_bot_chat.html.erb">Send</button>

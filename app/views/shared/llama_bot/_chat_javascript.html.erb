@@ -255,6 +255,13 @@
       return summary;
     }
 
+    const toggleCodeSnippetsButton = document.getElementById('toggleCodeSnippets');
+    const codeSnippetsContainer = document.getElementById('codeSnippetsContainer');
+
+    toggleCodeSnippetsButton.addEventListener('click', function() {
+        codeSnippetsContainer.classList.toggle('hidden');
+    });
+
     // Initial bot message
     loadChatHistory();
     addMessage("What do you want to build?", "bot");
