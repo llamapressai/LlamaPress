@@ -14,7 +14,16 @@ class LlamaBotController < ApplicationController
       context = params[:context]
       selectedElement = params[:selectedElement].present? && !params[:selectedElement].empty? ? params[:selectedElement] : nil
       webPageId = params[:webPageId]
-      llama_bot_response = LlamaBot.completion(user_message, context, selectedElement, webPageId)
+      
+      if user_message.include?("ave snippet:") && selectedElement.present? # Save the snippet to the database
+        snippet_name = user_message.split(":")[1] # get snippet name by splitting on :
+        page = Page.find_by(id: webPageId)
+        snippet = Snippet.new(name: snippet_name, content: selectedElement, site_id: page.site_id)
+        snippet.save
+        llama_bot_response = "Snippet saved"
+      else 
+        llama_bot_response = LlamaBot.completion(user_message, context, selectedElement, webPageId)
+      end
 
       # Things needed: 
       # 1. Stop Button (user can press LlamaBot Javascript button to stop the bot).

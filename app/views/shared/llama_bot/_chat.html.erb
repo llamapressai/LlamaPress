@@ -98,21 +98,39 @@
                             <li class="bg-white p-2 rounded shadow">
                                 <h4 class="font-medium"><%= snippet.name %></h4>
                                 <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
-                                <span class="text-sm bg-gray-100 p-2 mt-1 rounded"><%= raw snippet.content %></span>
+                                
+                                <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
+                                
+                                <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
                                 <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
-                                <!-- TODO: Move copyToClipboard to Javascript File -->
-                                <script>
-                                function copyToClipboard(text) {
-                                  navigator.clipboard.writeText(text).then(function() {
-                                    console.log('Copying to clipboard was successful!');
-                                  }, function(err) {
-                                    console.error('Could not copy text: ', err);
-                                  });
-                                }
-                                </script>
                             </li>
                         <% end %>
                     </ul>
+                    
+                    <!-- TODO: Move JavaScript to separate file -->
+                    <script>
+                    function copyToClipboard(text) {
+                      navigator.clipboard.writeText(text).then(function() {
+                        console.log('Copying to clipboard was successful!');
+                      }, function(err) {
+                        console.error('Could not copy text: ', err);
+                      });
+                    }
+
+                    function toggleSnippetContent(snippetId) {
+                        var contentId = 'snippet-content-' + snippetId;
+                        var content = document.getElementById(contentId);
+                        var button = content.previousElementSibling;
+                        
+                        if (content.classList.contains('hidden')) {
+                            content.classList.remove('hidden');
+                            button.textContent = 'Hide';
+                        } else {
+                            content.classList.add('hidden');
+                            button.textContent = 'View';
+                        }
+                    }
+                    </script>
                 <% else %>
                     <p class="text-gray-600">No code snippets available.</p>
                 <% end %>
