@@ -1,6 +1,7 @@
 class SubmissionsController < ApplicationController
   before_action :set_submission, only: %i[ show edit update destroy ]
   skip_before_action :verify_authenticity_token, only: [:create]
+  skip_before_action :authenticate_user!, only: [:create]
 
   # GET /submissions or /submissions.json
   def index
@@ -23,11 +24,13 @@ class SubmissionsController < ApplicationController
   # POST /submissions or /submissions.json
   def create
     data = JSON.parse(params.to_json).reject { |key, value| key == "controller" || key == "action" }
-    @submission = current_site.submissions.new(data: data)
+    @page = Page.find_by(id: params[:page_id])
+    @site = @page&.site || Site.find_by(id: params[:site_id])
+    @submission = @site.submissions.new(data: data)
 
     respond_to do |format|
       if @submission.save
-        format.html { redirect_to submission_url(@submission), notice: "Submission was successfully created." }
+        format.html { redirect_to "/#{@page.slug}", notice: "Submission was successfully created." }
         format.json { render :show, status: :created, location: @submission }
       else
         format.html { render :new, status: :unprocessable_entity }
