@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('mouseup', () => {
         isResizing = false;
         currentImage = null;
+        saveChanges();
     });
 
     // Event listener for when editing starts
