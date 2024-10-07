@@ -10,6 +10,7 @@ class Page < ApplicationRecord
   after_initialize :set_default_html_content, if: :new_record?
 
   friendly_id :slug, use: :slugged
+  before_save :add_llama_ids_to_content, if: :content_changed?
 
   def render_content
     content = self.content
@@ -67,6 +68,19 @@ class Page < ApplicationRecord
 
   def inject_analytics_partial
     render_to_string(partial: 'shared/llama_bot/analytics')
+  end
+
+  def add_llama_ids_to_content
+    # Parse the content as a full HTML document
+    document = Nokogiri::HTML::Document.parse(content)
+
+    # Add data-llama-id attribute to all elements in the html page
+    document.css('html *').each_with_index do |node, index|
+      node.set_attribute('data-llama-id', index.to_s)
+    end
+
+    # Update the content attribute with the modified HTML
+    self.content = document.to_html
   end
 
   # Ensure the web page has a web site. If not, create one so the user doesn't have to.
