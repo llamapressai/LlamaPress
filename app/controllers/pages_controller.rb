@@ -29,7 +29,7 @@ class PagesController < ApplicationController
       end
     end
 
-    content = @page.content
+    content = @page.render_content
     content += inject_chat_partial(content) if current_user.present?
     content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
