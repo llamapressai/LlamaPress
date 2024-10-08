@@ -98,14 +98,27 @@ class Page < ApplicationRecord
   end
 
   def add_llama_ids_to_content
-    # Parse the content as a full HTML document
-    document = Nokogiri::HTML::Document.parse(content)
-
-    # Add data-llama-id attribute to all elements in the html page
-    document.css('html *').each_with_index do |node, index|
+    # Parse the content as a fragment instead of a full document
+    fragment = Nokogiri::HTML::DocumentFragment.parse(self.content)
+  
+    # Add data-llama-id attribute to all elements in the fragment
+    fragment.css('*').each_with_index do |node, index|
       node.set_attribute('data-llama-id', index.to_s)
     end
-
+  
+    # Create a new HTML5 document
+    document = Nokogiri::HTML5::Document.new
+    document.encoding = 'UTF-8'
+  
+    # Create and append html and body elements if they don't exist
+    html_node = fragment.at_css('html') || document.create_element('html')
+    body_node = html_node.at_css('body') || document.create_element('body')
+  
+    # Move all top-level nodes of the fragment into the body
+    fragment.children.each { |child| body_node.add_child(child) }
+    html_node.add_child(body_node) unless html_node.at_css('body')
+    document.add_child(html_node)
+  
     # Update the content attribute with the modified HTML
     self.content = document.to_html
   end

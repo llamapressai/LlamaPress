@@ -33,6 +33,7 @@ class PagesController < ApplicationController
 
     content = @page.render_content
     content += inject_chat_partial(content) if current_user.present?
+    content += inject_style()
     content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
@@ -171,6 +172,10 @@ class PagesController < ApplicationController
     def inject_chat_partial(content)
       render_to_string(partial: 'shared/llama_bot/chat')
     end
+
+    def inject_style()
+      render_to_string(partial: 'shared/llama_bot/css')
+    end 
 
     def inject_analytics_partial()
       render_to_string(partial: 'shared/llama_bot/analytics')

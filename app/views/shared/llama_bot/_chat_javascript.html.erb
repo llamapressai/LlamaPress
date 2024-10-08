@@ -282,9 +282,16 @@
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
     const chatbotContainer = document.getElementById("chatbotContainer");
-    document.body.classList.toggle("selection-mode");
+    if (inSelectionMode) {
+      document.body.classList.add("selection-mode");
+      chatbotContainer.classList.add("hidden");
+    }
+    if (!inSelectionMode) {
+      document.body.classList.remove("selection-mode");
+      chatbotContainer.classList.remove("hidden");
+    }
+
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
-    chatbotContainer.classList.toggle("hidden");
   }
 
   function handleElementSelection(event) {
@@ -320,35 +327,6 @@
   // Add necessary event listeners
   document.addEventListener("click", handleElementSelection, true);
 
-  // Add some basic styles if they haven't been added yet
-  if (!document.getElementById("selection-mode-styles")) {
-    const style = document.createElement("style");
-    style.id = "selection-mode-styles";
-    style.textContent = `
-        .selection-mode * {
-            cursor: pointer !important;
-        }
-        .selection-mode *:hover {
-            outline: 2px solid red !important;
-        }
-        .selected-element {
-            position: relative;
-        }
-        .selected-element::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 4px solid #3B82F6;
-            background-color: rgba(59, 130, 246, 0.1);
-            pointer-events: none;
-            z-index: 9999;
-        }
-    `;
-    document.head.appendChild(style);
-  }
   // Listen for custom elementSelected event
   document.addEventListener("elementSelected", (e) => {
     selectedElementHTML = e.detail;

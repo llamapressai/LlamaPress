@@ -1,14 +1,178 @@
-<div class="fixed bottom-4 right-4 z-50" data-llama="app/views/shared/_llama_bot_chat.html.erb exclude_when_saving_contenteditable_edits">
-    <!-- Chat icon -->
-    <div id="chatIcon" class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="h-8 w-8 md:h-12 md:w-12" data-llama="app/views/shared/_llama_bot_chat.html.erb">
+<div
+  class="fixed bottom-4 right-4 z-50"
+  data-llama="app/views/shared/_llama_bot_chat.html.erb exclude_when_saving_contenteditable_edits"
+>
+  <!-- Chat icon -->
+  <div
+    id="chatIcon"
+    class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
+    data-llama="app/views/shared/_llama_bot_chat.html.erb"
+  >
+    <img
+      src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7"
+      alt="LlamaPress Logo"
+      class="h-8 w-8 md:h-12 md:w-12"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    />
+  </div>
+
+  <!-- Chat bubble -->
+  <div
+    class="absolute bottom-16 md:bottom-20 right-0 bg-gray-800 rounded-lg p-2 md:p-3 shadow-lg"
+    data-llama="app/views/shared/_llama_bot_chat.html.erb"
+  >
+    <p
+      class="text-white text-xs md:text-sm whitespace-nowrap"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    >
+      What do you want to build?
+    </p>
+    <!-- Bubble tail -->
+    <div
+      class="absolute bottom-0 right-4 md:right-6 transform translate-y-1/2 rotate-45 w-2 h-2 md:w-3 md:h-3 bg-gray-800"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    ></div>
+  </div>
+
+  <!-- Chatbot window -->
+  <div
+    id="chatbotContainer"
+    class="fixed bottom-16 md:bottom-24 right-2 md:right-4 w-[90vw] md:w-[480px] h-[80vh] md:h-[576px] border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out hidden"
+    data-llama="app/views/shared/_llama_bot_chat.html.erb"
+  >
+    <div
+      class="bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 md:p-4 flex justify-between items-center rounded-t-2xl shadow-md"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    >
+      <div
+        class="flex items-center space-x-3"
+        data-llama="app/views/shared/_llama_bot_chat.html.erb"
+      >
+        <a
+          href="/home"
+          class="text-white hover:text-blue-200 transition-colors duration-200"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            />
+          </svg>
+        </a>
+        <span
+          class="font-semibold text-lg md:text-xl"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >LLama Bot</span
+        >
+      </div>
+      <div
+        class="flex items-center"
+        data-llama="app/views/shared/_llama_bot_chat.html.erb"
+      >
+        <button
+          id="historyButton"
+          class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
+          title="Chat History"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </button>
+        <button
+          id="expandButton"
+          class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
+          title="Expand/Collapse"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            />
+          </svg>
+        </button>
+        <button
+          id="closeButton"
+          class="text-2xl hover:text-blue-200 transition-colors duration-200"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          &times;
+        </button>
+      </div>
     </div>
-    
-    <!-- Chat bubble -->
-    <div class="absolute bottom-16 md:bottom-20 right-0 bg-gray-800 rounded-lg p-2 md:p-3 shadow-lg" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-        <p class="text-white text-xs md:text-sm whitespace-nowrap" data-llama="app/views/shared/_llama_bot_chat.html.erb">What do you want to build?</p>
-        <!-- Bubble tail -->
-        <div class="absolute bottom-0 right-4 md:right-6 transform translate-y-1/2 rotate-45 w-2 h-2 md:w-3 md:h-3 bg-gray-800" data-llama="app/views/shared/_llama_bot_chat.html.erb"></div>
+    <div
+      id="chatbotMessages"
+      class="flex-grow overflow-y-auto p-4 text-black"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    >
+      <div
+        id="historyDrawer"
+        class="hidden bg-white border-l border-gray-300 absolute right-0 top-0 h-full w-64 shadow-lg transition-all duration-300 ease-in-out"
+      >
+        <div class="p-4">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-lg">Chat History</h3>
+            <button
+              id="closeHistoryDrawer"
+              class="text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <ul
+            id="historyList"
+            class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]"
+          >
+            <!-- History items will be dynamically added here -->
+          </ul>
+        </div>
+      </div>
     </div>
 
     <!-- Chatbot window -->
@@ -142,10 +306,192 @@
             </div>
         </div>
     </div>
-</div>
+    <div
+      class="flex flex-col"
+      data-llama="app/views/shared/_llama_bot_chat.html.erb"
+    >
+      <div
+        class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100"
+        data-llama="app/views/shared/_llama_bot_chat.html.erb"
+      >
+        <button
+          onclick="toggleSelectionMode()"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          title="Select element"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            />
+          </svg>
+        </button>
+        <button
+          id="toggleImagesForUserToSelect"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          title="Insert image"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            />
+          </svg>
+        </button>
+        <button
+          id="toggleCodeSnippets"
+          class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          title="Show code snippets"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            />
+          </svg>
+        </button>
+        <div
+          id="selectedElementContainer"
+          class="flex-grow rounded-md mx-2 p-2 flex items-center justify-center hidden relative"
+          style="max-width: 500px; max-height: 180px"
+          llama-tag="app/views/shared/_llama_bot_chat.html.erb"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          <button
+            id="closeSelectedElement"
+            class="absolute top-0 left-0 text-red-500 hover:text-red-700 focus:outline-none z-10 p-1"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              data-llama="app/views/shared/_llama_bot_chat.html.erb"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+                data-llama="app/views/shared/_llama_bot_chat.html.erb"
+              />
+            </svg>
+          </button>
+          <div
+            id="selectedElementContent"
+            class="text-sm overflow-auto w-full h-full"
+            style="max-width: 500px; max-height: 180px"
+            data-llama="app/views/shared/_llama_bot_chat.html.erb"
+          ></div>
+        </div>
+      </div>
 
-<%= render partial: 'shared/llama_bot/history_modal' %>
-<%= render partial: 'shared/llama_bot/chat_javascript' %>
-<% if current_user.present? && controller_name == 'pages' && action_name == 'show' %>
-    <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %>
-<% end %>
+      <!-- New div for code snippets -->
+      <div
+        id="codeSnippetsContainer"
+        class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto"
+      >
+        <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
+        <% if current_user&.organization&.snippets&.any? %>
+        <ul class="space-y-2">
+          <% current_user.organization.snippets.each do |snippet| %>
+          <li class="bg-white p-2 rounded shadow">
+            <h4 class="font-medium"><%= snippet.name %></h4>
+            <button
+              class="mt-1 text-sm text-blue-500 hover:text-blue-700"
+              onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')"
+              data-content="<%= j snippet.content %>"
+            >
+              Copy
+            </button>
+            <span class="text-sm bg-gray-100 p-2 mt-1 rounded"
+              ><%= raw snippet.content %></span
+            >
+            <pre
+              class="text-sm bg-gray-100 p-2 mt-1 rounded"
+            ><code><%= snippet.get_snippet_component %></code></pre>
+            <!-- TODO: Move copyToClipboard to Javascript File -->
+            <script>
+              function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(
+                  function () {
+                    console.log("Copying to clipboard was successful!");
+                  },
+                  function (err) {
+                    console.error("Could not copy text: ", err);
+                  }
+                );
+              }
+            </script>
+          </li>
+          <% end %>
+        </ul>
+        <% else %>
+        <p class="text-gray-600">No code snippets available.</p>
+        <% end %>
+      </div>
+
+      <div
+        class="p-2 md:p-4 border-t border-gray-300 flex flex-col"
+        data-llama="app/views/shared/_llama_bot_chat.html.erb"
+      >
+        <textarea
+          id="userInput"
+          placeholder="Type your message..."
+          class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-black text-sm md:text-base"
+          rows="2 md:rows-3"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and crazy!</textarea
+        >
+        <button
+          id="sendButton"
+          class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-50 self-end text-sm md:text-base"
+          data-llama="app/views/shared/_llama_bot_chat.html.erb"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<%= render partial: 'shared/llama_bot/css' %> <%= render partial:
+'shared/llama_bot/history_modal' %> <%= render partial:
+'shared/llama_bot/chat_javascript' %> <% if current_user.present? &&
+controller_name == 'pages' && action_name == 'show' %> <%= render partial:
+'shared/llama_bot/chat_contenteditable_javascript' %> <% end %>
