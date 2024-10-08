@@ -51,18 +51,15 @@
   <% end %>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% site.snippets&.order(updated_at: :desc)&.each do |snippet| %>
-      <div class="p-6 border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800">
+      <%= link_to snippet_path(snippet), class: "p-6 border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800 block" do %>
         <h3 class="font-bold text-xl text-white mb-2"><%= snippet.name %></h3>
         <pre class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
-        <div>
-          <%= raw snippet.content %>
-        </div>
-          <code class="text-sm text-gray-300"><%= snippet.content %></code>
+          <code class="text-sm text-gray-300"><%= truncate(snippet.content, length: 150) %></code>
         </pre>
         <p class="text-sm text-gray-400 mt-4">
           Last updated: <%= time_ago_in_words(snippet.updated_at) %> ago
         </p>
-      </div>
+      <% end %>
     <% end %>
   </div>
 
