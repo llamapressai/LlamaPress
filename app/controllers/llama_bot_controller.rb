@@ -1,4 +1,6 @@
 require Rails.root.join('lib', 'llama_bot.rb')
+require 'securerandom'
+
 class LlamaBotController < ApplicationController
     skip_before_action :verify_authenticity_token, only: [:message]
 
@@ -16,9 +18,21 @@ class LlamaBotController < ApplicationController
       webPageId = params[:webPageId]
       
       if user_message.include?("ave snippet:") && selectedElement.present? # Save the snippet to the database
+
+
+          # Parse the selectedElement HTML
+        doc = Nokogiri::HTML.fragment(selectedElement)
+
+         # Find all elements with 'data-llama-id' and replace the value with a UUID
+        doc.css('[data-llama-id]').each do |node|
+          node['data-llama-id'] = SecureRandom.uuid
+        end
+
+        updated_selectedElement = doc.to_html 
+
         snippet_name = user_message.split(":")[1] # get snippet name by splitting on :
         page = Page.find_by(id: webPageId)
-        snippet = Snippet.new(name: snippet_name, content: selectedElement, site_id: page.site_id)
+        snippet = Snippet.new(name: snippet_name, content: updated_selectedElement, site_id: page.site_id)
         snippet.save
         llama_bot_response = "Snippet saved"
       else 

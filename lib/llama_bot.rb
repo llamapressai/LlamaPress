@@ -121,7 +121,7 @@ module LlamaBot
             @web_page = web_page_id&.empty? ? nil : Page.find_by(id: web_page_id)
             
             # Load the HTML content from the database or the file system
-            file_contents = should_we_edit_html_in_webpage_database ? @web_page&.content : File.read(file_path)
+            file_contents = should_we_edit_html_in_webpage_database ? @web_page&.render_content : File.read(file_path)
 
             return file_contents
         end
