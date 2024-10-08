@@ -4,7 +4,7 @@ class Organization < ApplicationRecord
     has_many :users, dependent: :destroy
     has_many :sites, dependent: :destroy
     has_many :pages, dependent: :destroy
-
+    has_many :snippets, through: :sites
     after_create :create_default_site_and_page
 
     def create_default_site_and_page

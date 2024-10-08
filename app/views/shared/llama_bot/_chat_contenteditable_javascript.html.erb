@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isResizing = false;
     let currentImage = null;
     let startX, startY, startWidth, startHeight;
+    let aspectRatio;
 
     document.body.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'IMG') {
@@ -123,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startY = e.clientY;
             startWidth = currentImage.clientWidth;
             startHeight = currentImage.clientHeight;
+            aspectRatio = startWidth / startHeight;
             e.preventDefault();
         }
     });
@@ -130,13 +132,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
         const width = startWidth + (e.clientX - startX);
-        const height = startHeight + (e.clientY - startY);
+        const height = width / aspectRatio;
         currentImage.style.width = `${width}px`;
         currentImage.style.height = `${height}px`;
         updateTailwindClasses(currentImage, width, height);
     });
 
     document.body.addEventListener('mouseup', () => {
+        if (isResizing) {
+            saveChanges();
+        }
         isResizing = false;
         currentImage = null;
     });
