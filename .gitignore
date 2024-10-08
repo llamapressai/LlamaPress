@@ -47,3 +47,4 @@ config/local_env.yml
 
 #ignore the start script
 start
+.prettierignore
