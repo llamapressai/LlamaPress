@@ -50,8 +50,8 @@ class Page < ApplicationRecord
   # This method adds data-llama-editable attributes to all nodes in the HTML document. These attributes prevent ALL the html code that's in the document from being saved into the page database.
   # This is needed because modern browser plugins inject extra things into the page, and we need to exclude those from being saved, otherwise they will be saved to the database.
   def render_llama_contenteditable_tags(content)
-    # Parse the content as a full HTML5 document
-    document = Nokogiri::HTML5::Document.parse(content)
+    # Parse the content as a full HTML document
+    document = Nokogiri::HTML::Document.parse(content)
 
     # Add data-llama-editable attribute to all elements in the html page
     document.css('html *').each do |node|
