@@ -275,9 +275,16 @@
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
     const chatbotContainer = document.getElementById("chatbotContainer");
-    document.body.classList.toggle("selection-mode");
+    if (inSelectionMode) {
+      document.body.classList.add("selection-mode");
+      chatbotContainer.classList.add("hidden");
+    }
+    if (!inSelectionMode) {
+      document.body.classList.remove("selection-mode");
+      chatbotContainer.classList.remove("hidden");
+    }
+
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
-    chatbotContainer.classList.toggle("hidden");
   }
 
   function handleElementSelection(event) {
@@ -316,7 +323,7 @@
   // Add some basic styles if they haven't been added yet
   if (!document.getElementById("selection-mode-styles")) {
     const style = document.createElement("style");
-    style.id = "selection-mode-styles";
+    style.id = "selection-mode-styles2";
     style.textContent = `
         .selection-mode * {
             cursor: pointer !important;

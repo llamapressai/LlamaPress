@@ -1,0 +1,40 @@
+
+    <style type="text/css" id="selection-mode-styles">
+    .selection-mode * {
+        cursor: pointer !important;
+    }
+    .selection-mode *:hover {
+        outline: 2px solid red !important;
+    }
+    .selected-element {
+        position: relative;
+    }
+    .selected-element::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 4px solid #3b82f6;
+        background-color: rgba(59, 130, 246, 0.1);
+        pointer-events: none;
+        z-index: 9999;
+    }
+    
+    </style>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Select the style element
+    var styleElement = document.getElementById('selection-mode-styles');
+    
+    if (styleElement) {
+      // Remove it from its current position
+      styleElement.parentNode.removeChild(styleElement);
+      
+      // Append it to the head
+      document.head.appendChild(styleElement);
+    }
+  });
+</script>
