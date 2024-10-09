@@ -1,17 +1,16 @@
 class Page < ApplicationRecord
   include Rails.application.routes.url_helpers
+  include ApplicationHelper
 
   extend FriendlyId
   belongs_to :site
   belongs_to :organization
   has_many :page_histories, dependent: :destroy
+  friendly_id :slug, use: :slugged
 
   before_validation :ensure_site, on: :create
   after_initialize :set_default_html_content, if: :new_record?
-
-  friendly_id :slug, use: :slugged
-  before_save :add_llama_ids_to_content, if: :content_changed?
-  before_save :prevent_overwriting_snippets, if: :content_changed?
+  before_save :pre_save_processing, if: :content_changed?
 
   def render_content
     content = self.content
@@ -78,7 +77,7 @@ class Page < ApplicationRecord
   # This is needed because modern browser plugins inject extra things into the page, and we need to exclude those from being saved, otherwise they will be saved to the database.
   def render_llama_contenteditable_tags(content)
     # Parse the content as a full HTML document
-    document = Nokogiri::HTML::Document.parse(content)
+    document = Nokogiri::HTML5::Document.parse(content)
 
     # Add data-llama-editable attribute to all elements in the html page
     document.css('html *').each do |node|
@@ -97,41 +96,33 @@ class Page < ApplicationRecord
     render_to_string(partial: 'shared/llama_bot/analytics')
   end
 
-  def add_llama_ids_to_content
-    # Parse the content as a fragment instead of a full document
-    fragment = Nokogiri::HTML::DocumentFragment.parse(self.content)
-  
-    # Add data-llama-id attribute to all elements in the fragment
-    fragment.css('*').each_with_index do |node, index|
+  def pre_save_processing
+    add_llama_ids_to_content! #save llama_ids to sync with llamabot to ensure accurate edits
+    prevent_overwriting_snippets! #prevent overwriting snippet templates with syntax: {{snippet_id:id}} to it's rendered html. This would happen when the user edits the page directly after the snippet is rendered if we didn't have this check.
+    ensure_doctype_html! #ensure the document has a doctype html. When the user edits page directly from the browser, it's possible for the doctype to be removed on accident. We must have this <!DOCTYPE html> tag for the browser to render the page correctly.
+  end
+
+  # This method adds data-llama-id attributes to all nodes in the HTML document. These attributes help keep the code in sync with llamabot for highly accurate edits
+  def add_llama_ids_to_content!
+    # Parse the content as a full HTML document
+    document = Nokogiri::HTML5::Document.parse(content)
+
+    # Add data-llama-id attribute to all elements in the html page
+    document.css('html *').each_with_index do |node, index|
       node.set_attribute('data-llama-id', index.to_s)
     end
-  
-    # Create a new HTML5 document
-    document = Nokogiri::HTML5::Document.new
-    document.encoding = 'UTF-8'
-  
-    # Create and append html and body elements if they don't exist
-    html_node = fragment.at_css('html') || document.create_element('html')
-    body_node = html_node.at_css('body') || document.create_element('body')
-  
-    # Move all top-level nodes of the fragment into the body
-    fragment.children.each { |child| body_node.add_child(child) }
-    html_node.add_child(body_node) unless html_node.at_css('body')
-    document.add_child(html_node)
-  
     # Update the content attribute with the modified HTML
     self.content = document.to_html
   end
-
 
   # We don't want the user to overwrite snippets when they use contenteditable to edit the page.
   # This method checks for data-llama-snippet-id attribute, which means it was rendered from a {{snippet_id: 2}} or {{snippet_name: name}}
   # If it has this snippet-id or snippet-name, then this method prevents the user from overwriting it.
   # The limitation is that the user won't be able to edit the snippet from the page, but they won't accidentally overwrite it.
   # Eventually, we can detect if the user is editing a snippet, and then allow them to edit it globally for all pages.
-  def prevent_overwriting_snippets()
+  def prevent_overwriting_snippets!
     # Parse the content as a full HTML document
-    document = Nokogiri::HTML::Document.parse(self.content) #check for {{snippet_name:name}} and {{snippet_id:id}} and don't let the user overwrite those.
+    document = Nokogiri::HTML5::Document.parse(self.content) #check for {{snippet_name:name}} and {{snippet_id:id}} and don't let the user overwrite those.
     document.css('html *').each do |node|
       if node.attributes['data-llama-snippet-id'].present?
         #swap the content of the node with the snippet 
@@ -143,6 +134,13 @@ class Page < ApplicationRecord
       end
     end
     self.content = document.to_html
+  end
+
+  def ensure_doctype_html!
+    document = Nokogiri::HTML5::Document.parse(self.content)
+    if !starts_with_doctype_html?(self.content)
+      self.content = "<!DOCTYPE html>#{document.to_html}"
+    end
   end
 
   # Ensure the web page has a web site. If not, create one so the user doesn't have to.
