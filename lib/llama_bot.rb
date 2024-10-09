@@ -34,21 +34,52 @@ module LlamaBot
         def handle_write_code(response)
             code_to_write = response['payload']['code']
             destination = response['payload']['destination']
-            should_we_write_page_to_database =  response["query_params"]["context"].include? "pages/show"
+            should_we_write_page_to_database = response["query_params"]["context"].include? "pages/show"
             
-            if should_we_write_page_to_database
-                web_page = Page.find_by(id: response['query_params']['web_page_id'])
-                web_page.update(content: code_to_write)
-                web_page_history = PageHistory.create(page_id: web_page.id, content: code_to_write, prompt: response['query_params']['user_message'], user_message: response['query_params']['user_message'])
-            else #If we're in sandbox mode, reject.
-                if ENV['SANDBOX_MODE'] == 'true'
-                    return "Sorry, but we're in sandbox mode. You can't write code to the filesystem in sandbox mode."
+            # Check if the response contains snippets
+            doc = Nokogiri::HTML.fragment(code_to_write)
+            snippet_elements = doc.css('[data-llama-snippet-id]')
+          
+            if snippet_elements.any?
+              snippet_elements.each do |snippet_element|
+                snippet_id = snippet_element['data-llama-snippet-id']
+                snippet_content = snippet_element.to_html
+          
+                # Update the snippet in the database if it exists
+                snippet = Snippet.find_by(id: snippet_id)
+                if snippet
+                  snippet.update(content: snippet_content)
+                else
+                  return "Snippet with ID #{snippet_id} not found."
                 end
-                File.write(destination, code_to_write)
+              end
             end
-
-            return "Got it! Here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
-        end
+          
+            if should_we_write_page_to_database
+              # Write the full page content to the database
+              web_page = Page.find_by(id: response['query_params']['web_page_id'])
+              if web_page
+                web_page.update(content: code_to_write)
+                PageHistory.create(
+                  page_id: web_page.id, 
+                  content: code_to_write, 
+                  prompt: response['query_params']['user_message'], 
+                  user_message: response['query_params']['user_message']
+                )
+              else
+                return "Web page not found."
+              end
+            elsif ENV['SANDBOX_MODE'] == 'true'
+              # If in sandbox mode, reject file write
+              return "Sorry, but we're in sandbox mode. You can't write code to the filesystem in sandbox mode."
+            else
+              # Write the code to the specified file destination
+              File.write(destination, code_to_write)
+            end
+          
+            return "Got it! Snippets have been updated and here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
+          end
+          
 
         def handle_run_commands(response)
             # if we're in sandbox mode, reject.
@@ -121,7 +152,7 @@ module LlamaBot
             @web_page = web_page_id&.empty? ? nil : Page.find_by(id: web_page_id)
             
             # Load the HTML content from the database or the file system
-            file_contents = should_we_edit_html_in_webpage_database ? @web_page&.content : File.read(file_path)
+            file_contents = should_we_edit_html_in_webpage_database ? @web_page&.render_content : File.read(file_path)
 
             return file_contents
         end
