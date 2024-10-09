@@ -87,6 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
             node.removeAttribute('contenteditable');
         });
 
+        // Remove 'selected-element' class from any nodes that have it
+        const selectedElements = clonedDoc.querySelectorAll('.selected-element');
+        selectedElements.forEach(element => {
+            element.classList.remove('selected-element');
+        });
+
         // Get the cleaned HTML content
         let cleanedContent = clonedDoc.documentElement.outerHTML;
 
