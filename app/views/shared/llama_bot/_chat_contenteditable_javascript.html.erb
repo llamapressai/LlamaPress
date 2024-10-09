@@ -93,6 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
             element.classList.remove('selected-element');
         });
 
+        // Remove 'selected-element' class from any nodes that have it
+        const selectionModeElements = clonedDoc.querySelectorAll('.selection-mode');
+        selectionModeElements.forEach(element => {
+            element.classList.remove('selection-mode');
+        });
+
         // Get the cleaned HTML content
         let cleanedContent = clonedDoc.documentElement.outerHTML;
 
