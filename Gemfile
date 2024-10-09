@@ -69,3 +69,5 @@ gem 'rouge'
 gem 'charlock_holmes'
 gem 'friendly_id'
 gem 'diffy'
+#S3
+gem "aws-sdk-s3"
