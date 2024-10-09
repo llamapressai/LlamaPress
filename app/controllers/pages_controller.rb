@@ -2,7 +2,7 @@ require 'diffy'
 
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show]
   skip_before_action :verify_authenticity_token, only: [:restore, :update]
 
   # GET /
