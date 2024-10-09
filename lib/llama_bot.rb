@@ -46,12 +46,13 @@ module LlamaBot
                 snippet_content = snippet_element.to_html
           
                 # Update the snippet in the database if it exists
-                snippet = Snippet.find_by(id: snippet_id)
-                if snippet
-                  snippet.update(content: snippet_content)
-                else
-                  return "Snippet with ID #{snippet_id} not found."
-                end
+                # Temporary: disable saving snippet to database when LLM responds (we need snippet history before we implement this, we keep overwriting the snippet on accident)
+                # snippet = Snippet.find_by(id: snippet_id)
+                # if snippet
+                #   snippet.update(content: snippet_content)
+                # else
+                #   return "Snippet with ID #{snippet_id} not found."
+                # end
               end
             end
           
