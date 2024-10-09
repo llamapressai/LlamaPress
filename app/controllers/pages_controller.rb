@@ -9,7 +9,6 @@ class PagesController < ApplicationController
   # Find and render the root page depending on the domain.
   # If no root page is found, redirect to the llama press home page.
   def home
-
     #If the user is signed in, and they have a default site, redirect to that site's home page.
 
     #If no user, no site, no page, no domain.
@@ -62,7 +61,7 @@ class PagesController < ApplicationController
     content = @page.render_content
 
     # Inject the chat partial
-    content += inject_chat_partial(content)
+    content += inject_chat_partial(content) if current_user.present?
     content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
