@@ -1,7 +1,6 @@
 class SitesController < ApplicationController
   before_action :set_site, only: %i[ show edit update destroy ]
   skip_before_action :verify_authenticity_token, only: [:get_signed_s3_url_for_uploading_images]
-
   
   
   # GET /sites or /sites.json
@@ -114,18 +113,22 @@ class SitesController < ApplicationController
 
   def list_images
     if params[:site_slug].present?
+      #page = params[:page] || 1
+      page = 1 
+      per_page = 10
+      offset = (page.to_i - 1) * per_page
       slug = params[:site_slug]
       @page = Page.find_by(slug: slug)
       @site = @page.site 
-      @images = @site.images.map do |image|
-        {
-          url: url_for(image),
-          filename: image.filename.to_s
-        }
-      end
-    
-      render json: @images
-    
+      @images = @site.images.order(created_at: :desc).offset(offset).limit(per_page)
+      render json: @images.map { |img|
+          {
+            attachment_id: img.id,
+            blob_id: img.blob_id,
+            url: img.service.send(:object_for, img.key).public_url,
+            image: @site.extract_image_data(img)
+          }
+      }
     else
       render json: { error: "No site slug provided" }, status: 400
     end
