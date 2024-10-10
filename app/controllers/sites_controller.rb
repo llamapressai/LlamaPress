@@ -82,8 +82,8 @@ class SitesController < ApplicationController
 
     if params[:site_slug].present?
       slug = params[:site_slug]
-      @page = Page.find_by(slug: slug)
-      @site = @page.site 
+      @page = Page.find_by(slug: slug) || Page.find(slug)
+      @site = @page.site || current_site
     else
       render json: { error: "No site slug provided" }, status: 400
     end
@@ -91,6 +91,7 @@ class SitesController < ApplicationController
     if params[:image_blob_ids].present?
       params[:image_blob_ids].each do |blob_id|
         blob = ActiveStorage::Blob.find_signed(blob_id)
+        @site = @site || current_site
         @site.images.attach(blob.signed_id) if blob
       end
   
@@ -117,8 +118,8 @@ class SitesController < ApplicationController
       per_page = 10
       offset = (page.to_i - 1) * per_page
       slug = params[:site_slug]
-      @page = Page.find_by(slug: slug)
-      @site = @page.site 
+      @page = Page.find_by(slug: slug) || Page.find(slug)
+      @site = @page.site || current_site
       @images = @site.images.order(created_at: :desc).offset(offset).limit(per_page)
       render json: @images.map { |img|
           {
