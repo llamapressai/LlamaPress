@@ -280,6 +280,40 @@
     });
   });
 
+  function fetchImagesForSite() {
+    const csrfToken = "<%= form_authenticity_token %>";
+    const path = window.location.pathname;
+    const segments = path.split('/');
+    const slug = segments[segments.length - 1];
+
+    fetch('/sites/list_images.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ site_slug: slug })
+    })
+    .then(response => {
+      console.log('Raw response:', response); // Print the raw response
+      return response.json();
+    })
+    .then(images => {
+      const container = document.querySelector('#imagesForUserToSelect .flex.justify-around');
+      container.innerHTML = ''; // Clear existing images
+
+      images.forEach(image => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image.url;
+        imgElement.alt = image.filename;
+        imgElement.className = 'h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105';
+        container.appendChild(imgElement);
+      });
+    })
+    .catch(error => console.error('Error fetching images:', error));
+  }
+
+
   let inSelectionMode = false;
   let selectedElementHTML = null;
 
@@ -426,16 +460,6 @@
   }
 
 
-
-  function getSiteImages(){
-    console.log("Get site image")
-  }
-
-  function getCSRFToken() {
-  const metaTag = document.querySelector('meta[name="csrf-token"]');
-  return metaTag ? metaTag.getAttribute('content') : '';
-}
-
   // Add event listeners
   expandButton.addEventListener("click", toggleExpand);
   window.addEventListener("resize", updateChatbotSize);
@@ -541,8 +565,20 @@
                 site_slug: slug
              }),
             success: function(response) {
-            console.log("Images attached to business successfully!");
+            console.log("Images attached to site successfully!");
+            document.getElementById('imagesDoneUploading').classList.add('hidden');
             
+            const previewContainer = document.querySelector('#upload-preview');
+            if (previewContainer) {
+                previewContainer.innerHTML = '';
+                previewContainer.classList.add('hidden')
+            }
+                        
+            
+            
+            fetchImagesForSite() 
+            $('#submitButton').hide() 
+            $('#imagesDoneUploading').hide()
             //window.location.href = "/view_images_and_assign_them_to_job";
 
             // Handle success response, e.g., show success message to user
@@ -550,6 +586,7 @@
             error: function(jqXHR, textStatus, errorThrown) {
             console.error("Error attaching images to business:", textStatus, errorThrown);
             // Handle error, e.g., show error message to user
+            document.getElementById('imagesDoneUploading').classList.add('hidden');
             }
         });
     }
@@ -560,7 +597,7 @@
     const file_name = document.getElementById('image_holder');
     const uploadText = file_name.files.length > 1 ? 'Upload your images ('+file_name.files.length+' files)' : 'Upload your images ('+file_name.files[0].name+')';
     const csrfToken = "<%= form_authenticity_token %>";
-    $('#file_name_show').html(uploadText);
+    //$('#file_name_show').html(uploadText);
     const previewContainer = document.querySelector('#upload-preview');
     previewContainer.innerHTML = ''; // Clear previous previews
     
@@ -623,7 +660,8 @@
                         div.id = data["key"];
                         div.className = "is-loading";
                         
-                        div.appendChild(img);           // Append the img to the div
+                        div.appendChild(img);
+                        previewContainer.classList.remove('hidden')           // Append the img to the div
                         previewContainer.appendChild(div);  // Append the div to the previewContainer
                     };
                         // $('#upload-preview').addClass('is-loading');
@@ -681,6 +719,8 @@
             $('#submitButton').removeClass('is-loading');
             $('#imageUploadingLabel').hide();
             $('#imagesDoneUploading').show();
+            $('#submitButton').show() 
+            $('#image_holder').hide()
         })
         .catch(error => {
             console.error('Some uploads failed:', error);
@@ -688,6 +728,7 @@
             $('#submitButton').removeClass('is-loading');   
             $('#imageUploadingLabel').hide();     
             $('#imagesDoneUploading').show();    
+           
             // Handle the error - maybe inform the user that some uploads failed.
       });
     }
@@ -767,39 +808,6 @@
 
   document.addEventListener("DOMContentLoaded", function() {
   fetchImagesForSite();
-
-  function fetchImagesForSite() {
-    const csrfToken = "<%= form_authenticity_token %>";
-    const path = window.location.pathname;
-    const segments = path.split('/');
-    const slug = segments[segments.length - 1];
-
-    fetch('/sites/list_images.json', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({ site_slug: slug })
-    })
-    .then(response => {
-      console.log('Raw response:', response); // Print the raw response
-      return response.json();
-    })
-    .then(images => {
-      const container = document.querySelector('#imagesForUserToSelect .flex.justify-around');
-      container.innerHTML = ''; // Clear existing images
-
-      images.forEach(image => {
-        const imgElement = document.createElement('img');
-        imgElement.src = image.url;
-        imgElement.alt = image.filename;
-        imgElement.className = 'h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105';
-        container.appendChild(imgElement);
-      });
-    })
-    .catch(error => console.error('Error fetching images:', error));
-  }
 });
 
 

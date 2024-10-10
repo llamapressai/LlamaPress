@@ -180,36 +180,36 @@
     </div>
 
 
-    <div id="imagesForUserToSelect" class="flex-grow overflow-y-auto p-4 border border-gray-300 rounded-lg mt-2" data-llama="app/views/shared/_llama_bot_chat.html.erb">
-    <p id="imageUploadingLabel" style="color:red; display:none;"> Your images are being saved.. please wait for them to finish uploading before submitting! </p>
-<p id="imagesDoneUploading" style="color:green; display:none"> Your images are saved! You can now submit. 👍 </p>
-
-<div class="upload">
-<label for="image_holder">
-    <span class="material-icons"> add_photo_alternate </span>
-    <span id="file_name_show" >Upload your images</span>
-</label>
-
-<input type="file" id="image_holder" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
-
-</div>
-
-<div id="upload-preview">
-    <!-- Images will be displayed here -->
-</div>
-
-<button id="submitButton" name="submit" class="btn" style="width: 60%" onclick="submitPreuploadedS3ImagesToServer()">
-Submit <i id="submitIcon" class="gg-arrow-long-right"></i>
-</button>
+    <div id="imagesForUserToSelect" class="flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2">
+      <p id="imageUploadingLabel" class="text-red-500 text-center hidden mb-4 text-lg font-semibold">
+        Your images are being saved... please wait for them to finish uploading before submitting!
+      </p>
+      <p id="imagesDoneUploading" class="text-green-600 text-center hidden mb-4 text-lg font-semibold">
+        Your images are saved! You can now submit. 👍
+      </p>
+      
     
+      <div class="upload flex flex-col items-center space-y-4">
+        <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+
+          <span id="file_name_show" class="text-xl">Upload your images</span>
+        </label>
+        <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
+      </div>
     
-    <div class="flex justify-around">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/9l5fibreuoyajy2qzf3sd6qc78op" alt="Image 1" class="h-16 mr-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/n1xzr5281lf6i75f4la03llf5wt6" alt="Image 1" class="h-16 mr-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/a1cvdzrbtj5x128ol5x03v91y1er" alt="Image 2" class="h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105">
-        <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/hgah0bzljzd41cdv61ezgnzkypld" alt="Image 3" class="h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105">
+      <div id="upload-preview" class="hidden grid grid-cols-3 gap-4 mt-6 p-4 bg-white rounded-lg shadow-inner border border-gray-200">
+        <!-- Images will be displayed here -->
+      </div>
+    
+      <button id="submitButton" name="submit" class="w-4/5 mx-auto bg-green-500 hidden hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg mt-6 transform hover:scale-105 transition duration-300 ease-in-out" onclick="submitPreuploadedS3ImagesToServer()">
+        Submit <i id="submitIcon" class="gg-arrow-long-right ml-2"></i>
+      </button>
+    
+      <!-- this is where images load into -->
+      <div class="flex justify-around">
+      </div>
     </div>
-</div>
+    
     <div
       class="flex flex-col"
       data-llama="app/views/shared/_llama_bot_chat.html.erb"
