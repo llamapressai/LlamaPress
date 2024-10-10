@@ -37,6 +37,8 @@ Rails.application.routes.draw do
   get "llama_bot/templates" => "llama_bot#templates", as: :llama_bot_templates
   get '/p/:id' => 'pages#show', as: :page_show #scope /w/ pages for easier page sharing
 
+  get '/pages/:id/preview' => 'pages#preview', as: :page_preview
+
   # Catch-all route at the end
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && !request.path.start_with?('/cable')

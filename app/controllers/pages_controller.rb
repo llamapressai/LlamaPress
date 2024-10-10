@@ -1,7 +1,7 @@
 require 'diffy'
 
 class PagesController < ApplicationController
-  before_action :set_page, only: %i[ show edit update destroy restore]
+  before_action :set_page, only: %i[ show edit update destroy restore preview]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show]
   skip_before_action :verify_authenticity_token, only: [:restore, :update]
 
@@ -74,6 +74,12 @@ class PagesController < ApplicationController
 
   # GET /pages/1/edit
   def edit
+  end
+
+  # GET /pages/1/preview
+  def preview
+    content = @page.render_content
+    render inline: content.html_safe, layout: 'page'
   end
 
   # POST /pages or /pages.json
