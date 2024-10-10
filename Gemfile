@@ -69,3 +69,5 @@ gem 'rouge'
 gem 'charlock_holmes'
 gem 'friendly_id'
 gem 'diffy'
+
+gem 'twilio-ruby'
