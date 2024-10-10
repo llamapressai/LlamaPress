@@ -1,3 +1,7 @@
+
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdn.jsdelivr.net/npm/hash-wasm"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://bundle.run/buffer@6.0.3"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script data-llama="exclude_when_saving_contenteditable_edits">
   document.addEventListener("DOMContentLoaded", () => {
     const chatIcon = document.getElementById("chatIcon");
@@ -276,6 +280,47 @@
     });
   });
 
+
+
+
+
+
+
+
+  function fetchImagesForSite1() {
+    const csrfToken = "<%= form_authenticity_token %>";
+    const path = window.location.pathname;
+    const segments = path.split('/');
+    const slug = segments[segments.length - 1];
+
+    fetch('/sites/list_images.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ site_slug: slug })
+    })
+    .then(response => {
+      console.log('Raw response:', response); // Print the raw response
+      return response.json();
+    })
+    .then(images => {
+      const container = document.querySelector('#imagesForUserToSelect .flex.justify-around');
+      container.innerHTML = ''; // Clear existing images
+
+      images.forEach(image => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image.url;
+        imgElement.alt = image.filename;
+        imgElement.className = 'h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105';
+        container.appendChild(imgElement);
+      });
+    })
+    .catch(error => console.error('Error fetching images:', error));
+  }
+
+
   let inSelectionMode = false;
   let selectedElementHTML = null;
 
@@ -421,6 +466,7 @@
     }
   }
 
+
   // Add event listeners
   expandButton.addEventListener("click", toggleExpand);
   window.addEventListener("resize", updateChatbotSize);
@@ -498,4 +544,327 @@
     .addEventListener("click", function () {
       document.getElementById("historyDrawer").classList.add("hidden");
     });
+
+    const chunkSize = 64 * 1024 * 1024;
+    const fileReader = new FileReader();
+    let hasher = null;
+
+    const imageBlobIdsToAttachToJobRequest = []; // This is an array with the image blob IDs that we need to pass as a parameter into job_requests so it can attach these images to the job_request after it's been created.
+
+
+    function submitPreuploadedS3ImagesToServer(){
+        const csrfToken = "<%= form_authenticity_token %>";
+        console.log("Made it with these image blob IDs!");
+        console.log(imageBlobIdsToAttachToJobRequest);
+        
+        
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        const slug = segments[segments.length - 1];
+        $.post({
+            url: "/attach_multiple_pre_uploaded_s3_blobs_to_sites.json",
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            data: JSON.stringify({ // Convert data to JSON string
+                image_blob_ids: imageBlobIdsToAttachToJobRequest,
+                site_slug: slug
+             }),
+            success: function(response) {
+            console.log("Images attached to site successfully!");
+            document.getElementById('imagesDoneUploading').classList.add('hidden');
+            
+            const previewContainer = document.querySelector('#upload-preview');
+            if (previewContainer) {
+                previewContainer.innerHTML = '';
+                previewContainer.classList.add('hidden')
+            }
+                        
+            
+            
+            fetchImagesForSite() 
+            $('#submitButton').hide() 
+            $('#imagesDoneUploading').hide()
+            //window.location.href = "/view_images_and_assign_them_to_job";
+
+            // Handle success response, e.g., show success message to user
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error attaching images to business:", textStatus, errorThrown);
+            // Handle error, e.g., show error message to user
+            document.getElementById('imagesDoneUploading').classList.add('hidden');
+            }
+        });
+    }
+
+
+
+    async function get_file_name(input){
+    const file_name = document.getElementById('image_holder');
+    const uploadText = file_name.files.length > 1 ? 'Upload your images ('+file_name.files.length+' files)' : 'Upload your images ('+file_name.files[0].name+')';
+    const csrfToken = "<%= form_authenticity_token %>";
+    //$('#file_name_show').html(uploadText);
+    const previewContainer = document.querySelector('#upload-preview');
+    previewContainer.innerHTML = ''; // Clear previous previews
+    
+    let uploadPromises = [];
+
+    //disable the submit button until all images are finished being uploaded.
+    document.getElementById('submitButton').disabled = true; // Re-enable the submit button
+    // document.getElementById('submitButton').disabled = true; // Re-enable the submit button
+    $('#imageUploadingLabel').show();
+    $('#imagesDoneUploading').hide();
+
+    $('#submitButton').addClass('is-loading');
+
+    //TODO: how do we iterate over these images and upload them?
+    // /jobs_requests/pre_signed_s3_url_for_uploading_images
+    // Check if browser supports FileReader
+    if (window.FileReader && input.files && input.files.length) {
+      //?? We do it with all the images here.?
+        for (let i = 0; i < input.files.length; i++) {
+
+          const file = input.files[i];
+
+          // const hex = await RNFS.hash(result.path, 'md5') //get the md5 hash for this image
+          const hex = await readFile(file);
+          // const base64 = Buffer.from(hex, 'hex').toString('base64') // get the base64 encoded for this image
+          const base64 = buffer.Buffer.from(hex, "hex").toString('base64');
+          const randomGuid = Math.random().toString(36).substr(2, 5); //get a randomGuid for the image name
+          const extensionForImage = getExtenstionFromMimeType(file.type) //get the extension for the image
+
+          const fileHash = {
+            filename: file.name || randomGuid + extensionForImage,
+            byte_size: file.size, 
+            checksum: base64,
+            content_type: file.type
+          };
+
+          let uploadPromise = new Promise((resolve, reject) => {
+            $.ajax({
+              type: "POST",
+              url: "/sites/pre_signed_s3_url_for_uploading_images.json",
+              headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken,
+                },
+              data: JSON.stringify(fileHash),
+              success: function(data, textStatus, jqXHR) {
+                console.log(data);
+                // debugger;  // Uncomment if you need to pause execution here
+
+                //PREVIEW IMAGE SO USER CAN SEE WHAT THEY ARE UPLOADING
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = "Preview image";
+                        img.style.width = '100px';  // or any desired preview size
+                        
+                        const div = document.createElement('div');
+                        div.id = data["key"];
+                        div.className = "is-loading";
+                        
+                        div.appendChild(img);
+                        previewContainer.classList.remove('hidden')           // Append the img to the div
+                        previewContainer.appendChild(div);  // Append the div to the previewContainer
+                    };
+                        // $('#upload-preview').addClass('is-loading');
+
+                    reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf') {
+                  //TODO: Turn iFrame into document.createElement('iframe')
+                  // <iframe src="" title="" align="top" width="100%" frameborder="0" scrolling="auto" target="Message"></iframe>
+                  const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = e.target.result;
+                        iframe.title = "Preview PDF";
+                        iframe.align = "top";
+                        iframe.width = "100%";
+                        iframe.frameBorder = "0";
+                        iframe.scrolling = "auto";
+                        iframe.target = "Message";
+
+                        const div = document.createElement('div');
+                        div.id = data["key"];
+                        div.className = "is-loading";
+
+                        div.appendChild(iframe);           // Append the iframe to the div
+                        previewContainer.appendChild(div);  // Append the div to the previewContainer                  
+                      }
+                  }
+                
+                imageBlobIdsToAttachToJobRequest.push(data["signed_id"]);
+
+                const signedId = data["signed_id"];
+                
+                //const hiddenInput = $('<input/>', {
+                //  type: 'hidden',
+                //  name: 'job_request[images][]', // This name matches the parameter you're allowing in your controller
+                //  value: signedId
+                //});
+                uploadToS3(data, file, resolve, reject);
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log("Error uploading s3 blob!");
+                console.log(textStatus, errorThrown);
+              }
+            });
+          });
+        uploadPromises.push(uploadPromise);
+      }
+      // Wait for all the images to be uploaded before re-enabling the submit button
+      // await Promise.all(uploadPromises);
+      // document.getElementById('submitButton').disabled = false; // Re-enable the submit button
+      await Promise.all(uploadPromises)
+        .then(() => {
+            console.log('All uploads complete!');
+            document.getElementById('submitButton').disabled = false; // Re-enable the submit button
+            $('#submitButton').removeClass('is-loading');
+            $('#imageUploadingLabel').hide();
+            $('#imagesDoneUploading').show();
+            $('#submitButton').show() 
+            $('#image_holder').hide()
+        })
+        .catch(error => {
+            console.error('Some uploads failed:', error);
+            document.getElementById('submitButton').disabled = false; // Re-enable the submit button
+            $('#submitButton').removeClass('is-loading');   
+            $('#imageUploadingLabel').hide();     
+            $('#imagesDoneUploading').show();    
+           
+            // Handle the error - maybe inform the user that some uploads failed.
+      });
+    }
+  }
+
+  function uploadToS3(presignedData, file, resolveCallback, failureCallback) {
+      $.ajax({
+          url: presignedData.url,
+          type: 'PUT',
+          contentType: presignedData.headers["Content-Type"],
+          headers: {
+              "Content-MD5": presignedData.headers["Content-MD5"]
+          },
+          processData: false, // Important, do not process data
+          data: file,
+          success: function() {
+              console.log("Successfully uploaded to S3");
+              $(`#${presignedData.key}`).removeClass("is-loading"); //done uploading.
+              resolveCallback();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              console.error("Error uploading to S3:", textStatus, errorThrown);
+              failureCallback();
+          }
+      });
+  }
+
+// This is how you would call the function inside your success callback:
+// uploadToS3(data, file);
+
+  function hashChunk(chunk) {
+    return new Promise((resolve, reject) => {
+      fileReader.onload = async(e) => {
+        const view = new Uint8Array(e.target.result);
+        hasher.update(view);
+        resolve();
+      };
+
+      fileReader.readAsArrayBuffer(chunk);
+    });
+  }
+
+  const readFile = async(file) => {
+    if (hasher) {
+      hasher.init();
+    } else {
+      hasher = await hashwasm.createMD5();
+    }
+
+    const chunkNumber = Math.floor(file.size / chunkSize);
+
+    for (let i = 0; i <= chunkNumber; i++) {
+      const chunk = file.slice(
+        chunkSize * i,
+        Math.min(chunkSize * (i + 1), file.size)
+      );
+      await hashChunk(chunk);
+    }
+
+    const hash = hasher.digest();
+    return Promise.resolve(hash);
+  };
+
+  function getExtenstionFromMimeType(mimeType) {
+      const mimeToExtensionMap = {
+          'image/jpeg': '.jpg',
+          'image/png': '.png',
+          'image/gif': '.gif',
+          'image/webp': '.webp',
+          'image/tiff': '.tiff',
+          'image/bmp': '.bmp',
+          // Add other mappings as needed
+      };
+
+      return mimeToExtensionMap[mimeType] || ''; // return empty string if mimeType is not in the map
+  }  
+
+document.addEventListener('DOMContentLoaded', function() {
+  let page = 1;
+  const imageContainer = document.getElementById('image-container');
+  const path = window.location.pathname;
+  const segments = path.split('/');
+  const slug = segments[segments.length - 1];
+
+  function fetchImagesForSite(page) {
+  const csrfToken = "<%= form_authenticity_token %>";
+  fetch('/sites/list_images.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken
+    },
+    body: JSON.stringify({
+      site_slug: slug,
+      page: page
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(image => {
+      const imgElement = document.createElement('img');
+      imgElement.src = image.url;
+      imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
+      imageContainer.appendChild(imgElement);
+    });
+  })
+  .catch(error => console.error('Error fetching images:', error));
+}
+
+function handleHorizontalScroll() {
+
+  console.log("Trigger horizontal scroll")
+  const scrollContainer = document.getElementById('imagesForUserToSelect');
+  const scrollPosition = scrollContainer.scrollLeft + scrollContainer.clientWidth;
+  const scrollWidth = scrollContainer.scrollWidth;
+
+  // Check if the scroll position is near the end of the scrollable area
+  if (scrollWidth - scrollPosition <= 50) { // Adjust the threshold as needed
+    page += 1;
+    fetchImagesForSite(page);
+  }
+}
+
+const scrollContainer = document.getElementById('imagesForUserToSelect');
+scrollContainer.addEventListener('scroll', handleHorizontalScroll);
+  // Initial fetch
+  fetchImagesForSite(page);
+});
+
+
+
 </script>

@@ -39,6 +39,13 @@ Rails.application.routes.draw do
 
   get '/pages/:id/preview' => 'pages#preview', as: :page_preview
 
+  post '/attach_pre_uploaded_s3_blob_to_site', to: 'sites#attach_pre_uploaded_s3_blob_to_site'
+  post '/attach_multiple_pre_uploaded_s3_blobs_to_sites', to: 'sites#attach_multiple_pre_uploaded_s3_blobs_to_sites'
+  
+
+  post 'sites/pre_signed_s3_url_for_uploading_images', to: 'sites#get_signed_s3_url_for_uploading_images'
+  post '/sites/list_images', to: 'sites#list_images'
+ 
   # Catch-all route at the end
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && !request.path.start_with?('/cable')
