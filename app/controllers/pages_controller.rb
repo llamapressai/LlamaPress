@@ -1,15 +1,14 @@
 require 'diffy'
 
 class PagesController < ApplicationController
-  before_action :set_page, only: %i[ show edit update destroy restore]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug]
+  before_action :set_page, only: %i[ show edit update destroy restore preview]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show]
   skip_before_action :verify_authenticity_token, only: [:restore, :update]
 
   # GET /
   # Find and render the root page depending on the domain.
   # If no root page is found, redirect to the llama press home page.
   def home
-
     #If the user is signed in, and they have a default site, redirect to that site's home page.
 
     #If no user, no site, no page, no domain.
@@ -62,7 +61,7 @@ class PagesController < ApplicationController
     content = @page.render_content
 
     # Inject the chat partial
-    content += inject_chat_partial(content)
+    content += inject_chat_partial(content) if current_user.present?
     content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
   end
@@ -75,6 +74,12 @@ class PagesController < ApplicationController
 
   # GET /pages/1/edit
   def edit
+  end
+
+  # GET /pages/1/preview
+  def preview
+    content = @page.render_content
+    render inline: content.html_safe, layout: 'page'
   end
 
   # POST /pages or /pages.json
@@ -99,9 +104,8 @@ class PagesController < ApplicationController
 
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
-    #how can I compare page.content to page_params[:content], and generate a title describign diffs?
-    diffs = Diffy::Diff.new(@page.content, page_params[:content]).to_s
-    @page.save_history("#{diffs}")
+    message = params[:message].present? ? params[:message] : "User Edit"
+    @page.save_history(message)
     respond_to do |format|
       if @page.update(page_params)
         format.html { redirect_to page_url(@page), notice: "web page was successfully updated." }

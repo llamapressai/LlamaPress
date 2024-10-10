@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   get "llama_bot/models" => "llama_bot#models", as: :llama_bot_models
   get "llama_bot/database" => "llama_bot#database", as: :llama_bot_database
   get "llama_bot/templates" => "llama_bot#templates", as: :llama_bot_templates
+  get '/p/:id' => 'pages#show', as: :page_show #scope /w/ pages for easier page sharing
+
+  get '/pages/:id/preview' => 'pages#preview', as: :page_preview
 
   post '/attach_pre_uploaded_s3_blob_to_site', to: 'sites#attach_pre_uploaded_s3_blob_to_site'
   post '/attach_multiple_pre_uploaded_s3_blobs_to_sites', to: 'sites#attach_multiple_pre_uploaded_s3_blobs_to_sites'

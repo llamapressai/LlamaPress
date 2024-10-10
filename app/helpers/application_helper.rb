@@ -22,4 +22,9 @@ module ApplicationHelper
           }
         end
       end
+
+    #helper method to check if the content starts with <!DOCTYPE html>
+    def starts_with_doctype_html?(content)
+        return content.strip.start_with?('<!DOCTYPE html>')
+    end
 end

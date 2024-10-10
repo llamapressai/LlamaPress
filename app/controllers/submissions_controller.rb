@@ -1,7 +1,8 @@
 class SubmissionsController < ApplicationController
   before_action :set_submission, only: %i[ show edit update destroy ]
   skip_before_action :verify_authenticity_token, only: [:create]
-  skip_before_action :authenticate_user!, only: [:create]
+  skip_before_action :authenticate_user!, only: [:create, :show]
+  layout false, only: :show
 
   # GET /submissions or /submissions.json
   def index
@@ -28,9 +29,13 @@ class SubmissionsController < ApplicationController
     @site = @page&.site || Site.find_by(id: params[:site_id])
     @submission = @site.submissions.new(data: data)
 
+    #TODO: 
+    # - What if we don't have page_id set in the form? Do we still record the form submissions?
+    # - Is there a way to see where we came from?
+
     respond_to do |format|
       if @submission.save
-        format.html { redirect_to "/#{@page.slug}", notice: "Submission was successfully created." }
+        format.html { redirect_to @submission, notice: "Submission was successfully created." }
         format.json { render :show, status: :created, location: @submission }
       else
         format.html { render :new, status: :unprocessable_entity }

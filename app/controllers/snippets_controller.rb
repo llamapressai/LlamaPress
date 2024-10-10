@@ -1,6 +1,7 @@
 class SnippetsController < ApplicationController
   before_action :set_snippet, only: %i[ show edit update destroy ]
   before_action :set_site, only: %i[ new edit ]
+  skip_before_action :verify_authenticity_token, only: %i[ update ]
 
   # GET /snippets or /snippets.json
   def index

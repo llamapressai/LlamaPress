@@ -12,89 +12,146 @@ document.addEventListener('DOMContentLoaded', () => {
     let isEditing = false;
     let originalContent = '';
     let saveTimeout;
+    let lastElementClicked = null;
 
     // Function to save changes
-    function saveChanges() {
+    function saveChanges(event) {
+        console.log('Saving changes for element:', lastElementClicked);
         let currentContent = document.documentElement.outerHTML;
         // Only save if content has changed
         if (currentContent !== originalContent) {
-
-            // Clone the entire document
-            const clonedDoc = document.cloneNode(true);
-
-            // Remove nodes that should be excluded
-            const nodesToExclude = clonedDoc.querySelectorAll('[data-llama*="exclude_when_saving_contenteditable_edits"]');
-            nodesToExclude.forEach(node => {
-                node.remove();
-            });
-
-            // Find all nodes that are not marked as editable
-            const nonEditableNodes = clonedDoc.querySelectorAll(':not([data-llama-editable="true"])');
-            nonEditableNodes.forEach(node => {
-                if (node.tagName !== 'HTML' && node.tagName !== 'BODY') {
-                    node.remove();
-                }
-            });
-
-            // Clean up remaining nodes
-            const editableNodes = clonedDoc.querySelectorAll('[data-llama-editable="true"]');
-            editableNodes.forEach(node => {
-                node.removeAttribute('data-llama-editable');
-                node.removeAttribute('contenteditable');
-            });
-
-            // Get the cleaned HTML content
-            let cleanedContent = clonedDoc.documentElement.outerHTML;
-
-            // Remove the contenteditable attribute from the html page so it doesn't get saved to the database.
-            cleanedContent = cleanedContent.replace(/\s*contenteditable="true"/g, '');
-
-            // Use a more modern confirmation dialog
-            //if (confirm('Save these changes?')) {
-                // Show a loading indicator
-                const loadingIndicator = document.createElement('div');
-                loadingIndicator.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits'); //Don't save these notifications to the page.
-                loadingIndicator.textContent = 'Saving...';
-                loadingIndicator.style.position = 'fixed';
-                loadingIndicator.style.top = '10px';
-                loadingIndicator.style.right = '10px';
-                loadingIndicator.style.padding = '10px';
-                loadingIndicator.style.background = 'rgba(0,0,0,0.7)';
-                loadingIndicator.style.color = 'white';
-                loadingIndicator.style.borderRadius = '5px';
-                document.body.appendChild(loadingIndicator);
-
-                fetch('/pages/<%= @page&.id %>.json', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ content: cleanedContent }),
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Save successful:', data);
-                    originalContent = cleanedContent; // Update original content after successful save
-                    showNotification('Changes saved successfully!', 'success');
-                })
-                .catch((error) => {
-                    console.error('Error saving changes:', error);
-                    showNotification('Error saving changes. Please try again.', 'error');
-                })
-                .finally(() => {
-                    // Remove the loading indicator
-                    document.body.removeChild(loadingIndicator);
-                });
-            //} else {
-                //document.body.innerHTML = originalContent; // Revert to original content
-              //  console.log('Changes discarded');
-            //}
+            //see what node got edited -- check if it has the data-llama-snippet-id attribute, if it does, do an PUT to /snippets/:id with just the nodes of that snippet 
+            if (lastElementClicked.hasAttribute('data-llama-snippet-id')) {
+                saveSnippetChanges(lastElementClicked);
+            } else {
+                savePageChanges();
+            }
         }
+    }
+
+    function saveSnippetChanges(element) {
+        const snippetId = element.getAttribute('data-llama-snippet-id');
+        let snippetElement = element;
+        
+        //Find parent snippet element
+        while (snippetElement.parentElement && snippetElement.parentElement.hasAttribute('data-llama-snippet-id')) {
+            snippetElement = snippetElement.parentElement;
+        }
+        const snippetContent = snippetElement.outerHTML;
+
+        fetch(`/snippets/${snippetId}.json`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: snippetContent }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Snippet save successful:', data);
+            showNotification('Snippet changes saved successfully!', 'success');
+        })
+        .catch((error) => {
+            console.error('Error saving snippet changes:', error);
+            showNotification('Error saving snippet changes. Please try again.', 'error');
+        });
+    }
+
+    function savePageChanges() {
+        // Clone the entire document
+        const clonedDoc = document.cloneNode(true);
+
+        // Remove nodes that should be excluded
+        const nodesToExclude = clonedDoc.querySelectorAll('[data-llama*="exclude_when_saving_contenteditable_edits"]');
+        nodesToExclude.forEach(node => {
+            node.remove();
+        });
+
+        // Find all nodes that are not marked as editable
+        const nonEditableNodes = clonedDoc.querySelectorAll(':not([data-llama-editable="true"])');
+        nonEditableNodes.forEach(node => {
+            if (node.tagName !== 'HTML' && node.tagName !== 'BODY') {
+                node.remove();
+            }
+        });
+
+        // Clean up remaining nodes
+        const editableNodes = clonedDoc.querySelectorAll('[data-llama-editable="true"]');
+        editableNodes.forEach(node => {
+            node.removeAttribute('data-llama-editable');
+            node.removeAttribute('contenteditable');
+        });
+
+        // Remove 'selected-element' class from any nodes that have it
+        const selectedElements = clonedDoc.querySelectorAll('.selected-element');
+        selectedElements.forEach(element => {
+            element.classList.remove('selected-element');
+        });
+
+        // Remove 'selected-element' class from any nodes that have it
+        const selectionModeElements = clonedDoc.querySelectorAll('.selection-mode');
+        selectionModeElements.forEach(element => {
+            element.classList.remove('selection-mode');
+        });
+
+        // Get the cleaned HTML content
+        let cleanedContent = clonedDoc.documentElement.outerHTML;
+
+        // Remove the contenteditable attribute from the html page so it doesn't get saved to the database.
+        cleanedContent = cleanedContent.replace(/\s*contenteditable="true"/g, '');
+
+        // Use a more modern confirmation dialog
+        //if (confirm('Save these changes?')) {
+            // Show a loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits'); //Don't save these notifications to the page.
+            loadingIndicator.textContent = 'Saving...';
+            loadingIndicator.style.position = 'fixed';
+            loadingIndicator.style.top = '10px';
+            loadingIndicator.style.right = '10px';
+            loadingIndicator.style.padding = '10px';
+            loadingIndicator.style.background = 'rgba(0,0,0,0.7)';
+            loadingIndicator.style.color = 'white';
+            loadingIndicator.style.borderRadius = '5px';
+            document.body.appendChild(loadingIndicator);
+
+            message = "Edit: " + lastElementClicked.innerHTML;
+
+            fetch('/pages/<%= @page&.id %>.json', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: cleanedContent, message: message }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Save successful:', data);
+                originalContent = cleanedContent; // Update original content after successful save
+                showNotification('Page changes saved successfully!', 'success');
+            })
+            .catch((error) => {
+                console.error('Error saving changes:', error);
+                showNotification('Error saving changes. Please try again.', 'error');
+            })
+            .finally(() => {
+                // Remove the loading indicator
+                document.body.removeChild(loadingIndicator);
+            });
+        //} else {
+            //document.body.innerHTML = originalContent; // Revert to original content
+            //  console.log('Changes discarded');
+        //}
     }
 
     // Function to update Tailwind classes
@@ -117,6 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let aspectRatio;
 
     document.body.addEventListener('mousedown', (e) => {
+        lastElementClicked = e.target;
+        console.log("lastElementClicked", lastElementClicked);
         if (e.target.tagName === 'IMG') {
             isResizing = true;
             currentImage = e.target;
@@ -140,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.addEventListener('mouseup', () => {
         if (isResizing) {
-            saveChanges();
+            saveChanges(event);
         }
         isResizing = false;
         currentImage = null;
@@ -148,9 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event listener for when editing starts
     document.body.addEventListener('focus', (event) => {
+        
+        const editableTarget = event.target.closest('[data-llama-editable="true"]');
         if (event.target.isContentEditable) {
             originalContent = document.body.innerHTML;
             isEditing = false;
+            currentElementBeingEdited = event.target;
         }
     }, true);
 
@@ -164,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Set a new timeout to save changes after 2 seconds of inactivity
             saveTimeout = setTimeout(saveChanges, 2000);
+            currentElementBeingEdited = event.target;
         }
     }, true);
 
@@ -171,15 +234,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('blur', (event) => {
         if (event.target.isContentEditable && isEditing) {
             clearTimeout(saveTimeout); // Clear any pending save
-            saveChanges(); // Save immediately on blur
+            saveChanges(event, currentElementBeingEdited); // Save immediately on blur
             isEditing = false;
+            currentElementBeingEdited = null;
         }
     }, true);
 
     // Listen for page unload to save any unsaved changes
     window.addEventListener('beforeunload', (event) => {
         if (isEditing) {
-            saveChanges();
+            saveChanges(event);
             event.preventDefault(); // Cancel the event
             event.returnValue = ''; // Display a default message in most browsers
         }
