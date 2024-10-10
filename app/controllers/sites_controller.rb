@@ -113,8 +113,7 @@ class SitesController < ApplicationController
 
   def list_images
     if params[:site_slug].present?
-      #page = params[:page] || 1
-      page = 1 
+      page = params[:page] || 1
       per_page = 10
       offset = (page.to_i - 1) * per_page
       slug = params[:site_slug]

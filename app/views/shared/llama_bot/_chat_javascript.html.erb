@@ -280,7 +280,14 @@
     });
   });
 
-  function fetchImagesForSite() {
+
+
+
+
+
+
+
+  function fetchImagesForSite1() {
     const csrfToken = "<%= form_authenticity_token %>";
     const path = window.location.pathname;
     const segments = path.split('/');
@@ -806,8 +813,56 @@
       return mimeToExtensionMap[mimeType] || ''; // return empty string if mimeType is not in the map
   }  
 
-  document.addEventListener("DOMContentLoaded", function() {
-  fetchImagesForSite();
+document.addEventListener('DOMContentLoaded', function() {
+  let page = 1;
+  const imageContainer = document.getElementById('image-container');
+  const path = window.location.pathname;
+  const segments = path.split('/');
+  const slug = segments[segments.length - 1];
+
+  function fetchImagesForSite(page) {
+  const csrfToken = "<%= form_authenticity_token %>";
+  fetch('/sites/list_images.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken
+    },
+    body: JSON.stringify({
+      site_slug: slug,
+      page: page
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(image => {
+      const imgElement = document.createElement('img');
+      imgElement.src = image.url;
+      imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
+      imageContainer.appendChild(imgElement);
+    });
+  })
+  .catch(error => console.error('Error fetching images:', error));
+}
+
+function handleHorizontalScroll() {
+
+  console.log("Trigger horizontal scroll")
+  const scrollContainer = document.getElementById('imagesForUserToSelect');
+  const scrollPosition = scrollContainer.scrollLeft + scrollContainer.clientWidth;
+  const scrollWidth = scrollContainer.scrollWidth;
+
+  // Check if the scroll position is near the end of the scrollable area
+  if (scrollWidth - scrollPosition <= 50) { // Adjust the threshold as needed
+    page += 1;
+    fetchImagesForSite(page);
+  }
+}
+
+const scrollContainer = document.getElementById('imagesForUserToSelect');
+scrollContainer.addEventListener('scroll', handleHorizontalScroll);
+  // Initial fetch
+  fetchImagesForSite(page);
 });
 
 
