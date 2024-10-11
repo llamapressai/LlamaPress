@@ -930,29 +930,6 @@ document.addEventListener('DOMContentLoaded', function () {
       localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
     }
 
-  // Define copyCode in the global scope
-  function copyCode(elementId) {
-    const codeElement = document.getElementById(elementId);
-    const textArea = document.createElement('textarea');
-    textArea.value = codeElement.textContent;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    
-    //TODO: This is a hack to find the copy button. We should use a data attribute to find it.
-    let copyButton = codeElement.parentElement.parentElement.children[1];
-    copyButton.textContent = 'Copied!';
-    copyButton.classList.remove('bg-gray-200', 'hover:bg-gray-300');
-    copyButton.classList.add('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
-
-    setTimeout(() => {
-        copyButton.textContent = 'Copy';
-        copyButton.classList.remove('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
-        copyButton.classList.add('bg-gray-200', 'hover:bg-gray-300');
-    }, 2000);
-  }
-
     // Function to load chatbot state from localStorage
     function loadChatbotState() {
       const savedState = localStorage.getItem('chatbotState');
@@ -1099,4 +1076,27 @@ document.addEventListener('DOMContentLoaded', function () {
       saveChatbotState();
     }
   });
+
+    // Define copyCode in the global scope
+  function copyCode(elementId) {
+    const codeElement = document.getElementById(elementId);
+    const textArea = document.createElement('textarea');
+    textArea.value = codeElement.textContent;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    //TODO: This is a hack to find the copy button. We should use a data attribute to find it.
+    let copyButton = codeElement.parentElement.parentElement.children[1];
+    copyButton.textContent = 'Copied!';
+    copyButton.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+    copyButton.classList.add('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
+
+    setTimeout(() => {
+        copyButton.textContent = 'Copy';
+        copyButton.classList.remove('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
+        copyButton.classList.add('bg-gray-200', 'hover:bg-gray-300');
+    }, 2000);
+  }
 </script>
