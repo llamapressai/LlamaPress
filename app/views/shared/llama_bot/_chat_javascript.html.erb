@@ -1,7 +1,10 @@
-
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdn.jsdelivr.net/npm/hash-wasm"></script>
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://bundle.run/buffer@6.0.3"></script>
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<link data-llama="exclude_when_saving_contenteditable_edits" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 <script data-llama="exclude_when_saving_contenteditable_edits">
   document.addEventListener("DOMContentLoaded", () => {
     const chatIcon = document.getElementById("chatIcon");
@@ -63,12 +66,45 @@
       chatbotContainer.classList.toggle("hidden", !isOpen);
     }
 
+    function formatMessage(text) {
+      // Custom renderer to handle code blocks
+      const renderer = new marked.Renderer();
+      renderer.code = (code, language) => {
+        const validLanguage = Prism.languages[language] ? language : 'markup';
+        const highlightedCode = Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
+        const uniqueId = 'code-' + Math.random().toString(36).substr(2, 9);
+        return `
+          <div class="relative">
+            <pre class="language-${validLanguage}"><code id="${uniqueId}">${highlightedCode}</code></pre>
+            <button class="copy-button absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm" onclick="copyCode('${uniqueId}')">Copy</button>
+          </div>
+        `;
+      };
+
+      // Configure marked options
+      marked.setOptions({
+        renderer: renderer,
+        highlight: (code, lang) => {
+          const language = Prism.languages[lang] ? lang : 'markup';
+          return Prism.highlight(code, Prism.languages[language], language);
+        },
+        breaks: true,
+        gfm: true
+      });
+
+      // Parse the markdown
+      return marked.parse(text);
+    }
+
     function addMessage(text, sender) {
       const messageDiv = document.createElement("div");
       messageDiv.className = `mb-2 p-2 rounded ${
         sender === "bot" ? "bg-blue-100 self-start" : "bg-green-100 self-end"
       }`;
-      messageDiv.textContent = text;
+      
+      const formattedContent = formatMessage(text);
+      messageDiv.innerHTML = formattedContent;
+      
       chatbotMessages.appendChild(messageDiv);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
@@ -269,6 +305,40 @@
     // Initial bot message
     loadChatHistory();
     addMessage("What do you want to build?", "bot");
+
+    const textarea = document.getElementById('userInput');
+    const maxRows = 10; // Set this to your desired maximum number of rows
+
+    function autoResizeUserInputArea() {
+        textarea.style.height = 'auto';
+        const newHeight = Math.min(textarea.scrollHeight, textarea.rows * 24 * maxRows);
+        textarea.style.height = newHeight + 'px';
+    }
+
+    textarea.addEventListener('input', autoResizeUserInputArea);
+
+    document.addEventListener('keydown', function(e) {
+    // Check if Cmd+shift+L (Mac) or Ctrl+shift+L (Windows/Linux) is pressed to put content into chatbot container
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'l') {
+        e.preventDefault(); // Prevent default browser behavior
+        
+        //Get the current text selected by the cursor
+        const selectedText = `\`\`\`${window.getSelection().toString()}\`\`\``;
+        //$("#chatbotContainer").show();
+        if (!isOpen) {
+            toggleChat();
+        }
+        
+        $("#userInput").val(selectedText);
+        $("#userInput").focus();
+        autoResizeUserInputArea();
+      }
+      else if (e.key == "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleChat();
+      }
+    });
   });
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -286,39 +356,6 @@
 
 
 
-
-  function fetchImagesForSite1() {
-    const csrfToken = "<%= form_authenticity_token %>";
-    const path = window.location.pathname;
-    const segments = path.split('/');
-    const slug = segments[segments.length - 1];
-
-    fetch('/sites/list_images.json', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken
-      },
-      body: JSON.stringify({ site_slug: slug })
-    })
-    .then(response => {
-      console.log('Raw response:', response); // Print the raw response
-      return response.json();
-    })
-    .then(images => {
-      const container = document.querySelector('#imagesForUserToSelect .flex.justify-around');
-      container.innerHTML = ''; // Clear existing images
-
-      images.forEach(image => {
-        const imgElement = document.createElement('img');
-        imgElement.src = image.url;
-        imgElement.alt = image.filename;
-        imgElement.className = 'h-16 ml-2 rounded-lg border-2 border-gray-200 shadow-md transition-transform hover:scale-105';
-        container.appendChild(imgElement);
-      });
-    })
-    .catch(error => console.error('Error fetching images:', error));
-  }
 
 
   let inSelectionMode = false;
@@ -882,6 +919,29 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('Saving chatbot state:', chatbotState);
       localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
     }
+
+  // Define copyCode in the global scope
+  function copyCode(elementId) {
+    const codeElement = document.getElementById(elementId);
+    const textArea = document.createElement('textarea');
+    textArea.value = codeElement.textContent;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    //TODO: This is a hack to find the copy button. We should use a data attribute to find it.
+    let copyButton = codeElement.parentElement.parentElement.children[1];
+    copyButton.textContent = 'Copied!';
+    copyButton.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+    copyButton.classList.add('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
+
+    setTimeout(() => {
+        copyButton.textContent = 'Copy';
+        copyButton.classList.remove('bg-green-500', 'hover:bg-green-600', 'text-white', 'copy-animation');
+        copyButton.classList.add('bg-gray-200', 'hover:bg-gray-300');
+    }, 2000);
+  }
 
     // Function to load chatbot state from localStorage
     function loadChatbotState() {
