@@ -66,16 +66,17 @@
       chatbotContainer.classList.toggle("hidden", !isOpen);
     }
 
-    function formatMessage(text) {
+    function formatMessage(text, sender) {
       // Custom renderer to handle code blocks
       const renderer = new marked.Renderer();
       renderer.code = (code, language) => {
         const validLanguage = Prism.languages[language] ? language : 'markup';
         const highlightedCode = Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
+        const escapedCode = escapeHtml(highlightedCode);
         const uniqueId = 'code-' + Math.random().toString(36).substr(2, 9);
         return `
           <div class="relative">
-            <pre class="language-${validLanguage}"><code id="${uniqueId}">${highlightedCode}</code></pre>
+            <pre class="language-${validLanguage}"><code id="${uniqueId}">${sender == "user" ? code : escapedCode}</code></pre>
             <button class="copy-button absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm" onclick="copyCode('${uniqueId}')">Copy</button>
           </div>
         `;
@@ -93,7 +94,19 @@
       });
 
       // Parse the markdown
-      return marked.parse(text);
+      if (sender == "user") {
+        return marked.parse(escapeHtml(text));
+      }
+      else {
+        return marked.parse(text);
+      }
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     function addMessage(text, sender) {
@@ -102,14 +115,8 @@
         sender === "bot" ? "bg-blue-100 self-start" : "bg-green-100 self-end"
       }`;
       
-      if (sender == "bot") {
-        const formattedContent = formatMessage(text);
-        messageDiv.innerHTML = formattedContent;
-      }
-      else {
-        messageDiv.textContent = text;
-      }
-      
+      const formattedContent = formatMessage(text, sender);
+      messageDiv.innerHTML = formattedContent;
       chatbotMessages.appendChild(messageDiv);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
@@ -340,7 +347,7 @@
         e.preventDefault(); // Prevent default browser behavior
         
         //Get the current text selected by the cursor
-        const selectedText = `\`\`\`${window.getSelection().toString()}\`\`\``;
+        const selectedText = `${window.getSelection().toString()}\n`;
         //$("#chatbotContainer").show();
         if (!isOpen) {
             toggleChat();
