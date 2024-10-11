@@ -865,116 +865,168 @@ scrollContainer.addEventListener('scroll', handleHorizontalScroll);
   fetchImagesForSite(page);
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const element = document.getElementById('chatbotContainer');
+    const resizers = document.querySelectorAll('#chatbotContainer .resizer');
+    let originalWidth, originalHeight, originalX, originalY;
+    let originalMouseX, originalMouseY;
 
-const chatbot = document.getElementById('chatbotContainer');
+    // Function to save chatbot state to localStorage
+    function saveChatbotState() {
+      const chatbotState = {
+        width: element.style.width,
+        height: element.style.height,
+        left: element.style.left,
+        top: element.style.top,
+      };
+      console.log('Saving chatbot state:', chatbotState);
+      localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
+    }
 
+    // Function to load chatbot state from localStorage
+    function loadChatbotState() {
+      const savedState = localStorage.getItem('chatbotState');
+      if (savedState) {
+        try {
+          const { width, height, left, top } = JSON.parse(savedState);
+          console.log('Loading chatbot state:', { width, height, left, top });
+          // Apply the saved state
+          element.style.width = width;
+          element.style.height = height;
+          element.style.left = left;
+          element.style.top = top;
+        } catch (error) {
+          console.error('Error parsing chatbot state:', error);
+          localStorage.removeItem('chatbotState');
+        }
+      }
+    }
 
-const element = document.getElementById('chatbotContainer');
-  const resizers = document.querySelectorAll('#chatbotContainer .resizer');
-  let originalWidth, originalHeight, originalX, originalY;
-  let originalMouseX, originalMouseY;
+    // Initial load of chatbot state
+    loadChatbotState();
 
-  resizers.forEach(function (resizer) {
-    resizer.addEventListener('mousedown', onMouseDown);
+    // Resizing functionality
+    resizers.forEach(function (resizer) {
+      resizer.addEventListener('mousedown', onMouseDown);
 
-    function onMouseDown(e) {
+      function onMouseDown(e) {
+        e.preventDefault();
+
+        originalWidth = parseFloat(getComputedStyle(element).width);
+        originalHeight = parseFloat(getComputedStyle(element).height);
+        originalX = element.getBoundingClientRect().left;
+        originalY = element.getBoundingClientRect().top;
+        originalMouseX = e.pageX;
+        originalMouseY = e.pageY;
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      }
+
+      function onMouseMove(e) {
+        let deltaX = e.pageX - originalMouseX;
+        let deltaY = e.pageY - originalMouseY;
+
+        if (resizer.classList.contains('bottom-right')) {
+          element.style.width = `${originalWidth + deltaX}px`;
+          element.style.height = `${originalHeight + deltaY}px`;
+        } else if (resizer.classList.contains('bottom-left')) {
+          element.style.width = `${originalWidth - deltaX}px`;
+          element.style.height = `${originalHeight + deltaY}px`;
+          element.style.left = `${originalX + deltaX}px`;
+        } else if (resizer.classList.contains('top-right')) {
+          element.style.width = `${originalWidth + deltaX}px`;
+          element.style.height = `${originalHeight - deltaY}px`;
+          element.style.top = `${originalY + deltaY}px`;
+        } else if (resizer.classList.contains('top-left')) {
+          element.style.width = `${originalWidth - deltaX}px`;
+          element.style.height = `${originalHeight - deltaY}px`;
+          element.style.top = `${originalY + deltaY}px`;
+          element.style.left = `${originalX + deltaX}px`;
+        } else if (resizer.classList.contains('top')) {
+          element.style.height = `${originalHeight - deltaY}px`;
+          element.style.top = `${originalY + deltaY}px`;
+        } else if (resizer.classList.contains('bottom')) {
+          element.style.height = `${originalHeight + deltaY}px`;
+        } else if (resizer.classList.contains('left')) {
+          element.style.width = `${originalWidth - deltaX}px`;
+          element.style.left = `${originalX + deltaX}px`;
+        } else if (resizer.classList.contains('right')) {
+          element.style.width = `${originalWidth + deltaX}px`;
+        }
+
+        // Set minimum width and height
+        const minWidth = 300;
+        const minHeight = 200;
+
+        if (parseFloat(element.style.width) < minWidth) {
+          element.style.width = `${minWidth}px`;
+        }
+        if (parseFloat(element.style.height) < minHeight) {
+          element.style.height = `${minHeight}px`;
+        }
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        saveChatbotState();
+      }
+    });
+
+    // Draggable functionality
+    element.addEventListener('mousedown', dragMouseDown);
+
+    function dragMouseDown(e) {
+      // Prevent drag when clicking on resizers or interactive elements
+      if (
+        e.target.classList.contains('resizer') ||
+        e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.tagName === 'INPUT'
+      ) {
+        return;
+      }
       e.preventDefault();
 
-      originalWidth = parseFloat(getComputedStyle(element).width);
-      originalHeight = parseFloat(getComputedStyle(element).height);
-      originalX = element.getBoundingClientRect().left;
-      originalY = element.getBoundingClientRect().top;
-      originalMouseX = e.pageX;
-      originalMouseY = e.pageY;
+      originalMouseX = e.clientX;
+      originalMouseY = e.clientY;
+      originalX = element.offsetLeft;
+      originalY = element.offsetTop;
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('mousemove', elementDrag);
+      window.addEventListener('mouseup', stopElementDrag);
     }
 
-    function onMouseMove(e) {
-      let deltaX = e.pageX - originalMouseX;
-      let deltaY = e.pageY - originalMouseY;
+    function elementDrag(e) {
+      e.preventDefault();
+      let deltaX = e.clientX - originalMouseX;
+      let deltaY = e.clientY - originalMouseY;
+      let newLeft = originalX + deltaX;
+      let newTop = originalY + deltaY;
 
-      if (resizer.classList.contains('bottom-right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-        element.style.height = `${originalHeight + deltaY}px`;
-      } else if (resizer.classList.contains('bottom-left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-        element.style.height = `${originalHeight + deltaY}px`;
-        element.style.left = `${originalX + deltaX}px`;
-      } else if (resizer.classList.contains('top-right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-        element.style.height = `${originalHeight - deltaY}px`;
-        element.style.top = `${originalY + deltaY}px`;
-      } else if (resizer.classList.contains('top-left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-        element.style.height = `${originalHeight - deltaY}px`;
-        element.style.top = `${originalY + deltaY}px`;
-        element.style.left = `${originalX + deltaX}px`;
-      } else if (resizer.classList.contains('top')) {
-        element.style.height = `${originalHeight - deltaY}px`;
-        element.style.top = `${originalY + deltaY}px`;
-      } else if (resizer.classList.contains('bottom')) {
-        element.style.height = `${originalHeight + deltaY}px`;
-      } else if (resizer.classList.contains('left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-        element.style.left = `${originalX + deltaX}px`;
-      } else if (resizer.classList.contains('right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-      }
+      // Prevent moving off-screen
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const chatbotWidth = element.offsetWidth;
+      const chatbotHeight = element.offsetHeight;
 
-      // Set minimum width and height
-      const minWidth = 300;
-      const minHeight = 200;
+      // Ensure chatbot stays within the viewport horizontally
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft + chatbotWidth > viewportWidth) newLeft = viewportWidth - chatbotWidth;
 
-      if (parseFloat(element.style.width) < minWidth) {
-        element.style.width = `${minWidth}px`;
-      }
-      if (parseFloat(element.style.height) < minHeight) {
-        element.style.height = `${minHeight}px`;
-      }
+      // Ensure chatbot stays within the viewport vertically
+      if (newTop < 0) newTop = 0;
+      if (newTop + chatbotHeight > viewportHeight) newTop = viewportHeight - chatbotHeight;
+
+      element.style.left = `${newLeft}px`;
+      element.style.top = `${newTop}px`;
     }
 
-    function onMouseUp() {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
+    function stopElementDrag() {
+      window.removeEventListener('mousemove', elementDrag);
+      window.removeEventListener('mouseup', stopElementDrag);
+      saveChatbotState();
     }
   });
-
-  // Draggable functionality
-  element.addEventListener('mousedown', dragMouseDown);
-
-  function dragMouseDown(e) {
-    // Prevent drag when clicking on resizers or interactive elements
-    if (
-      e.target.classList.contains('resizer') ||
-      e.target.tagName === 'BUTTON' ||
-      e.target.tagName === 'TEXTAREA' ||
-      e.target.tagName === 'INPUT'
-    ) {
-      return;
-    }
-    e.preventDefault();
-
-    originalMouseX = e.clientX;
-    originalMouseY = e.clientY;
-    originalX = element.offsetLeft;
-    originalY = element.offsetTop;
-
-    window.addEventListener('mousemove', elementDrag);
-    window.addEventListener('mouseup', stopElementDrag);
-  }
-
-  function elementDrag(e) {
-    e.preventDefault();
-    let deltaX = e.clientX - originalMouseX;
-    let deltaY = e.clientY - originalMouseY;
-    element.style.left = `${originalX + deltaX}px`;
-    element.style.top = `${originalY + deltaY}px`;
-  }
-
-  function stopElementDrag() {
-    window.removeEventListener('mousemove', elementDrag);
-    window.removeEventListener('mouseup', stopElementDrag);
-  }
 </script>
