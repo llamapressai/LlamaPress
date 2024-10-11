@@ -866,5 +866,157 @@ scrollContainer.addEventListener('scroll', handleHorizontalScroll);
 });
 
 
+const chatbot = document.getElementById('chatbotContainer');
 
+
+  
+
+
+
+//   const toggleModeButton = document.getElementById('toggleModeButton');
+//   let isDragging = false;
+//   let isDragMode = true; // Start in drag mode
+//   let offsetX, offsetY;
+
+//   toggleModeButton.addEventListener('click', function() {
+//     isDragMode = !isDragMode;
+//     if (isDragMode) {
+//       chatbot.style.cursor = 'move';
+//       chatbot.style.resize = 'none';
+//     } else {
+//       chatbot.style.cursor = 'default';
+//       chatbot.style.resize = 'both';
+//     }
+//   });
+
+//   chatbot.addEventListener('mousedown', function(e) {
+//     if (isDragMode && e.target === chatbot) {
+//       isDragging = true;
+//       offsetX = e.clientX - chatbot.offsetLeft;
+//       offsetY = e.clientY - chatbot.offsetTop;
+//       chatbot.style.transition = 'none'; // Disable transition during drag
+//     }
+//   });
+
+//   document.addEventListener('mousemove', function(e) {
+//     if (isDragging) {
+//       chatbot.style.left = `${e.clientX - offsetX}px`;
+//       chatbot.style.top = `${e.clientY - offsetY}px`;
+//     }
+//   });
+
+//   document.addEventListener('mouseup', function() {
+//     isDragging = false;
+//     chatbot.style.transition = 'all 0.3s ease-in-out'; // Re-enable transition
+//   });
+
+
+const element = document.getElementById('chatbotContainer');
+  const resizers = document.querySelectorAll('#chatbotContainer .resizer');
+  let originalWidth, originalHeight, originalX, originalY;
+  let originalMouseX, originalMouseY;
+
+  resizers.forEach(function (resizer) {
+    resizer.addEventListener('mousedown', onMouseDown);
+
+    function onMouseDown(e) {
+      e.preventDefault();
+
+      originalWidth = parseFloat(getComputedStyle(element).width);
+      originalHeight = parseFloat(getComputedStyle(element).height);
+      originalX = element.getBoundingClientRect().left;
+      originalY = element.getBoundingClientRect().top;
+      originalMouseX = e.pageX;
+      originalMouseY = e.pageY;
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function onMouseMove(e) {
+      let deltaX = e.pageX - originalMouseX;
+      let deltaY = e.pageY - originalMouseY;
+
+      if (resizer.classList.contains('bottom-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+      } else if (resizer.classList.contains('bottom-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+        element.style.left = `${originalX + deltaX}px`;
+      } else if (resizer.classList.contains('top-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+        element.style.top = `${originalY + deltaY}px`;
+      } else if (resizer.classList.contains('top-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+        element.style.top = `${originalY + deltaY}px`;
+        element.style.left = `${originalX + deltaX}px`;
+      } else if (resizer.classList.contains('top')) {
+        element.style.height = `${originalHeight - deltaY}px`;
+        element.style.top = `${originalY + deltaY}px`;
+      } else if (resizer.classList.contains('bottom')) {
+        element.style.height = `${originalHeight + deltaY}px`;
+      } else if (resizer.classList.contains('left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.left = `${originalX + deltaX}px`;
+      } else if (resizer.classList.contains('right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+      }
+
+      // Set minimum width and height
+      const minWidth = 300;
+      const minHeight = 200;
+
+      if (parseFloat(element.style.width) < minWidth) {
+        element.style.width = `${minWidth}px`;
+      }
+      if (parseFloat(element.style.height) < minHeight) {
+        element.style.height = `${minHeight}px`;
+      }
+    }
+
+    function onMouseUp() {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    }
+  });
+
+  // Draggable functionality
+  element.addEventListener('mousedown', dragMouseDown);
+
+  function dragMouseDown(e) {
+    // Prevent drag when clicking on resizers or interactive elements
+    if (
+      e.target.classList.contains('resizer') ||
+      e.target.tagName === 'BUTTON' ||
+      e.target.tagName === 'TEXTAREA' ||
+      e.target.tagName === 'INPUT'
+    ) {
+      return;
+    }
+    e.preventDefault();
+
+    originalMouseX = e.clientX;
+    originalMouseY = e.clientY;
+    originalX = element.offsetLeft;
+    originalY = element.offsetTop;
+
+    window.addEventListener('mousemove', elementDrag);
+    window.addEventListener('mouseup', stopElementDrag);
+  }
+
+  function elementDrag(e) {
+    e.preventDefault();
+    let deltaX = e.clientX - originalMouseX;
+    let deltaY = e.clientY - originalMouseY;
+    element.style.left = `${originalX + deltaX}px`;
+    element.style.top = `${originalY + deltaY}px`;
+  }
+
+  function stopElementDrag() {
+    window.removeEventListener('mousemove', elementDrag);
+    window.removeEventListener('mouseup', stopElementDrag);
+  }
 </script>
