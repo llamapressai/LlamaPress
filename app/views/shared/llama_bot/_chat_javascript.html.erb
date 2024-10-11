@@ -102,8 +102,13 @@
         sender === "bot" ? "bg-blue-100 self-start" : "bg-green-100 self-end"
       }`;
       
-      const formattedContent = formatMessage(text);
-      messageDiv.innerHTML = formattedContent;
+      if (sender == "bot") {
+        const formattedContent = formatMessage(text);
+        messageDiv.innerHTML = formattedContent;
+      }
+      else {
+        messageDiv.textContent = text;
+      }
       
       chatbotMessages.appendChild(messageDiv);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
@@ -130,6 +135,8 @@
       const userMessage = userInput.value;
       addMessage(userMessage, "user");
       userInput.value = "";
+      autoResizeUserInputArea();
+      //debugger;
       isLoading = true;
       showLoadingIndicator();
       let selectedElement = document.getElementById("selectedElementContent");
@@ -165,6 +172,7 @@
       } finally {
         isLoading = false;
         hideLoadingIndicator();
+        //autoResizeUserInputArea();
       }
     }
 
@@ -313,6 +321,10 @@
         textarea.style.height = 'auto';
         const newHeight = Math.min(textarea.scrollHeight, textarea.rows * 24 * maxRows);
         textarea.style.height = newHeight + 'px';
+        //minimum make it 2 rows
+        if (newHeight < 24) {
+          textarea.style.height = '24px';
+        }
     }
 
     textarea.addEventListener('input', autoResizeUserInputArea);
