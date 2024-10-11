@@ -316,6 +316,11 @@
     }
 
     textarea.addEventListener('input', autoResizeUserInputArea);
+    let lastElementClicked = null;
+    document.addEventListener('mousedown', function(e) {
+      lastElementClicked = e.target;
+      console.log("lastElementClicked in Javascript.js", lastElementClicked);
+    });
 
     document.addEventListener('keydown', function(e) {
     // Check if Cmd+shift+L (Mac) or Ctrl+shift+L (Windows/Linux) is pressed to put content into chatbot container
@@ -332,6 +337,8 @@
         $("#userInput").val(selectedText);
         $("#userInput").focus();
         autoResizeUserInputArea();
+        inSelectionMode = true;
+        handleElementSelection({target: lastElementClicked, preventDefault: function() {}, stopPropagation: function() {}});
       }
       else if (e.key == "Escape") {
         e.preventDefault();
@@ -349,14 +356,6 @@
       mobileMenu.classList.toggle("hidden");
     });
   });
-
-
-
-
-
-
-
-
 
   let inSelectionMode = false;
   let selectedElementHTML = null;
@@ -689,7 +688,6 @@
               data: JSON.stringify(fileHash),
               success: function(data, textStatus, jqXHR) {
                 console.log(data);
-                // debugger;  // Uncomment if you need to pause execution here
 
                 //PREVIEW IMAGE SO USER CAN SEE WHAT THEY ARE UPLOADING
                 if (file.type.startsWith('image/')) {
