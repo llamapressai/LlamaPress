@@ -385,16 +385,12 @@
       chatbotContainer.style.maxHeight = "none";
     } else if (screenWidth < 1024) {
       // Tablets
-      chatbotContainer.style.width = "80%";
-      chatbotContainer.style.height = "80%";
       chatbotContainer.style.maxWidth = "600px";
       chatbotContainer.style.maxHeight = "800px";
     } else {
       // Desktops
       chatbotContainer.style.width = "800px";
       chatbotContainer.style.height = "800px";
-      chatbotContainer.style.maxWidth = "80%";
-      chatbotContainer.style.maxHeight = "80%";
     }
   }
 
@@ -406,13 +402,13 @@
       // Mobile devices
       chatbotContainer.style.width = "100%";
       chatbotContainer.style.height = "50%";
-      chatbotContainer.style.maxWidth = "none";
-      chatbotContainer.style.maxHeight = "none";
+    //   chatbotContainer.style.maxWidth = "none";
+    //   chatbotContainer.style.maxHeight = "none";
     } else {
       chatbotContainer.style.width = "480px";
       chatbotContainer.style.height = "576px";
-      chatbotContainer.style.maxWidth = "80%";
-      chatbotContainer.style.maxHeight = "80%";
+    //   chatbotContainer.style.maxWidth = "80%";
+    //   chatbotContainer.style.maxHeight = "80%";
     }
   }
 
@@ -832,6 +828,101 @@ scrollContainer.addEventListener('scroll', handleHorizontalScroll);
   fetchImagesForSite(page);
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const element = document.getElementById('chatbotContainer');
+    const resizers = document.querySelectorAll('#chatbotContainer .resizer');
+    let originalWidth, originalHeight, originalX, originalY;
+    let originalMouseX, originalMouseY;
 
+    // Function to save chatbot size to localStorage (only width and height)
+    function saveChatbotState() {
+        const chatbotState = {
+            width: element.style.width,
+            height: element.style.height,
+        };
+        console.log('Saving chatbot state:', chatbotState);
+        localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
+    }
 
+    // Function to load chatbot state from localStorage
+    function loadChatbotState() {
+        const savedState = localStorage.getItem('chatbotState');
+        if (savedState) {
+            try {
+                const { width, height } = JSON.parse(savedState);
+                console.log('Loading chatbot state:', { width, height });
+                // Apply the saved state
+                element.style.width = width;
+                element.style.height = height;
+            } catch (error) {
+                console.error('Error parsing chatbot state:', error);
+                localStorage.removeItem('chatbotState');
+            }
+        }
+    }
+
+    // Initial load of chatbot state
+    loadChatbotState();
+
+    // Resizing functionality
+    resizers.forEach(function (resizer) {
+        resizer.addEventListener('mousedown', onMouseDown);
+
+        function onMouseDown(e) {
+            e.preventDefault();
+
+            originalWidth = parseFloat(getComputedStyle(element).width);
+            originalHeight = parseFloat(getComputedStyle(element).height);
+            originalMouseX = e.pageX;
+            originalMouseY = e.pageY;
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        }
+
+        function onMouseMove(e) {
+    let deltaX = e.pageX - originalMouseX;
+    let deltaY = e.pageY - originalMouseY;
+
+    if (resizer.classList.contains('bottom-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('bottom-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('top-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('top-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('top')) {
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('bottom')) {
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+    } else if (resizer.classList.contains('right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+    }
+
+    // Set minimum width and height
+    const minWidth = 300;
+    const minHeight = 200;
+
+    if (parseFloat(element.style.width) < minWidth) {
+        element.style.width = `${minWidth}px`;
+    }
+    if (parseFloat(element.style.height) < minHeight) {
+        element.style.height = `${minHeight}px`;
+    }
+}
+
+        function onMouseUp() {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            saveChatbotState();
+        }
+    });
+});
 </script>
