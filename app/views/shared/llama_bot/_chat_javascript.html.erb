@@ -869,48 +869,6 @@ scrollContainer.addEventListener('scroll', handleHorizontalScroll);
 const chatbot = document.getElementById('chatbotContainer');
 
 
-  
-
-
-
-//   const toggleModeButton = document.getElementById('toggleModeButton');
-//   let isDragging = false;
-//   let isDragMode = true; // Start in drag mode
-//   let offsetX, offsetY;
-
-//   toggleModeButton.addEventListener('click', function() {
-//     isDragMode = !isDragMode;
-//     if (isDragMode) {
-//       chatbot.style.cursor = 'move';
-//       chatbot.style.resize = 'none';
-//     } else {
-//       chatbot.style.cursor = 'default';
-//       chatbot.style.resize = 'both';
-//     }
-//   });
-
-//   chatbot.addEventListener('mousedown', function(e) {
-//     if (isDragMode && e.target === chatbot) {
-//       isDragging = true;
-//       offsetX = e.clientX - chatbot.offsetLeft;
-//       offsetY = e.clientY - chatbot.offsetTop;
-//       chatbot.style.transition = 'none'; // Disable transition during drag
-//     }
-//   });
-
-//   document.addEventListener('mousemove', function(e) {
-//     if (isDragging) {
-//       chatbot.style.left = `${e.clientX - offsetX}px`;
-//       chatbot.style.top = `${e.clientY - offsetY}px`;
-//     }
-//   });
-
-//   document.addEventListener('mouseup', function() {
-//     isDragging = false;
-//     chatbot.style.transition = 'all 0.3s ease-in-out'; // Re-enable transition
-//   });
-
-
 const element = document.getElementById('chatbotContainer');
   const resizers = document.querySelectorAll('#chatbotContainer .resizer');
   let originalWidth, originalHeight, originalX, originalY;
