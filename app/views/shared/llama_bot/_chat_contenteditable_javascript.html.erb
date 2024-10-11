@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('mousedown', (e) => {
         lastElementClicked = e.target;
         console.log("lastElementClicked", lastElementClicked);
-        if (e.target.tagName === 'IMG') {
+        if (e.target.tagName === 'IMG' && !e.target.parentElement.id === 'image-container') {
             isResizing = true;
             currentImage = e.target;
             startX = e.clientX;
