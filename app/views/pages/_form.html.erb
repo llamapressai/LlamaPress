@@ -50,6 +50,8 @@
 <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/xml/xml.min.js" %>
 <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css" %>
 <%= stylesheet_link_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/theme/monokai.min.css" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/standalone.min.js" %>
+<%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-html.min.js" %>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -246,5 +248,28 @@
         previewContainer.classList.add('hidden');
       }
     });
+
+    // Add a new Prettify button
+    var prettifyButton = document.createElement('button');
+    prettifyButton.textContent = 'Prettify';
+    prettifyButton.className = 'rounded-lg py-3 px-5 bg-purple-600 text-white inline-block font-medium cursor-pointer ml-2';
+    prettifyButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      var currentContent = editor.getValue();
+      var prettifiedContent = prettier.format(currentContent, {
+        parser: "html",
+        plugins: prettierPlugins,
+        printWidth: 120,
+        tabWidth: 2,
+        useTabs: false,
+        singleQuote: true,
+        bracketSameLine: true,
+      });
+      editor.setValue(prettifiedContent);
+    });
+
+    // Insert the Prettify button after the Preview button
+    var previewButton = document.getElementById('preview-content');
+    previewButton.parentNode.insertBefore(prettifyButton, previewButton.nextSibling);
   });
 </script>
