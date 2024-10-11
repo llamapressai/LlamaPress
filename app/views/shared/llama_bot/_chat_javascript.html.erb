@@ -418,16 +418,16 @@
       chatbotContainer.style.maxHeight = "none";
     } else if (screenWidth < 1024) {
       // Tablets
-      chatbotContainer.style.width = "80%";
-      chatbotContainer.style.height = "80%";
+    //   chatbotContainer.style.width = "80%";
+    //   chatbotContainer.style.height = "80%";
       chatbotContainer.style.maxWidth = "600px";
       chatbotContainer.style.maxHeight = "800px";
     } else {
       // Desktops
       chatbotContainer.style.width = "800px";
       chatbotContainer.style.height = "800px";
-      chatbotContainer.style.maxWidth = "80%";
-      chatbotContainer.style.maxHeight = "80%";
+    //   chatbotContainer.style.maxWidth = "80%";
+    //   chatbotContainer.style.maxHeight = "80%";
     }
   }
 
@@ -439,13 +439,13 @@
       // Mobile devices
       chatbotContainer.style.width = "100%";
       chatbotContainer.style.height = "50%";
-      chatbotContainer.style.maxWidth = "none";
-      chatbotContainer.style.maxHeight = "none";
+    //   chatbotContainer.style.maxWidth = "none";
+    //   chatbotContainer.style.maxHeight = "none";
     } else {
       chatbotContainer.style.width = "480px";
       chatbotContainer.style.height = "576px";
-      chatbotContainer.style.maxWidth = "80%";
-      chatbotContainer.style.maxHeight = "80%";
+    //   chatbotContainer.style.maxWidth = "80%";
+    //   chatbotContainer.style.maxHeight = "80%";
     }
   }
 
@@ -871,35 +871,31 @@ document.addEventListener('DOMContentLoaded', function () {
     let originalWidth, originalHeight, originalX, originalY;
     let originalMouseX, originalMouseY;
 
-    // Function to save chatbot state to localStorage
+    // Function to save chatbot size to localStorage (only width and height)
     function saveChatbotState() {
-      const chatbotState = {
-        width: element.style.width,
-        height: element.style.height,
-        left: element.style.left,
-        top: element.style.top,
-      };
-      console.log('Saving chatbot state:', chatbotState);
-      localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
+        const chatbotState = {
+            width: element.style.width,
+            height: element.style.height,
+        };
+        console.log('Saving chatbot state:', chatbotState);
+        localStorage.setItem('chatbotState', JSON.stringify(chatbotState));
     }
 
     // Function to load chatbot state from localStorage
     function loadChatbotState() {
-      const savedState = localStorage.getItem('chatbotState');
-      if (savedState) {
-        try {
-          const { width, height, left, top } = JSON.parse(savedState);
-          console.log('Loading chatbot state:', { width, height, left, top });
-          // Apply the saved state
-          element.style.width = width;
-          element.style.height = height;
-          element.style.left = left;
-          element.style.top = top;
-        } catch (error) {
-          console.error('Error parsing chatbot state:', error);
-          localStorage.removeItem('chatbotState');
+        const savedState = localStorage.getItem('chatbotState');
+        if (savedState) {
+            try {
+                const { width, height } = JSON.parse(savedState);
+                console.log('Loading chatbot state:', { width, height });
+                // Apply the saved state
+                element.style.width = width;
+                element.style.height = height;
+            } catch (error) {
+                console.error('Error parsing chatbot state:', error);
+                localStorage.removeItem('chatbotState');
+            }
         }
-      }
     }
 
     // Initial load of chatbot state
@@ -907,126 +903,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Resizing functionality
     resizers.forEach(function (resizer) {
-      resizer.addEventListener('mousedown', onMouseDown);
+        resizer.addEventListener('mousedown', onMouseDown);
 
-      function onMouseDown(e) {
-        e.preventDefault();
+        function onMouseDown(e) {
+            e.preventDefault();
 
-        originalWidth = parseFloat(getComputedStyle(element).width);
-        originalHeight = parseFloat(getComputedStyle(element).height);
-        originalX = element.getBoundingClientRect().left;
-        originalY = element.getBoundingClientRect().top;
-        originalMouseX = e.pageX;
-        originalMouseY = e.pageY;
+            originalWidth = parseFloat(getComputedStyle(element).width);
+            originalHeight = parseFloat(getComputedStyle(element).height);
+            originalMouseX = e.pageX;
+            originalMouseY = e.pageY;
 
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-      }
-
-      function onMouseMove(e) {
-        let deltaX = e.pageX - originalMouseX;
-        let deltaY = e.pageY - originalMouseY;
-
-        if (resizer.classList.contains('bottom-right')) {
-          element.style.width = `${originalWidth + deltaX}px`;
-          element.style.height = `${originalHeight + deltaY}px`;
-        } else if (resizer.classList.contains('bottom-left')) {
-          element.style.width = `${originalWidth - deltaX}px`;
-          element.style.height = `${originalHeight + deltaY}px`;
-          element.style.left = `${originalX + deltaX}px`;
-        } else if (resizer.classList.contains('top-right')) {
-          element.style.width = `${originalWidth + deltaX}px`;
-          element.style.height = `${originalHeight - deltaY}px`;
-          element.style.top = `${originalY + deltaY}px`;
-        } else if (resizer.classList.contains('top-left')) {
-          element.style.width = `${originalWidth - deltaX}px`;
-          element.style.height = `${originalHeight - deltaY}px`;
-          element.style.top = `${originalY + deltaY}px`;
-          element.style.left = `${originalX + deltaX}px`;
-        } else if (resizer.classList.contains('top')) {
-          element.style.height = `${originalHeight - deltaY}px`;
-          element.style.top = `${originalY + deltaY}px`;
-        } else if (resizer.classList.contains('bottom')) {
-          element.style.height = `${originalHeight + deltaY}px`;
-        } else if (resizer.classList.contains('left')) {
-          element.style.width = `${originalWidth - deltaX}px`;
-          element.style.left = `${originalX + deltaX}px`;
-        } else if (resizer.classList.contains('right')) {
-          element.style.width = `${originalWidth + deltaX}px`;
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
         }
 
-        // Set minimum width and height
-        const minWidth = 300;
-        const minHeight = 200;
+        function onMouseMove(e) {
+    let deltaX = e.pageX - originalMouseX;
+    let deltaY = e.pageY - originalMouseY;
 
-        if (parseFloat(element.style.width) < minWidth) {
-          element.style.width = `${minWidth}px`;
-        }
-        if (parseFloat(element.style.height) < minHeight) {
-          element.style.height = `${minHeight}px`;
-        }
-      }
+    if (resizer.classList.contains('bottom-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('bottom-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('top-right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('top-left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('top')) {
+        element.style.height = `${originalHeight - deltaY}px`;
+    } else if (resizer.classList.contains('bottom')) {
+        element.style.height = `${originalHeight + deltaY}px`;
+    } else if (resizer.classList.contains('left')) {
+        element.style.width = `${originalWidth - deltaX}px`;
+    } else if (resizer.classList.contains('right')) {
+        element.style.width = `${originalWidth + deltaX}px`;
+    }
 
-      function onMouseUp() {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-        saveChatbotState();
-      }
+    // Set minimum width and height
+    const minWidth = 300;
+    const minHeight = 200;
+
+    if (parseFloat(element.style.width) < minWidth) {
+        element.style.width = `${minWidth}px`;
+    }
+    if (parseFloat(element.style.height) < minHeight) {
+        element.style.height = `${minHeight}px`;
+    }
+}
+
+        function onMouseUp() {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+            saveChatbotState();
+        }
     });
-
-    // Draggable functionality
-    element.addEventListener('mousedown', dragMouseDown);
-
-    function dragMouseDown(e) {
-      // Prevent drag when clicking on resizers or interactive elements
-      if (
-        e.target.classList.contains('resizer') ||
-        e.target.tagName === 'BUTTON' ||
-        e.target.tagName === 'TEXTAREA' ||
-        e.target.tagName === 'INPUT'
-      ) {
-        return;
-      }
-      e.preventDefault();
-
-      originalMouseX = e.clientX;
-      originalMouseY = e.clientY;
-      originalX = element.offsetLeft;
-      originalY = element.offsetTop;
-
-      window.addEventListener('mousemove', elementDrag);
-      window.addEventListener('mouseup', stopElementDrag);
-    }
-
-    function elementDrag(e) {
-      e.preventDefault();
-      let deltaX = e.clientX - originalMouseX;
-      let deltaY = e.clientY - originalMouseY;
-      let newLeft = originalX + deltaX;
-      let newTop = originalY + deltaY;
-
-      // Prevent moving off-screen
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const chatbotWidth = element.offsetWidth;
-      const chatbotHeight = element.offsetHeight;
-
-      // Ensure chatbot stays within the viewport horizontally
-      if (newLeft < 0) newLeft = 0;
-      if (newLeft + chatbotWidth > viewportWidth) newLeft = viewportWidth - chatbotWidth;
-
-      // Ensure chatbot stays within the viewport vertically
-      if (newTop < 0) newTop = 0;
-      if (newTop + chatbotHeight > viewportHeight) newTop = viewportHeight - chatbotHeight;
-
-      element.style.left = `${newLeft}px`;
-      element.style.top = `${newTop}px`;
-    }
-
-    function stopElementDrag() {
-      window.removeEventListener('mousemove', elementDrag);
-      window.removeEventListener('mouseup', stopElementDrag);
-      saveChatbotState();
-    }
-  });
+});
 </script>

@@ -41,9 +41,9 @@
   <!-- Chatbot window -->
   <div
     id="chatbotContainer"
-    class="fixed bottom-16 md:bottom-24 right-2 md:right-4 w-[90vw] md:w-[480px] h-[80vh] md:h-[576px] border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out hidden"
+    class="hidden fixed border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out"
     data-llama="app/views/shared/_llama_bot_chat.html.erb"
-    style="cursor: move; overflow: auto; min-width: 300px; min-height: 200px;"
+    style="overflow: auto; min-width: 300px; min-height: 200px;  bottom: 85px; right: 15px; max-width: 97%; max-height: 85%;"
   >
     <div
       class="bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 md:p-4 flex justify-between items-center rounded-t-2xl shadow-md"
@@ -396,14 +396,15 @@ Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and
         </button>
       </div>
     </div>
-    <div class="resizer top-left w-2 h-2 -top-1 -left-1 cursor-nwse-resize absolute bg-transparent z-10"></div>
-    <div class="resizer top-right w-2 h-2 -top-1 -right-1 cursor-nesw-resize absolute bg-transparent z-10"></div>
-    <div class="resizer bottom-left w-2 h-2 -bottom-1 -left-1 cursor-nesw-resize absolute bg-transparent z-10"></div>
-    <div class="resizer bottom-right w-2 h-2 -bottom-1 -right-1 cursor-nwse-resize absolute bg-transparent z-10"></div>
-    <div class="resizer top h-1 w-full -top-1 left-0 cursor-ns-resize absolute bg-transparent z-10"></div>
-    <div class="resizer bottom h-1 w-full -bottom-1 left-0 cursor-ns-resize absolute bg-transparent z-10"></div>
-    <div class="resizer left w-1 h-full top-0 -left-1 cursor-ew-resize absolute bg-transparent z-10"></div>
-    <div class="resizer right w-1 h-full top-0 -right-1 cursor-ew-resize absolute bg-transparent z-10"></div>
+      <!-- Resizers -->
+  <div class="resizer top-left w-2 h-2 -top-1 -left-1 cursor-nwse-resize absolute z-10"></div>
+  <div class="resizer top-right w-2 h-2 -top-1 -right-1 cursor-nesw-resize absolute z-10"></div>
+  <div class="resizer bottom-left w-2 h-2 -bottom-1 -left-1 cursor-nesw-resize absolute z-10"></div>
+  <div class="resizer bottom-right w-2 h-2 -bottom-1 -right-1 cursor-nwse-resize absolute z-10"></div>
+  <div class="resizer top h-1 w-full -top-1 left-0 cursor-ns-resize absolute z-10"></div>
+  <div class="resizer bottom h-1 w-full -bottom-1 left-0 cursor-ns-resize absolute z-10"></div>
+  <div class="resizer left w-1 h-full top-0 -left-1 cursor-ew-resize absolute z-10"></div>
+  <div class="resizer right w-1 h-full top-0 -right-1 cursor-ew-resize absolute z-10"></div>
   </div>
 
 </div>
