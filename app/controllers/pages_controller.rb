@@ -45,10 +45,10 @@ class PagesController < ApplicationController
       redirect_to llama_bot_home_path and return
     end
     
-    content = @page.content
+    content = @page.render_content
     content += inject_chat_partial(content) if current_user.present?
     content += inject_analytics_partial() if Rails.env.production?
-    render inline: content.html_safe, layout: 'page' 
+    render inline: content.html_safe, layout: 'page'
   end
 
   # GET /pages or /pages.json
