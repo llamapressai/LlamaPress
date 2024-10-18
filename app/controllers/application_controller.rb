@@ -36,6 +36,11 @@ class ApplicationController < ActionController::Base
       @site = current_user&.default_site
     end
 
+    if @site.nil?
+      #Number Five: Inspect the current_organization for their default site.
+      @site = current_user.organization.sites.first
+    end
+
     # If no user, no site, no page, no domain, then current_site is nil.
     Rails.logger.info("Domain request for: " + domain)
     return @site
