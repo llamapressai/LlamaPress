@@ -23,4 +23,8 @@ class User < ApplicationRecord
   def create_default_organization
     self.build_organization if organization.nil?
   end
+
+  def set_public_id
+    self.public_id ||= self.id
+  end
 end
