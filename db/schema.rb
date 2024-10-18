@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_16_205512) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -87,6 +87,19 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
     t.index ["site_id"], name: "index_pages_on_site_id"
   end
 
+  create_table "posts", force: :cascade do |t|
+    t.string "title"
+    t.string "slug"
+    t.text "content"
+    t.bigint "page_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_id"], name: "index_posts_on_page_id"
+    t.index ["slug"], name: "index_posts_on_slug", unique: true
+    t.index ["user_id"], name: "index_posts_on_user_id"
+  end
+
   create_table "sites", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.string "name"
@@ -139,6 +152,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"
+  add_foreign_key "posts", "pages"
+  add_foreign_key "posts", "users"
   add_foreign_key "sites", "organizations"
   add_foreign_key "snippets", "sites"
   add_foreign_key "submissions", "sites"

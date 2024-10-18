@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :posts
   resources :snippets
   resources :submissions
   resources :pages do

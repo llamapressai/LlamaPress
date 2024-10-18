@@ -1,0 +1,88 @@
+<%# This is llama press's custom context menu that is displayed when the user right clicks on a page %>
+
+<!-- Add this new div for the custom context menu -->
+<div id="llama-context-menu" data-llama-editable="false" class="hidden fixed bg-white border rounded shadow-lg">
+    <textarea id="llama-prompt-textarea" rows="3" class="w-full p-2 border rounded mb-2" placeholder="Enter your prompt..."></textarea>
+    <button id="llama-context-menu-submit-prompt" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Submit</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="saveAsSnippet()">Save as Snippet</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="insertContent()">Insert Content</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="newPage()">New Page</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="improveWriting()">Improve Writing</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="generateIdeas()">Generate Ideas</button>
+    <button class="block w-full px-4 py-2 text-left hover:bg-gray-100" onclick="translateContent()">Translate Content</button>
+</div>
+
+<script>
+    const llamaContextMenu = document.getElementById('llama-context-menu');
+    const promptTextarea = document.getElementById('llama-prompt-textarea');
+    const submitPrompt = document.getElementById('llama-context-menu-submit-prompt');
+
+    document.addEventListener('contextmenu', showCustomContextMenu);
+    submitPrompt.addEventListener('click', handlePromptSubmit);
+
+    function showCustomContextMenu(e) {
+        e.preventDefault();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        llamaContextMenu.style.display = 'block';
+        llamaContextMenu.style.left = `${x}px`;
+        llamaContextMenu.style.top = `${y}px`;
+        
+        // Restore the last selection
+        if (lastSelection) {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(lastSelection);
+            
+            // Load the selected content into the prompt textarea
+            promptTextarea.value = lastSelection.toString();
+        }
+        
+        promptTextarea.focus();
+    }
+
+    function handlePromptSubmit() {
+        alert('Coming soon!');
+        
+        const promptText = promptTextarea.value;
+
+        // Here you can handle the prompt text
+        console.log("Prompt submitted:", promptText);
+        
+        // Clear the textarea and hide the custom context menu
+        promptTextarea.value = '';
+        llamaContextMenu.style.display = 'none';
+    }
+
+    function saveAsSnippet() {
+        alert('Coming soon!');
+    }
+
+    function insertContent() {
+        alert('Coming soon!');
+    }
+
+    function newPage() {
+        alert('Coming soon!');
+    }
+
+    function improveWriting() {
+        alert('Coming soon!');
+    }
+
+    function generateIdeas() {
+        alert('Coming soon!');
+    }
+
+    function translateContent() {
+        alert('Coming soon!');
+    }
+
+    // Close the custom context menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!llamaContextMenu.contains(e.target)) {
+            llamaContextMenu.style.display = 'none';
+        }
+    });
+</script>

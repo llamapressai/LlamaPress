@@ -436,8 +436,11 @@ Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and
   </div>
 
 </div>
-<%= render partial: 'shared/llama_bot/css' %> <%= render partial:
-'shared/llama_bot/history_modal' %> <%= render partial:
-'shared/llama_bot/chat_javascript' %> <% if current_user.present? &&
-controller_name == 'pages' && action_name == 'show' %> <%= render partial:
-'shared/llama_bot/chat_contenteditable_javascript' %> <% end %>
+<%= render partial: 'shared/llama_bot/css' %> 
+<%= render partial: 'shared/llama_bot/history_modal' %> 
+<%= render partial: 'shared/llama_bot/chat_javascript' %> 
+<% if current_user.present? && controller_name == 'pages' && action_name == 'show' %> 
+  <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %> 
+  <%= render partial: 'shared/llama_bot/toolbar' %> 
+  <%= render partial: 'shared/llama_bot/context_menu' %> 
+<% end %>
