@@ -15,6 +15,7 @@ class User < ApplicationRecord
 
   def notify_registration
     Twilio.send_text("9152845787", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+    Twilio.send_text("3853001203", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
   end
 
   private
