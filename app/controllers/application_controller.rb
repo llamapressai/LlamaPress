@@ -38,7 +38,7 @@ class ApplicationController < ActionController::Base
 
     if @site.nil?
       #Number Five: Inspect the current_organization for their default site.
-      @site = current_user.organization.sites.first
+      @site = current_user&.organization&.sites&.first
     end
 
     # If no user, no site, no page, no domain, then current_site is nil.
