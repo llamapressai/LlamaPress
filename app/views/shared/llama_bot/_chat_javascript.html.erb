@@ -4,6 +4,7 @@
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.12/marked.min.js"></script>
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script data-llama="exclude_when_saving_contenteditable_edits" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script data-llama="exclude_when_saving_contenteditable_edits" src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs" type="module"></script> 
 <link data-llama="exclude_when_saving_contenteditable_edits" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 <script data-llama="exclude_when_saving_contenteditable_edits">
   document.addEventListener("DOMContentLoaded", () => {
@@ -899,7 +900,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 function handleHorizontalScroll() {
-
   console.log("Trigger horizontal scroll")
   const scrollContainer = document.getElementById('imagesForUserToSelect');
   const scrollPosition = scrollContainer.scrollLeft + scrollContainer.clientWidth;

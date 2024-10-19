@@ -1,4 +1,3 @@
-
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <style>
@@ -235,6 +234,27 @@
       <div id="image-container" class="flex justify-around">
       </div>
     </div>
+
+    <div id="promptsContainer" class="py-4 bg-gray-50">
+      <div class="text-sm font-medium text-gray-600 mb-3 ml-4">Prompt Ideas:</div>
+      <div class="overflow-x-auto">
+        <div id="promptsList" class="inline-flex space-x-3 px-4"> 
+          <div class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.textContent)">
+            💡 Improve design 10X
+          </div>
+          <div class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.textContent)">
+          <!--<picture>
+            <source srcset="https://fonts.gstatic.com/s/e/notoemoji/latest/1f383/512.webp" type="image/webp">
+            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f383/512.gif" alt="🎃" width="32" height="32">
+          </picture>-->
+            🎃 Add Halloween animation
+          </div>
+          <div class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.textContent)">
+            Optimize for mobile
+          </div>
+        </div>
+      </div>
+    </div>
     
     <div
       class="flex flex-col"
@@ -417,6 +437,8 @@
         >
           Send
         </button>
+        <!--TODO: add animation when user presses send while it's waiting for a response. -->
+        <!--<dotlottie-player src="https://lottie.host/9f9cd2dd-4a84-4fa0-904a-4f7d72cae241/XM6ZklRzAZ.json" background="transparent" speed="1" style="width: 50px;" loop autoplay></dotlottie-player>-->
       </div>
     </div>
   <!-- Resizers -->
