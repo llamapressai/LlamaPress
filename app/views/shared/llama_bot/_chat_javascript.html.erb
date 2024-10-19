@@ -954,7 +954,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial load of chatbot state
     loadChatbotState();
 
-    // Resizing functionality
+    // Resizing functionality for dragging on the edges of the chatbot to resize the chatbot window size
     resizers.forEach(function (resizer) {
         resizer.addEventListener('mousedown', onMouseDown);
 
@@ -971,42 +971,42 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function onMouseMove(e) {
-    let deltaX = e.pageX - originalMouseX;
-    let deltaY = e.pageY - originalMouseY;
+          let deltaX = e.pageX - originalMouseX;
+          let deltaY = e.pageY - originalMouseY;
 
-    if (resizer.classList.contains('bottom-right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-        element.style.height = `${originalHeight + deltaY}px`;
-    } else if (resizer.classList.contains('bottom-left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-        element.style.height = `${originalHeight + deltaY}px`;
-    } else if (resizer.classList.contains('top-right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-        element.style.height = `${originalHeight - deltaY}px`;
-    } else if (resizer.classList.contains('top-left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-        element.style.height = `${originalHeight - deltaY}px`;
-    } else if (resizer.classList.contains('top')) {
-        element.style.height = `${originalHeight - deltaY}px`;
-    } else if (resizer.classList.contains('bottom')) {
-        element.style.height = `${originalHeight + deltaY}px`;
-    } else if (resizer.classList.contains('left')) {
-        element.style.width = `${originalWidth - deltaX}px`;
-    } else if (resizer.classList.contains('right')) {
-        element.style.width = `${originalWidth + deltaX}px`;
-    }
+          if (resizer.classList.contains('bottom-right')) {
+              element.style.width = `${originalWidth + deltaX}px`;
+              element.style.height = `${originalHeight + deltaY}px`;
+          } else if (resizer.classList.contains('bottom-left')) {
+              element.style.width = `${originalWidth - deltaX}px`;
+              element.style.height = `${originalHeight + deltaY}px`;
+          } else if (resizer.classList.contains('top-right')) {
+              element.style.width = `${originalWidth + deltaX}px`;
+              element.style.height = `${originalHeight - deltaY}px`;
+          } else if (resizer.classList.contains('top-left')) {
+              element.style.width = `${originalWidth - deltaX}px`;
+              element.style.height = `${originalHeight - deltaY}px`;
+          } else if (resizer.classList.contains('top')) {
+              element.style.height = `${originalHeight - deltaY}px`;
+          } else if (resizer.classList.contains('bottom')) {
+              element.style.height = `${originalHeight + deltaY}px`;
+          } else if (resizer.classList.contains('left')) {
+              element.style.width = `${originalWidth - deltaX}px`;
+          } else if (resizer.classList.contains('right')) {
+              element.style.width = `${originalWidth + deltaX}px`;
+          }
 
-    // Set minimum width and height
-    const minWidth = 300;
-    const minHeight = 200;
+          // Set minimum width and height
+          const minWidth = 300;
+          const minHeight = 200;
 
-    if (parseFloat(element.style.width) < minWidth) {
-        element.style.width = `${minWidth}px`;
-    }
-    if (parseFloat(element.style.height) < minHeight) {
-        element.style.height = `${minHeight}px`;
-    }
-}
+          if (parseFloat(element.style.width) < minWidth) {
+              element.style.width = `${minWidth}px`;
+          }
+          if (parseFloat(element.style.height) < minHeight) {
+              element.style.height = `${minHeight}px`;
+          }
+        }
 
         function onMouseUp() {
             window.removeEventListener('mousemove', onMouseMove);
@@ -1016,7 +1016,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Define copyCode in the global scope
+// IMPORTANT! Don't move. We need the copyCode function outside of the DomContentLoad so that it's in the global scope. This is used when the LLM returns a code snippet for the user to copy -- mainly on pages/1/edit where you can view the code, but eventually we'll allow user to edit code on the show page as well.
+/**
+ * This method copies the code from the element with the given ID and then changes the text of the button to say "Copied!"
+ * @param {string} elementId - The ID of the element containing the code to copy.
+ */
   function copyCode(elementId) {
     const codeElement = document.getElementById(elementId);
     const textArea = document.createElement('textarea');
