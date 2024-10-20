@@ -53,7 +53,18 @@ class PagesController < ApplicationController
 
   # GET /pages or /pages.json
   def index
-    @pages = current_organization.pages
+    if current_site.present?
+      @pages = current_site.pages
+    else
+      @pages = current_organization.pages
+    end
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: @pages
+      end
+    end
   end
 
   # GET /pages/1 or /pages/1.json
