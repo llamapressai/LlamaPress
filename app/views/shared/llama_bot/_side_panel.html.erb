@@ -1,0 +1,91 @@
+<!-- Side panel for the Llama Bot, includes the html and javascript for managing it -->
+
+
+<div id="llama-side-panel" class="fixed top-0 left-0 h-full w-72 bg-gray-100 transform -translate-x-full transition-transform duration-300 ease-in-out z-50" data-llama="exclude_when_saving_contenteditable_edits">
+  <button id="llama-toggle-panel" class="absolute right-0 top-4 -mr-10 bg-gray-100 p-2 rounded-r cursor-pointer">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+  </button>
+  
+  <div class="h-full overflow-y-auto p-4">
+    <h2 class="text-xl font-bold mb-4">Pages for your site </h2> 
+    <!-- TODO: Show the site's actual name rather than generic name. <=# @page&.site&.name || "your site" %> -->
+    <div id="iframe-list" class="space-y-6">
+      <!-- Iframe items will be dynamically added here -->
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const panel = document.getElementById('llama-side-panel');
+    const toggleBtn = document.getElementById('llama-toggle-panel');
+    
+    toggleBtn.addEventListener('click', function() {
+      panel.classList.toggle('-translate-x-full');
+    });
+
+    setPagesOnSidePanel();
+
+    async function setPagesOnSidePanel() {
+      const iframeList = document.getElementById('iframe-list');
+      try {
+        const iframes = await getIFramesForThisSite();
+
+        // Dynamically create iframe items
+        iframes.forEach(iframe => {
+          const iframeItem = document.createElement('div');
+          iframeItem.className = 'iframe-item mb-6';
+          iframeItem.innerHTML = `
+            <a href="${iframe.url}" class="block">
+              <h3 class="text-lg underline text-blue-500 font-semibold mb-2">${iframe.title}</h3>
+              <div class="iframe-wrapper relative">
+                <iframe src="${iframe.previewUrl}" class="w-full h-64 border-0" frameborder="0" scrolling="no"></iframe>
+                <div class="absolute inset-0"></div>
+              </div>
+            </a>
+          `;
+          iframeList.appendChild(iframeItem);
+        });
+
+        adjustIframeHeights();
+      } catch (error) {
+        console.error('Error setting pages on side panel:', error);
+      }
+    }
+    
+    
+    /**
+     * Fetch this pages siblings nested under this page's site, and put it into an iFrame format to display to the user.
+     */
+    async function getIFramesForThisSite() {
+        let pages = await getPagesForThisSite();
+
+        return pages.map(page => {
+            return page.id == <%= @page&.id %> ? null : { title: page.slug, url: page.slug, previewUrl: `/pages/${page.id}/preview`};
+        });
+    }
+
+    /**
+     * Fetch the other sibling pages nested under this page's site.
+     */
+    async function getPagesForThisSite() {
+        return fetch(`/pages.json?site_id=<%=@page&.site_id%>`)
+            .then(response => response.json())
+            .then(data => {
+                return data;
+        });
+    }
+
+    // Adjust iframe heights to fit content without scrolling
+    function adjustIframeHeights() {
+      const iframes = document.querySelectorAll('#iframe-list iframe');
+      iframes.forEach(iframe => {
+        iframe.onload = function() {
+          iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+        }
+      });
+    }
+  });
+</script>

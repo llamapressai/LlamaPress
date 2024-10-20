@@ -1,3 +1,4 @@
+  <script src="https://cdn.tailwindcss.com"></script>
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
   <style>
@@ -455,6 +456,7 @@
 </div>
 <%= render partial: 'shared/llama_bot/css' %> 
 <%= render partial: 'shared/llama_bot/history_modal' %> 
+<%= render partial: 'shared/llama_bot/side_panel' %>
 <%= render partial: 'shared/llama_bot/chat_javascript' %> 
 <% if current_user.present? && controller_name == 'pages' && action_name == 'show' %> 
   <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %> 
