@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_18_223034) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_20_034548) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,7 +80,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_18_223034) do
     t.bigint "site_id", null: false
     t.text "content"
     t.string "slug"
-    t.string "prompt"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "organization_id"
@@ -91,12 +90,11 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_18_223034) do
     t.string "title"
     t.string "slug"
     t.text "content"
-    t.bigint "page_id", null: false
+    t.bigint "page_id"
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["page_id"], name: "index_posts_on_page_id"
-    t.index ["slug"], name: "index_posts_on_slug", unique: true
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -146,6 +144,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_18_223034) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.datetime "mixpanel_profile_last_set_at"
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"

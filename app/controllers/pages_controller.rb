@@ -181,7 +181,7 @@ class PagesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def page_params
-      params.require(:page).permit(:site_id, :content, :slug, :prompt, :organization_id)
+      params.require(:page).permit(:site_id, :content, :slug, :organization_id)
     end
 
     def inject_chat_partial(content)

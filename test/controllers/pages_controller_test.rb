@@ -20,7 +20,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create page" do
     assert_difference("Page.count") do
-      post pages_url, params: { page: { content: @page.content, prompt: @page.prompt, slug: @page.slug, site_id: @page.site_id } }
+      post pages_url, params: { page: { content: @page.content, slug: @page.slug, site_id: @page.site_id } }
     end
 
     assert_redirected_to page_url(Page.last)
@@ -37,8 +37,8 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update page" do
-    patch page_url(@page), params: { page: { content: @page.content, prompt: @page.prompt, slug: "@page.slug#{Time.now.to_i}", site_id: @page.site_id, organization_id: @page.organization_id } }
-    #TODO: Fix and discuss - organization_id issues with page.
+    patch page_url(@page), params: { page: { content: @page.content, slug: "#{@page.slug}-#{Time.now.to_i}", site_id: @page.site_id, organization_id: @page.organization_id } }
+    @page.reload #Make sure we get the most up to date slug by reloading this page. Friendly id doesn't update immediately
     assert_redirected_to page_url(@page)
   end
 
@@ -55,7 +55,6 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Page.count") do
       post pages_url, params: { page: { 
         content: @page.content, 
-        prompt: @page.prompt, 
         slug: "unique-slug-#{Time.now.to_i}", 
         site_id: @page.site_id 
       } }
@@ -105,6 +104,6 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
 
     # Test redirecting when no matching page is found
     get '/non-existent-page'
-    assert_response :not_found
+    assert_redirected_to llama_bot_home_path
   end
 end
