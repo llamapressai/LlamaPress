@@ -236,7 +236,7 @@
       </div>
     </div>
 
-    <div id="promptsContainer" class="py-4 bg-gray-50">
+    <div id="promptsContainer" class="py-4 bg-gray-50 hidden">
       <div class="text-sm font-medium text-gray-600 mb-3 ml-4">Prompt Ideas:</div>
       <div class="overflow-x-auto">
         <div id="promptsList" class="inline-flex space-x-3 px-4"> 
@@ -370,55 +370,76 @@
             data-llama="app/views/shared/_chat.html.erb"
           ></div>
         </div>
+        <button
+          id="togglePrompts"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          title="Toggle prompt suggestions"
+          onclick="togglePromptsContainer()"
+          data-llama="app/views/shared/_chat.html.erb"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+            />
+          </svg>
+        </button>
       </div>
 
       <!-- New div for code snippets -->
-<!-- New div for code snippets -->
-            <div id="codeSnippetsContainer" class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
-                <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
-                <% if current_user&.organization&.snippets&.any? %>
-                    <ul class="space-y-2"> 
-                        <% current_user.organization.snippets.each do |snippet| %>
-                            <li class="bg-white p-2 rounded shadow">
-                                <h4 class="font-medium"><%= snippet.name %></h4>
-                                <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
-                                
-                                <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
-                                
-                                <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
-                                <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
-                            </li>
-                        <% end %>
-                    </ul>
-                    
-                    <!-- TODO: Move JavaScript to separate file -->
-                    <script>
-                    function copyToClipboard(text) {
-                      navigator.clipboard.writeText(text).then(function() {
-                        console.log('Copying to clipboard was successful!');
-                      }, function(err) {
-                        console.error('Could not copy text: ', err);
-                      });
-                    }
+      <div id="codeSnippetsContainer" class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
+          <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
+          <% if current_user&.organization&.snippets&.any? %>
+              <ul class="space-y-2"> 
+                  <% current_user.organization.snippets.each do |snippet| %>
+                      <li class="bg-white p-2 rounded shadow">
+                          <h4 class="font-medium"><%= snippet.name %></h4>
+                          <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
+                          
+                          <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
+                          
+                          <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
+                          <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
+                      </li>
+                  <% end %>
+              </ul>
+              
+              <!-- TODO: Move JavaScript to separate file -->
+              <script>
+              function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(function() {
+                  console.log('Copying to clipboard was successful!');
+                }, function(err) {
+                  console.error('Could not copy text: ', err);
+                });
+              }
 
-                    function toggleSnippetContent(snippetId) {
-                        var contentId = 'snippet-content-' + snippetId;
-                        var content = document.getElementById(contentId);
-                        var button = content.previousElementSibling;
-                        
-                        if (content.classList.contains('hidden')) {
-                            content.classList.remove('hidden');
-                            button.textContent = 'Hide';
-                        } else {
-                            content.classList.add('hidden');
-                            button.textContent = 'View';
-                        }
-                    }
-                    </script>
-                <% else %>
-                    <p class="text-gray-600">No code snippets available.</p>
-                <% end %>
-            </div>
+              function toggleSnippetContent(snippetId) {
+                  var contentId = 'snippet-content-' + snippetId;
+                  var content = document.getElementById(contentId);
+                  var button = content.previousElementSibling;
+                  
+                  if (content.classList.contains('hidden')) {
+                      content.classList.remove('hidden');
+                      button.textContent = 'Hide';
+                  } else {
+                      content.classList.add('hidden');
+                      button.textContent = 'View';
+                  }
+              }
+              </script>
+          <% else %>
+              <p class="text-gray-600">No code snippets available.</p>
+          <% end %>
+      </div>
 
       <div
         class="p-2 md:p-4 border-t border-gray-300 flex flex-col"
@@ -463,3 +484,4 @@
   <%= render partial: 'shared/llama_bot/toolbar' %> 
   <%= render partial: 'shared/llama_bot/context_menu' %> 
 <% end %>
+
