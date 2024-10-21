@@ -63,7 +63,7 @@
         let pages = await getPagesForThisSite();
 
         return pages.map(page => {
-            return page.id == <%= @page&.id %> ? null : { title: page.slug, url: page.slug, previewUrl: `/pages/${page.id}/preview`};
+            return page.id == <%= @page&.id %> ? null : { id: page.id, title: page.slug, url: `/pages/${page.id}`, previewUrl: `/pages/${page.id}/preview`};
         });
     }
 
