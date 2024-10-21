@@ -53,11 +53,15 @@
         iframes.forEach(iframe => {
           const iframeItem = document.createElement('div');
           iframeItem.className = 'iframe-item mb-6';
+
+          //TODO: I pulled out this iFrame because it was too large
+          //<iframe src="${iframe.previewUrl}" class="w-full h-64 border-0" frameborder="0" scrolling="no"></iframe>
           iframeItem.innerHTML = `
             <a href="${iframe.url}" class="block">
               <h3 class="text-lg underline text-blue-500 font-semibold mb-2">${iframe.title}</h3>
               <div class="iframe-wrapper relative">
-                <iframe src="${iframe.previewUrl}" class="w-full h-64 border-0" frameborder="0" scrolling="no"></iframe>
+              <!-- insert iframe here -->
+
                 <div class="absolute inset-0"></div>
               </div>
             </a>
