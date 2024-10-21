@@ -67,6 +67,9 @@
       chatbotContainer.classList.toggle("hidden", !isOpen);
     }
 
+    // Expose toggleChat to the global scope
+    window.toggleChat = toggleChat;
+
     function formatMessage(text, sender) {
       // Custom renderer to handle code blocks
       const renderer = new marked.Renderer();
@@ -137,21 +140,27 @@
       }
     }
 
+    /**
+     * Sends a message to the LLM and handles the response.
+     * Handles the UI logic for sending the message, displaying the message, and hiding the loading indicator, hiding chat tool windows, etc.
+     */
     async function sendMessage() {
       if (userInput.value.trim() === "" || isLoading) return;
-
       const userMessage = userInput.value;
       addMessage(userMessage, "user");
       userInput.value = "";
       autoResizeUserInputArea();
-      //debugger;
       isLoading = true;
       showLoadingIndicator();
+
+      hideAllChatToolWindows();
+
+      //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
       let selectedElement = document.getElementById("selectedElementContent");
       let selectedElementInnerHtml = selectedElement.innerHTML.replace(
         "selected-element",
         ""
-      ); //remove this class so the LLM doesn't save it after it's used.
+      ); 
 
       try {
         const response = await fetch("/llama_bot/message.json", {
@@ -184,6 +193,25 @@
       }
     }
 
+    /**
+     * Toggles the prompts container.
+     */
+    function togglePromptsContainer() {
+      document.getElementById('promptsContainer').classList.toggle("hidden");
+    }
+    //make global access to toggle prompts container
+    window.togglePromptsContainer = togglePromptsContainer;
+
+    /**
+     * Hides all chat tool windows.
+     */
+    function hideAllChatToolWindows() {
+      //hide all chat tool windows
+      document.getElementById("promptsContainer").classList.add("hidden");
+      document.getElementById("imagesForUserToSelect").style.display = "none";
+      document.getElementById('codeSnippetsContainer')
+    }
+
     chatIcon.addEventListener("click", toggleChat);
     closeButton.addEventListener("click", toggleChat);
     sendButton.addEventListener("click", sendMessage);
@@ -198,6 +226,9 @@
       }
     });
 
+    /**
+     * Loads the chat history for the current web page and puts it into the modal history drawer.
+     */
     function loadChatHistory() {
       let webPageId = "<%=@page&.id%>";
       if (webPageId) {
@@ -247,10 +278,8 @@
     document
       .getElementById("restoreButton")
       .addEventListener("click", function () {
-        console.log("restoreButton clicked");
-        // we need to do a POST with the webPageHistory.id to /pages/restore
+        // Do a POST with the webPageHistory.id to /pages/restore
         let webPageId = "<%=@page&.id%>";
-        //QUESTION: how do I get this webpagehistory id?
         // we save it to the restoreButton so that when the user clicks on the history item.. we have the ID.
 
         const webPageHistoryId = document
@@ -381,6 +410,9 @@
   let inSelectionMode = false;
   let selectedElementHTML = null;
 
+  /**
+   * Toggle selection mode. This allows the user to select an element on the page that they want the LLM to edit.
+   */
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
     const chatbotContainer = document.getElementById("chatbotContainer");
@@ -396,8 +428,12 @@
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
   }
 
+  /**
+   * Handle element selection. This fires when the user to selects an element on the page that they want the LLM to edit.
+   * @param {Event} event - The event object.
+   */
   function handleElementSelection(event) {
-    if (!inSelectionMode) return;
+    if (!inSelectionMode) return; //prevent from running if selection mode is off
     event.preventDefault();
     event.stopPropagation();
 
@@ -492,16 +528,15 @@
       // Mobile devices
       chatbotContainer.style.width = "100%";
       chatbotContainer.style.height = "50%";
-    //   chatbotContainer.style.maxWidth = "none";
-    //   chatbotContainer.style.maxHeight = "none";
     } else {
       chatbotContainer.style.width = "480px";
       chatbotContainer.style.height = "576px";
-    //   chatbotContainer.style.maxWidth = "80%";
-    //   chatbotContainer.style.maxHeight = "80%";
     }
   }
 
+  /**
+   * Toggle the chatbot size between expanded and collapsed. This fires when user clicks on the top right expand button.
+   */
   function toggleExpand() {
     if (isExpanded) {
       setCollapsedSize();
@@ -518,7 +553,6 @@
       setCollapsedSize();
     }
   }
-
 
   // Add event listeners
   expandButton.addEventListener("click", toggleExpand);
@@ -580,6 +614,10 @@
     });
   });
 
+
+  /**
+   * Toggle the history drawer. This fires when user clicks on the top right history button.
+   */
   document
     .getElementById("historyButton")
     .addEventListener("click", function () {
@@ -592,6 +630,9 @@
       }
     });
 
+  /**
+   * Close the history drawer. This fires when user clicks on the close button in the history drawer.
+   */
   document
     .getElementById("closeHistoryDrawer")
     .addEventListener("click", function () {
