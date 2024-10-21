@@ -153,14 +153,13 @@
       isLoading = true;
       showLoadingIndicator();
 
-      hideAllChatToolWindows();
-
       //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
       let selectedElement = document.getElementById("selectedElementContent");
       let selectedElementInnerHtml = selectedElement.innerHTML.replace(
         "selected-element",
         ""
       ); 
+      hideAllChatToolWindows();
 
       try {
         const response = await fetch("/llama_bot/message.json", {
@@ -209,8 +208,15 @@
       //hide all chat tool windows
       document.getElementById("promptsContainer").classList.add("hidden");
       document.getElementById("imagesForUserToSelect").style.display = "none";
-      document.getElementById('codeSnippetsContainer')
+      document.getElementById('codeSnippetsContainer').classList.add("hidden");
+      
+      // clear selected element 
+      document.getElementById("selectedElementContainer").style.display =
+        "none";
+      document.getElementById("selectedElementContent").innerHTML = "";
     }
+    //make global access to hide all chat tool windows
+    window.hideAllChatToolWindows = hideAllChatToolWindows;
 
     chatIcon.addEventListener("click", toggleChat);
     closeButton.addEventListener("click", toggleChat);
@@ -393,6 +399,11 @@
         e.preventDefault();
         e.stopPropagation();
         toggleChat();
+      }
+      else if ((e.key == "c" && e.altKey) || (e.key == "ç") || (e.key == "c" && e.metaKey && e.shiftKey)) {
+        e.preventDefault(); //prevent the ç key from being typed
+        e.stopPropagation(); //prevent the ç key from being typed
+        toggleSelectionMode();
       }
     });
   });
