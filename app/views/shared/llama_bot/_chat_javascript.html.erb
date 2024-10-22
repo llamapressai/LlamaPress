@@ -45,7 +45,7 @@
       const spinner = document.createElement("div");
       spinner.innerHTML = `
         <div class="grid grid-cols-[40px_auto] gap-4 items-center w-full">
-        <div class="grid min-h-[20px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible">
+            <div class="grid min-h-[20px] w-full place-items-center overflow-hidden rounded-lg p-6">
         <svg class="text-gray-300 animate-spin" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
             width="24" height="24">
             <path
@@ -126,14 +126,24 @@
     }
 
     function showLoadingIndicator() {
+      // show all instances of is-loading class
+      document.querySelectorAll(".is-loading").forEach(element => {
+        element.classList.remove("hidden");
+      });
       const spinner = makeLoadingSpinner();
       const loadingDiv = document.createElement("div");
       loadingDiv.id = "loadingIndicator";
+      loadingDiv.classList.add("is-loading");
       loadingDiv.appendChild(spinner);
       chatbotMessages.appendChild(loadingDiv);
     }
 
     function hideLoadingIndicator() {
+      // hide all instances of is-loading class
+      document.querySelectorAll(".is-loading").forEach(element => {
+        element.classList.add("hidden");
+      });
+
       const loadingDiv = document.getElementById("loadingIndicator");
       if (loadingDiv) {
         loadingDiv.remove();
@@ -200,6 +210,13 @@
     }
     //make global access to toggle prompts container
     window.togglePromptsContainer = togglePromptsContainer;
+
+    function insertPrompt(prompt) {
+      userInput.value = prompt;
+      sendMessage();
+    }
+    //make global access to insert prompt
+    window.insertPrompt = insertPrompt;
 
     /**
      * Hides all chat tool windows.
