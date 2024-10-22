@@ -36,6 +36,9 @@
       console.log("Chat window has been toggled");
       isOpen = !isOpen;
       chatbotContainer.classList.toggle("hidden", !isOpen);
+
+      const chatbotMessages = document.getElementById('chatbotMessages');            
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
 
     // Expose toggleChat to the global scope
@@ -97,7 +100,7 @@
     /**
      * Adds a message to the chatbot messages container.
      */
-    function addMessage(text, sender) {
+    function addMessage(text, sender, onClickCallback = null) {
       const messageDiv = document.createElement("div");
       messageDiv.className = `mb-2 p-2 rounded ${
         sender === "bot" ? "bg-blue-100 self-start" : "bg-green-100 self-end"
@@ -107,6 +110,9 @@
       messageDiv.innerHTML = formattedContent;
       chatbotMessages.appendChild(messageDiv);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      if (onClickCallback) {
+        messageDiv.addEventListener("click", onClickCallback);
+      }
     }
 
     /**
@@ -285,14 +291,26 @@
             });
 
             //TODO: put chat history here to view history easier
-            //web_page_histories.reverse(); 
-            //web_page_histories.forEach((history) => {
-            //  addMessage(history.user_message, "user");
-            //});
+            web_page_histories.reverse();
+            web_page_histories.forEach((history) => {
+              addMessage(history.user_message, "user",function () {
+                console.log("History item clicked:", history);
+                const prompt = history.prompt || history.user_message;
+                const modal = document.getElementById("historyModal");
+                const mainIframe = document.getElementById("mainIframe");
+                mainIframe.innerHTML = atob(history.content);
+                document.getElementById("userPrompt").innerHTML = history.user_message;
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+                document
+                  .getElementById("restoreButton")
+                  .setAttribute("llama-data-web-page-history-id", history.id);
+              });
+            });
 
             addMessage("What do you want to build?", "bot");
             //scroll to bottom of chatbot
-            const chatbotMessages = document.getElementById('chatbotMessages');
+            const chatbotMessages = document.getElementById('chatbotMessages');            
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
           });
       }
