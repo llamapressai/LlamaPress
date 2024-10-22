@@ -255,7 +255,6 @@
     function loadChatHistory() {
       let webPageId = "<%=@page&.id%>";
       if (webPageId) {
-        //TODO: fetch Chat History from /web_page_histories IF this web_page_id is present in the URL
         fetch(`/pages/${webPageId}/histories.json`)
           .then((response) => {
             if (!response.ok) {
@@ -265,9 +264,21 @@
           })
           .then((data) => {
             web_page_histories = data.web_page_histories;
-            web_page_histories.forEach((history) => {
+            // Reverse the order of operations
+            web_page_histories.forEach((history) => { //
               addWebPageHistoryToHistoryDrawer(history);
             });
+
+            //TODO: put chat history here to view history easier
+            //web_page_histories.reverse(); 
+            //web_page_histories.forEach((history) => {
+            //  addMessage(history.user_message, "user");
+            //});
+
+            addMessage("What do you want to build?", "bot");
+            //scroll to bottom of chatbot
+            const chatbotMessages = document.getElementById('chatbotMessages');
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
           });
       }
     }
@@ -372,7 +383,6 @@
 
     // Initial bot message
     loadChatHistory();
-    addMessage("What do you want to build?", "bot");
 
     const textarea = document.getElementById('userInput');
     const maxRows = 10; // Set this to your desired maximum number of rows
