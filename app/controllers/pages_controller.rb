@@ -10,27 +10,37 @@ class PagesController < ApplicationController
   # If no root page is found, redirect to the llama press home page.
   def home
     #If the user is signed in, and they have a default site, redirect to that site's home page.
-
     #If no user, no site, no page, no domain.
     if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
+      puts 'site is present'
       @page = current_site.pages.first
       if @page.nil?
+        puts 'no page in site'
         redirect_to llama_bot_home_path and return
+      elsif current_user.present?
+        redirect_to "/pages/#{@page.id}" and return
+      else
+        #pass through and render everything
       end
     else # if no site is found for this domain, go to the default home page. 
       if current_user.present?
+        puts 'user is present'
         if current_user.organization.pages.count == 0
+          puts 'no pages in organization'
           redirect_to llama_bot_home_path and return
         else 
+          puts 'pages in organization'
           @page = current_user.organization.pages.first
           redirect_to "/pages/#{@page.id}" and return
         end
       else
+        puts 'no user'
         redirect_to new_user_registration_path and return 
       end
     end
 
-    content = @page.render_content
+    puts 'rendering page to a non-signed in user -- this is likely a public traffic visit going to a site\'s home page'
+    content = @page.render_content # we know @page is present, because we redirected above if it wasn't.
     content += inject_chat_partial(content) if current_user.present?
     content += inject_style()
     content += inject_analytics_partial() if Rails.env.production?
