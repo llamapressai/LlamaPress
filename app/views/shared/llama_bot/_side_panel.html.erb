@@ -10,7 +10,6 @@
   
   <div class="h-full overflow-y-auto p-4">
     <div class="mb-4">
-      <h2 class="text-xl font-bold mb-2">Pages</h2>
       <div class="flex flex-col space-y-2">
         <a href="/pages" class="text-blue-500 hover:text-blue-600 font-bold flex items-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -26,9 +25,96 @@
         </a>
       </div>
     </div>
+    <hr class="my-2"/>
+    <h2 class="text-xl font-bold mb-2">Your Pages</h2>
     <!-- TODO: Show the site's actual name rather than generic name. <=# @page&.site&.name || "your site" %> -->
     <div id="iframe-list" class="space-y-6">
       <!-- Iframe items will be dynamically added here -->
+    </div>
+    <hr class="my-2"/>
+    <h2 class="text-xl font-bold mb-2">Drag and Drop</h2>
+    <div id="drag-and-drop-list" class="space-y-6">
+    <!-- Button Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Button</h3>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" draggable="true">
+        Click me
+      </button>
+    </div>
+
+    <!-- Card Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Card</h3>
+      <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white" draggable="true">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Card Title</div>
+          <p class="text-gray-700 text-base">
+            This is a sample card component that you can drag and drop onto your page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Alert</h3>
+      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert" draggable="true">
+        <p class="font-bold">Warning</p>
+        <p>This is an example alert message.</p>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const draggableComponents = document.querySelectorAll('.draggable-component > *[draggable="true"]');
+        
+        draggableComponents.forEach(component => {
+          component.addEventListener('dragstart', function(e) {
+            //document.getElementById('llama-side-panel').classList.add('hidden');
+            const panel = document.getElementById('llama-side-panel');
+            panel.classList.toggle('-translate-x-full');
+            console.log('Drag started');
+            e.dataTransfer.setData('text/plain', component.outerHTML);
+          });
+        });
+
+        // Use document.body as a fallback if #drop-target doesn't exist
+        const dropTarget = document.querySelector('#drop-target') || document.body;
+
+        dropTarget.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          console.log('Dragging over drop target');
+        });
+
+        dropTarget.addEventListener('dragenter', function(e) {
+          e.preventDefault();
+          console.log('Entered drop target');
+        });
+
+        dropTarget.addEventListener('drop', function(e) {
+          e.preventDefault();
+          console.log('Drop event fired');
+          const droppedHTML = e.dataTransfer.getData('text/plain');
+          let prompt = `the user has dragged this new element and dropped it onto the page at this element. Please merge this into the page. new element: \`\`\`${droppedHTML}\`\`\` should be inserted`
+          console.log('Dropped HTML:', droppedHTML);
+          console.log('Prompt:', prompt);
+          if (droppedHTML) {
+            // open chatbot
+            toggleChat();
+            let customEvent = new CustomEvent("elementSelected", {
+              detail: e.target,
+            });
+            document.dispatchEvent(customEvent);
+            insertPrompt(prompt);
+            console.log('Component added to drop target');
+          } else {
+            console.log('No HTML data in drop event');
+          }
+        });
+
+        console.log('Event listeners set up');
+      });
+    </script>
     </div>
   </div>
 </div>
