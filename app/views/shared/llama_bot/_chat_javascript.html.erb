@@ -126,21 +126,21 @@
     }
 
     function showLoadingIndicator() {
-      // show all instances of is-loading class
-      document.querySelectorAll(".is-loading").forEach(element => {
+      // show all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
         element.classList.remove("hidden");
       });
       const spinner = makeLoadingSpinner();
       const loadingDiv = document.createElement("div");
       loadingDiv.id = "loadingIndicator";
-      loadingDiv.classList.add("is-loading");
+      loadingDiv.classList.add("is-thinking");
       loadingDiv.appendChild(spinner);
       chatbotMessages.appendChild(loadingDiv);
     }
 
     function hideLoadingIndicator() {
-      // hide all instances of is-loading class
-      document.querySelectorAll(".is-loading").forEach(element => {
+      // hide all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
         element.classList.add("hidden");
       });
 
@@ -748,7 +748,7 @@
     $('#imageUploadingLabel').show();
     $('#imagesDoneUploading').hide();
 
-    $('#submitButton').addClass('is-loading');
+    $('#submitButton').addClass('is-thinking');
 
     //TODO: how do we iterate over these images and upload them?
     // /jobs_requests/pre_signed_s3_url_for_uploading_images
@@ -796,13 +796,13 @@
                         
                         const div = document.createElement('div');
                         div.id = data["key"];
-                        div.className = "is-loading";
+                        div.className = "is-thinking";
                         
                         div.appendChild(img);
                         previewContainer.classList.remove('hidden')           // Append the img to the div
                         previewContainer.appendChild(div);  // Append the div to the previewContainer
                     };
-                        // $('#upload-preview').addClass('is-loading');
+                        // $('#upload-preview').addClass('is-thinking');
 
                     reader.readAsDataURL(file);
                 } else if (file.type === 'application/pdf') {
@@ -821,7 +821,7 @@
 
                         const div = document.createElement('div');
                         div.id = data["key"];
-                        div.className = "is-loading";
+                        div.className = "is-thinking";
 
                         div.appendChild(iframe);           // Append the iframe to the div
                         previewContainer.appendChild(div);  // Append the div to the previewContainer                  
@@ -854,7 +854,7 @@
         .then(() => {
             console.log('All uploads complete!');
             document.getElementById('submitButton').disabled = false; // Re-enable the submit button
-            $('#submitButton').removeClass('is-loading');
+            $('#submitButton').removeClass('is-thinking');
             $('#imageUploadingLabel').hide();
             $('#imagesDoneUploading').show();
             $('#submitButton').show() 
@@ -863,7 +863,7 @@
         .catch(error => {
             console.error('Some uploads failed:', error);
             document.getElementById('submitButton').disabled = false; // Re-enable the submit button
-            $('#submitButton').removeClass('is-loading');   
+            $('#submitButton').removeClass('is-thinking');   
             $('#imageUploadingLabel').hide();     
             $('#imagesDoneUploading').show();    
            
@@ -884,7 +884,7 @@
           data: file,
           success: function() {
               console.log("Successfully uploaded to S3");
-              $(`#${presignedData.key}`).removeClass("is-loading"); //done uploading.
+              $(`#${presignedData.key}`).removeClass("is-thinking"); //done uploading.
               resolveCallback();
           },
           error: function(jqXHR, textStatus, errorThrown) {
