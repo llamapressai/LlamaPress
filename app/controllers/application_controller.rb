@@ -48,11 +48,12 @@ class ApplicationController < ActionController::Base
 
   def set_context
     @context = request.path
-    @view_path = resolve_view_path
+    @view_path = resolve_view_path #this is used for LlamaBot to know what file to write code changes to.
   end
 
   private
-
+  # This is used to get the corresponding view file based on the controller route and action, so that LlamaBot can write 
+  # any code changes to the correct views file in the user's file system.
   def resolve_view_path
     route = Rails.application.routes.recognize_path(request.path, method: request.method)
     controller = route[:controller]
@@ -74,6 +75,10 @@ class ApplicationController < ActionController::Base
     nil
   end
 
+  # This is used to sanitize the domain to match the slug format of the site.
+  # To allow LlamaPress to properly route to the site, the domain must be saved to the user's Site record in the slug column, and not have a www., http://, or https://.
+  # The user must also have an A record in their DNS settings pointing to the IP address of the LlamaPress server.
+  # and the site must have a security certificate configured for the domain. 
   def sanitize_domain(domain)
     domain.slice! "www."
     domain.slice! "http://"
