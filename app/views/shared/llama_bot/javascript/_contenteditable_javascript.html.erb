@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastElementClicked = e.target;
         console.log("lastElementClicked", lastElementClicked);
         if (e.target.tagName === 'IMG' && e.target.parentElement.id !== 'image-container' && !e.target.classList.contains('llama-prevent-img-resize')) {
+            console.log("User is resizing image -- suppressing default behavior");
             isResizing = true;
             currentImage = e.target;
             startX = e.clientX;

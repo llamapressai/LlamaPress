@@ -479,8 +479,6 @@
             Send
           </button>
         </div>
-        <!--TODO: add animation when user presses send while it's waiting for a response. -->
-        <!--<dotlottie-player src="https://lottie.host/9f9cd2dd-4a84-4fa0-904a-4f7d72cae241/XM6ZklRzAZ.json" background="transparent" speed="1" style="width: 50px;" loop autoplay></dotlottie-player>-->
       </div>
     </div>
   <!-- Resizers -->
@@ -495,12 +493,12 @@
   </div>
 
 </div>
-<%= render partial: 'shared/llama_bot/css' %> 
-<%= render partial: 'shared/llama_bot/history_modal' %> 
+<%= render partial: 'shared/llama_bot/css' %>
+<%= render partial: 'shared/llama_bot/history_modal' %>
 <%= render partial: 'shared/llama_bot/side_panel' %>
-<%= render partial: 'shared/llama_bot/chat_javascript' %> 
+<%= render partial: 'shared/llama_bot/chat_javascript' %>
 <% if current_user.present? && controller_name == 'pages' && action_name == 'show' %> 
-  <%= render partial: 'shared/llama_bot/chat_contenteditable_javascript' %> 
+  <%= render partial: 'shared/llama_bot/javascript/contenteditable_javascript' %> 
   <%= render partial: 'shared/llama_bot/toolbar' %> 
   <%= render partial: 'shared/llama_bot/context_menu' %> 
 <% end %>
