@@ -56,7 +56,7 @@ module PagesHelper
             <ol class="space-y-6" data-llama-id="26">
                 <li class="flex items-start" data-llama-id="27">
                     <div class="flex-shrink-0" data-llama-id="28" data-llama-editable="true">
-                        <div id="chatIcon" class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_chat.html.erb">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer" data-llama="app/views/shared/_chat.html.erb">
                             <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="h-8 w-8 md:h-12 md:w-12 llama-prevent-img-resize" data-llama="app/views/shared/_chat.html.erb">
                         </div>
                     </div>
