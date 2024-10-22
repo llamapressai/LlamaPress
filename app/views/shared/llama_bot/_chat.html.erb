@@ -69,7 +69,7 @@
   <!-- Chatbot window -->
   <div
     id="chatbotContainer"
-    class="hidden fixed border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out"
+    class="hidden fixed border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out text-gray-800"
     data-llama="app/views/shared/_chat.html.erb"
     style="overflow: auto; min-width: 300px; min-height: 200px; bottom: 85px; right: 15px; max-width: 97%; max-height: 85%; z-index: 999;"
   >
@@ -243,7 +243,7 @@
           <div data-llama-prompt="Improve this design 10x. Make it beautiful, modern, and use font awesome icons and aos animations." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
             💡 Improve design 10X
           </div>
-          <div data-llama-prompt="Add a spooky Halloween animation to this page. Use CSS animations or JavaScript to create a festive effect." class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
+          <div data-llama-prompt="Please add a cool fall animation overlay to this page with falling leaf and pumpkin emojis using css keyframe animations" class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
             🎃 Add Halloween animation
           </div>
           <div data-llama-prompt="Optimize this page for mobile devices with tailwind css. Ensure responsive design, improve load times, and enhance touch interactions." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
@@ -263,7 +263,7 @@
       >
         <button
           onclick="toggleSelectionMode()"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
           title="Select element"
           data-llama="app/views/shared/_chat.html.erb"
         >
@@ -283,10 +283,11 @@
               data-llama="app/views/shared/_chat.html.erb"
             />
           </svg>
+          <span class="text-xs mt-1 text-gray-600">Select</span>
         </button>
         <button
           id="toggleImagesForUserToSelect"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
           title="Insert image"
           data-llama="app/views/shared/_chat.html.erb"
         >
@@ -306,10 +307,11 @@
               data-llama="app/views/shared/_chat.html.erb"
             />
           </svg>
+          <span class="text-xs mt-1 text-gray-600">Image</span>
         </button>
         <button
           id="toggleCodeSnippets"
-          class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
           title="Show code snippets"
           data-llama="app/views/shared/_chat.html.erb"
         >
@@ -329,10 +331,11 @@
               data-llama="app/views/shared/_chat.html.erb"
             />
           </svg>
+          <span class="text-xs mt-1 text-gray-600">Snippets</span>
         </button>
         <button
           id="togglePrompts"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
+          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
           title="Toggle prompt suggestions"
           onclick="togglePromptsContainer()"
           data-llama="app/views/shared/_chat.html.erb">
@@ -350,6 +353,7 @@
               d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
             />
           </svg>
+          <span class="text-xs mt-1 text-gray-600">Prompts</span>
         </button>        
         <div
           id="selectedElementContainer"
