@@ -15,8 +15,8 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
   <% @templates.each do |template| %>
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div class="aspect-[4/3] w-full border-1 border-gray-200">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-gray-300 hover:border-blue-500 transition duration-300 ease-in-out">
+      <div class="aspect-[4/3] w-full border-b border-gray-200">
         <iframe 
           src="<%= template[:url] %>" 
           title="<%= template[:name] %>" 
