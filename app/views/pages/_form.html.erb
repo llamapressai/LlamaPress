@@ -29,16 +29,46 @@
     <div id="preview-content" class="border border-gray-400 p-4 rounded-md"></div>
   </div>
 
-  <div class="my-5">
-    <%= form.label :content, "HTML Content" %>
-    <%= form.text_area :content, rows: 200, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full", style: "width: 100%; max-width: 800px;" %>
+  <div id="template-applied-banner" class="my-5 w-full bg-green-100 text-green-800 p-4 rounded-lg mb-4 hidden shadow-md">
+    <div class="flex items-center justify-center">
+      <i class="fas fa-check-circle text-green-500 mr-2 text-xl"></i>
+      <p class="font-semibold">Template applied successfully!</p>
+      <i class="fas fa-arrow-right text-green-500 mx-2"></i>
+      <button class="bg-green-200 hover:bg-green-300 text-green-800 font-semibold py-1 px-3 rounded-full transition duration-300 ease-in-out flex items-center">
+        <i class="fas fa-save mr-1"></i>
+        Save Changes
+      </button>
+    </div>
   </div>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const useTemplateButtons = document.querySelectorAll('.use-template-btn');
+      const banner = document.getElementById('template-applied-banner');
+      const saveChangesButton = banner.querySelector('button');
+
+      useTemplateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          banner.classList.remove('hidden');
+        });
+      });
+
+      saveChangesButton.addEventListener('click', function() {
+        // Trigger form submission
+        document.querySelector('form').submit();
+      });
+    });
+  </script>
+
+  <div class="my-5">
+    <%= form.label :content, "HTML Content (for us nerds 😎)" %>
+    <%= form.text_area :content, rows: 200, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full", style: "width: 100%; max-width: 800px;" %>
+  </div>
 
   <div class="inline">
     <%= form.submit "Save Page", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
     <button type="button" id="reset-content" class="rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2">Reset Content</button>
-  </div>  
+  </div>
 <% end %>
 
 <%= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js" %>
@@ -290,3 +320,5 @@
 
 
 </script>
+
+
