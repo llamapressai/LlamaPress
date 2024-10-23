@@ -285,26 +285,26 @@
           })
           .then((data) => {
             web_page_histories = data.web_page_histories;
-            // Reverse the order of operations
-            web_page_histories.forEach((history) => { //
-              addWebPageHistoryToHistoryDrawer(history);
-            });
 
-            //TODO: put chat history here to view history easier
-            web_page_histories.reverse();
+            //put chat history in the messages window to view & history
+            web_page_histories.reverse(); //reverse so it's in chronological order
             web_page_histories.forEach((history) => {
               addPageHistoryToMessagesArea(history);
             });
 
-            addMessage("What do you want to change?", "bot");
-            
             //scroll to bottom of chatbot
             const chatbotMessages = document.getElementById('chatbotMessages');            
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+            //ask the user what they want to change. We're ready to go.
+            addMessage("What do you want to change?", "bot");
           });
       }
     }
 
+    /**
+     * Creates a history in the chat window so user can see their page changes & restore if needed
+     */
     function addPageHistoryToMessagesArea(history) {
       // Create header section if it doesn't exist
       let headerSection = document.getElementById('pageHistoryHeader');
@@ -379,32 +379,6 @@
 
       chatbotMessages.appendChild(wrapper);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-    }
-
-    /**
-     * Add entry to web page history to the history drawer.
-     * @param {object} webPageHistory - The web page history to add.
-     */
-    function addWebPageHistoryToHistoryDrawer(webPageHistory) {
-      const historyDrawer = document.getElementById("historyList");
-      const historyItem = document.createElement("div");
-      historyItem.className =
-        "history-item cursor-pointer hover:bg-gray-100 p-2";
-      prompt = webPageHistory.prompt || webPageHistory.user_message;
-      historyItem.textContent = summarizePrompt(prompt);
-      historyItem.onclick = function () {
-        const modal = document.getElementById("historyModal"); // Get modal element
-        const mainIframe = document.getElementById("mainIframe");
-        mainIframe.innerHTML = atob(webPageHistory.content);
-        document.getElementById("userPrompt").innerHTML =
-          webPageHistory.user_message;
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-        document
-          .getElementById("restoreButton")
-          .setAttribute("llama-data-web-page-history-id", webPageHistory.id);
-      };
-      historyDrawer.appendChild(historyItem);
     }
 
     document
@@ -758,31 +732,6 @@
       }
     });
   });
-
-
-  /**
-   * Toggle the history drawer. This fires when user clicks on the top right history button.
-   */
-  document
-    .getElementById("historyButton")
-    .addEventListener("click", function () {
-      // Toggle the history drawer
-      const historyDrawer = document.getElementById("historyDrawer");
-      if (historyDrawer.classList.contains("hidden")) {
-        historyDrawer.classList.remove("hidden");
-      } else {
-        historyDrawer.classList.add("hidden");
-      }
-    });
-
-  /**
-   * Close the history drawer. This fires when user clicks on the close button in the history drawer.
-   */
-  document
-    .getElementById("closeHistoryDrawer")
-    .addEventListener("click", function () {
-      document.getElementById("historyDrawer").classList.add("hidden");
-    });
 </script>
 
 
