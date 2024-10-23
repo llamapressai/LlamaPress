@@ -1,11 +1,13 @@
+
 <div class="mx-auto md:w-2/3 w-full">
   <h1 class="font-bold text-4xl">New Web Page</h1>
-
   <h2 class="font-bold text-2xl">Starting Templates:</h2>
+  </div>
+  
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
     <% @templates.each do |template| %>
       <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="aspect-[4/3] w-full">
+        <div class="aspect-[4/3] w-full border-1 border-gray-200">
           <iframe 
             src="<%= template[:url] %>" 
             title="<%= template[:name] %>" 
@@ -14,14 +16,19 @@
         </div>
         <div class="p-6 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
-          <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
-            Use this Template
-          </button>
+          <div class="space-x-3">
+            <a href="<%= template[:url] %>" target="_blank" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block">
+              View
+            </a>
+            <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
+              Use this Template
+            </button>
+          </div>
         </div>
       </div>
     <% end %>
   </div>
-
+<div class="mx-auto md:w-3/4 w-full">
   <%= render "form", page: @page %>
 
   <%= link_to "Back to Web Pages", pages_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
