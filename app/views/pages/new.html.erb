@@ -1,19 +1,19 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
-  <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-8 mb-8">
-    <h1 class="font-bold text-4xl text-white mb-2 flex items-center">
-      <i class="fas fa-file-alt mr-4 text-yellow-300"></i>
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-6 sm:p-8 mb-8">
+    <h1 class="font-bold text-3xl sm:text-4xl lg:text-5xl text-white mb-2 flex items-center">
+      <i class="fas fa-file-alt mr-4 text-yellow-300 text-xl sm:text-2xl lg:text-3xl"></i>
       Create a New Web Page
     </h1>
-    <p class="text-blue-100 text-lg">Design your perfect web page with our easy-to-use templates</p>
+    <p class="text-blue-100 text-base sm:text-lg lg:text-xl">Design your perfect web page with our easy-to-use templates</p>
   </div>
   
-  <h2 class="font-bold text-3xl text-gray-800 mb-6 flex items-center">
-    <i class="fas fa-th-large mr-4 text-blue-500"></i>
+  <h2 class="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-800 mb-6 flex items-center">
+    <i class="fas fa-th-large mr-4 text-blue-500 text-lg sm:text-xl lg:text-2xl"></i>
     Choose a Starting Template
   </h2>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6">
   <% @templates.each do |template| %>
     <div class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-gray-300 hover:border-blue-500 transition duration-300 ease-in-out">
       <div class="aspect-[4/3] w-full border-b border-gray-200">
@@ -21,15 +21,16 @@
           src="<%= template[:url] %>" 
           title="<%= template[:name] %>" 
           class="w-full h-full border-0"
+          sandbox="allow-scripts allow-same-origin"
         ></iframe>
       </div>
-      <div class="p-6 flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
-        <div class="space-x-3">
-          <a href="<%= template[:url] %>" target="_blank" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block">
+      <div class="p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-center">
+        <h3 class="text-md sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-0"><%= template[:name] %></h3>
+        <div class="flex space-x-2 sm:space-x-3">
+          <a href="<%= template[:url] %>" target="_blank" class="px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block text-sm sm:text-base">
             View
           </a>
-          <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
+          <button class="use-template-btn px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out text-sm sm:text-base">
             Use this Template
           </button>
         </div>
@@ -38,10 +39,10 @@
   <% end %>
 </div>
 
-<div class="mx-auto md:w-3/4 w-full">
+<div class="mx-auto md:w-3/4 w-full px-4 sm:px-6 lg:px-8">
   <%= render "form", page: @page %>
 
-  <%= link_to "Back to Web Pages", pages_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+  <%= link_to "Back to Web Pages", pages_path, class: "mt-4 sm:mt-6 rounded-lg py-2 sm:py-3 px-4 sm:px-5 bg-gray-100 inline-block font-medium text-sm sm:text-base" %>
 </div>
 
 <script>
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .replace(/\\n/g, '\n')
       .replace(/\\"/g, '"')
       .replace(/\\'/g, "'")
-      .replace(/\\\//g, '/');  // New line to handle escaped forward slashes
+      .replace(/\\\//g, '/');
     return textarea.value;
   }
 });
