@@ -389,11 +389,14 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
+        let inDragDropModeForTemplate = false; //here to prevent any overriding of other drop events
+
         const draggableComponents = document.querySelectorAll('.draggable-component > *[draggable="true"]');
         
         draggableComponents.forEach(component => {
           component.addEventListener('dragstart', function(e) {
             //document.getElementById('llama-side-panel').classList.add('hidden');
+            inDragDropModeForTemplate = true;
             const panel = document.getElementById('llama-side-panel');
             panel.classList.toggle('-translate-x-full');
             console.log('Drag started');
@@ -405,33 +408,40 @@
         const dropTarget = document.querySelector('#drop-target') || document.body;
 
         dropTarget.addEventListener('dragover', function(e) {
-          e.preventDefault();
-          console.log('Dragging over drop target');
+            if (inDragDropModeForTemplate){
+                e.preventDefault();
+                console.log('Dragging over drop target');
+            }
         });
 
         dropTarget.addEventListener('dragenter', function(e) {
-          e.preventDefault();
-          console.log('Entered drop target');
+            if (inDragDropModeForTemplate){
+                e.preventDefault();
+                console.log('Entered drop target');
+            }
         });
 
-        dropTarget.addEventListener('drop', function(e) {
-          e.preventDefault();
-          console.log('Drop event fired');
-          const droppedHTML = e.dataTransfer.getData('text/plain');
-          let prompt = `the user has dragged this new element and dropped it onto the page at this element. Please merge this into the page. new element: \`\`\`${droppedHTML}\`\`\` should be inserted`
-          console.log('Dropped HTML:', droppedHTML);
-          console.log('Prompt:', prompt);
-          if (droppedHTML) {
-            // open chatbot
-            toggleChat();
-            let customEvent = new CustomEvent("elementSelected", {
-              detail: e.target,
-            });
-            document.dispatchEvent(customEvent);
-            insertPrompt(prompt);
-            console.log('Component added to drop target');
-          } else {
-            console.log('No HTML data in drop event');
+        dropTarget.addEventListener('drop', function(e) { //how do we only allow this to happen if 
+          if (inDragDropModeForTemplate){
+              e.preventDefault();
+              inDragDropModeForTemplate = false;
+              console.log('Drop event fired');
+              const droppedHTML = e.dataTransfer.getData('text/plain');
+              let prompt = `the user has dragged this new element and dropped it onto the page at this element. Please merge this into the page. new element: \`\`\`${droppedHTML}\`\`\` should be inserted`
+              console.log('Dropped HTML:', droppedHTML);
+              console.log('Prompt:', prompt);
+              if (droppedHTML) {
+                // open chatbot
+                toggleChat();
+                let customEvent = new CustomEvent("elementSelected", {
+                  detail: e.target,
+                });
+                document.dispatchEvent(customEvent);
+                insertPrompt(prompt);
+                console.log('Component added to drop target');
+              } else {
+                console.log('No HTML data in drop event');
+              }
           }
         });
 

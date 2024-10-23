@@ -726,6 +726,9 @@
 
     toggleImagesButton.addEventListener("click", () => {
       if (imagesContainer.style.display === "none") {
+        document.querySelectorAll('.llama-chat-toolbar-window').forEach(window => {
+          window.style.display = 'none';
+        });
         imagesContainer.style.display = "block";
       } else {
         imagesContainer.style.display = "none";

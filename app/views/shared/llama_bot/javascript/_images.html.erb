@@ -1,58 +1,43 @@
 <script>    
-    const chunkSize = 64 * 1024 * 1024;
-    const fileReader = new FileReader();
-    let hasher = null;
+  const chunkSize = 64 * 1024 * 1024;
+  const fileReader = new FileReader();
+  let hasher = null;
 
-    const imageBlobIdsToAttachToJobRequest = []; // This is an array with the image blob IDs that we need to pass as a parameter into job_requests so it can attach these images to the job_request after it's been created
-    function submitPreuploadedS3ImagesToServer(){
-        const csrfToken = "<%= form_authenticity_token %>";
-        console.log("Made it with these image blob IDs!");
-        console.log(imageBlobIdsToAttachToJobRequest);
-        
-        
-        const path = window.location.pathname;
-        const segments = path.split('/');
-        const slug = segments[segments.length - 1];
-        $.post({
-            url: "/attach_multiple_pre_uploaded_s3_blobs_to_sites.json",
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrfToken
-            },
-            data: JSON.stringify({ // Convert data to JSON string
-                image_blob_ids: imageBlobIdsToAttachToJobRequest,
-                site_slug: slug
-             }),
-            success: function(response) {
-            console.log("Images attached to site successfully!");
-            document.getElementById('imagesDoneUploading').classList.add('hidden');
-            
-            const previewContainer = document.querySelector('#upload-preview');
-            if (previewContainer) {
-                previewContainer.innerHTML = '';
-                previewContainer.classList.add('hidden')
-            }
-                        
-            
-            
-            fetchImagesForSite() 
-            $('#submitButton').hide() 
-            $('#imagesDoneUploading').hide()
-            //window.location.href = "/view_images_and_assign_them_to_job";
+  const imageBlobIdsToAttachToJobRequest = []; // This is an array with the image blob IDs that we need to pass as a parameter into job_requests so it can attach these images to the job_request after it's been created
+  
+  function submitPreuploadedS3ImagesToServer(){
+      const csrfToken = "<%= form_authenticity_token %>";
+      console.log("Made it with these image blob IDs!");
+      console.log(imageBlobIdsToAttachToJobRequest);
+      const path = window.location.pathname;
+      const segments = path.split('/');
+      const slug = segments[segments.length - 1];
+      $.post({
+          url: "/attach_multiple_pre_uploaded_s3_blobs_to_sites.json",
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+          },
+          data: JSON.stringify({ // Convert data to JSON string
+              image_blob_ids: imageBlobIdsToAttachToJobRequest,
+              site_slug: slug
+            }),
+          success: function(response) {
+          console.log("Images attached to site successfully!");
 
-            // Handle success response, e.g., show success message to user
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-            console.error("Error attaching images to business:", textStatus, errorThrown);
-            // Handle error, e.g., show error message to user
-            document.getElementById('imagesDoneUploading').classList.add('hidden');
-            }
-        });
-    }
+          $('#submitButton').hide();
+          fetchImagesForSite(<%=@page&.id%>);
+          // Handle success response, e.g., show success message to user
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+          console.error("Error attaching images to business:", textStatus, errorThrown);
+          // Handle error, e.g., show error message to user
+          document.getElementById('imagesDoneUploading').classList.add('hidden');
+          }
+      });
+  }
 
-
-
-    async function get_file_name(input){
+  async function get_file_name(input){
     const file_name = document.getElementById('image_holder');
     const uploadText = file_name.files.length > 1 ? 'Upload your images ('+file_name.files.length+' files)' : 'Upload your images ('+file_name.files[0].name+')';
     const csrfToken = "<%= form_authenticity_token %>";
@@ -179,6 +164,7 @@
             $('#imagesDoneUploading').show();
             $('#submitButton').show() 
             $('#image_holder').hide()
+            submitPreuploadedS3ImagesToServer();
         })
         .catch(error => {
             console.error('Some uploads failed:', error);
@@ -186,7 +172,7 @@
             $('#submitButton').removeClass('is-thinking');   
             $('#imageUploadingLabel').hide();     
             $('#imagesDoneUploading').show();    
-           
+          
             // Handle the error - maybe inform the user that some uploads failed.
       });
     }
@@ -274,31 +260,32 @@
    * Fetches images that the user previoulsy uploaded for the user to use in the page
    */
   function fetchImagesForSite(page) {
-//    const csrfToken = "<%= form_authenticity_token %>";
-//    fetch('/sites/list_images.json', {
-//    method: 'POST',
-//    headers: {
-//      'Content-Type': 'application/json',
-//      'X-CSRF-Token': csrfToken
-//    },
-//    body: JSON.stringify({
-//      site_slug: slug,
-//      page: page
-//    })
-//  })
-//  .then(response => response.json())
-//  .then(data => {
-//    data.forEach(image => {
-//      const imgElement = document.createElement('img');
-//      imgElement.src = image.url;
-//      imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
-//      imgElement.setAttribute('data-llama-editable', 'true');
-//
-//      imageContainer.appendChild(imgElement);
-//    });
-//  })
-//  .catch(error => console.error('Error fetching images:', error));
+    const csrfToken = "<%= form_authenticity_token %>";
+    fetch('/sites/list_images.json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken
+    },
+    body: JSON.stringify({
+      site_slug: slug,
+      page: page
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(image => {
+      const imgElement = document.createElement('img');
+      imgElement.src = image.url;
+      imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
+      imgElement.setAttribute('data-llama-editable', 'true');
+
+      imageContainer.appendChild(imgElement);
+    });
+  })
+  .catch(error => console.error('Error fetching images:', error));
 }
+window.fetchImagesForSite = fetchImagesForSite; //make global
 
 function handleHorizontalScroll() {
   console.log("Trigger horizontal scroll")
@@ -312,6 +299,11 @@ function handleHorizontalScroll() {
     fetchImagesForSite(page);
   }
 }
+
+function closeImageUploadWindow() {
+    document.getElementById('imagesForUserToSelect').classList.add('hidden');
+}
+window.closeImageUploadWindow = closeImageUploadWindow; // make global
 
 const scrollContainer = document.getElementById('imagesForUserToSelect');
 scrollContainer.addEventListener('scroll', handleHorizontalScroll);
