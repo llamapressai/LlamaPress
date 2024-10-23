@@ -12,6 +12,12 @@ class Page < ApplicationRecord
   friendly_id :slug, use: :slugged
 
   before_validation :ensure_site, on: :create
+  
+  #TODO: Eventually we'll want it to be unique just for the individual sites -- validates :slug, uniqueness: { scope: :site_id, message: "must be unique within the site" }
+  validates :slug, uniqueness: { message: "must be unique across all sites" }
+
+  before_validation :make_unique_slug, on: :create
+
   after_initialize :set_default_html_content, if: :new_record?
   before_save :pre_save_processing, if: :content_changed?
 
@@ -191,6 +197,15 @@ class Page < ApplicationRecord
     end
 
     name
+  end
+
+  def make_unique_slug
+    original_slug = self.slug
+    counter = 1
+    while Page.exists?(slug: self.slug)
+      self.slug = "#{original_slug}-#{counter}"
+      counter += 1
+    end
   end
 
   def controller

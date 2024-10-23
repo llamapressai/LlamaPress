@@ -272,5 +272,18 @@
     // Insert the Prettify button after the Preview button
     var previewButton = document.getElementById('preview-content');
     previewButton.parentNode.insertBefore(prettifyButton, previewButton.nextSibling);
+
+    // Add URL formatting
+    var slugField = document.getElementById('page_slug');
+    slugField.addEventListener('input', function(e) {
+      var value = e.target.value;
+      value = value.toLowerCase();
+      value = value.replace(/\s+/g, '-');
+      value = value.replace(/[^a-z0-9-_]/g, '');
+      e.target.value = value;
+    });
+
   });
+
+
 </script>
