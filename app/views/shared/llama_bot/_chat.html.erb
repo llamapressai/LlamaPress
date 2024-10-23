@@ -316,8 +316,15 @@
             <% end %>
       </div>
     </div>
-    <div class="p-2 md:p-4 border-t border-gray-300 flex flex-col" data-llama="app/views/shared/_chat.html.erb">
-      <textarea id="userInput" placeholder="Type your message..." class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical text-black text-sm md:text-base" rows="2 md:rows-3" data-llama="app/views/shared/_chat.html.erb"></textarea>
+
+    <div id="llama-user-input-container" class="p-2 md:p-4 border-t border-gray-300 flex flex-col" data-llama="app/views/shared/_chat.html.erb">
+      <textarea
+        id="userInput"
+        placeholder="Type your message..."
+        class="flex-grow mb-2 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical text-black text-sm md:text-base"
+        rows="2 md:rows-3"
+        data-llama="app/views/shared/_chat.html.erb"
+      ></textarea>
       <div class="flex items-center justify-end">
         <div id="loadingIndicator" class="hidden mr-2 is-thinking">
           <div class="grid grid-cols-[40px_auto] gap-4 items-center w-full">
