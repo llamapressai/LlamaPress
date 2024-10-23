@@ -74,16 +74,13 @@
     id="chatbotContainer"
     class="hidden fixed border border-gray-300 rounded-lg overflow-hidden shadow-lg bg-white flex flex-col transition-all duration-300 ease-in-out text-gray-800"
     data-llama="app/views/shared/_chat.html.erb"
-    style="overflow: auto; min-width: 300px; min-height: 200px; bottom: 85px; right: 15px; max-width: 97%; max-height: 85%; z-index: 999;"
-  >
+    style="overflow: auto; min-width: 300px; min-height: 200px; bottom: 85px; right: 15px; max-width: 97%; max-height: 85%; z-index: 999;">
     <div
       class="bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 md:p-4 flex justify-between items-center rounded-t-2xl shadow-md"
-      data-llama="app/views/shared/_chat.html.erb"
-    >
+      data-llama="app/views/shared/_chat.html.erb">
       <div
         class="flex items-center space-x-3"
-        data-llama="app/views/shared/_chat.html.erb"
-      >
+        data-llama="app/views/shared/_chat.html.erb">
         <a
           href="/pages"
           class="text-white hover:text-blue-200 transition-colors duration-200"
@@ -118,30 +115,7 @@
       </div>
       <div
         class="flex items-center"
-        data-llama="app/views/shared/_chat.html.erb"
-      >
-      <!-- Temporarily Disabling until we have a better use for it -- History is now being added into the Chat Window Directly -->
-<!--        <button
-          id="historyButton"
-          class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
-          title="Chat History"
-          data-llama="app/views/shared/_chat.html.erb"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        </button>-->
+        data-llama="app/views/shared/_chat.html.erb">
         <button
           id="expandButton"
           class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
@@ -177,39 +151,33 @@
     <div
       id="chatbotMessages"
       class="flex-grow overflow-y-auto p-4 text-black"
-      data-llama="app/views/shared/_chat.html.erb"
-    >
+      data-llama="app/views/shared/_chat.html.erb">
       <div
         id="historyDrawer"
-        class="hidden bg-white border-l border-gray-300 absolute right-0 top-0 h-full w-64 shadow-lg transition-all duration-300 ease-in-out"
-      >
+        class="hidden bg-white border-l border-gray-300 absolute right-0 top-0 h-full w-64 shadow-lg transition-all duration-300 ease-in-out">
         <div class="p-4">
           <div class="flex justify-between items-center mb-4">
             <h3 class="font-semibold text-lg">Chat History</h3>
             <button
               id="closeHistoryDrawer"
-              class="text-gray-500 hover:text-gray-700 focus:outline-none"
-            >
+              class="text-gray-500 hover:text-gray-700 focus:outline-none">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                  d="M6 18L18 6M6 6l12 12"/>
               </svg>
             </button>
           </div>
           <ul
             id="historyList"
-            class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]"
-          >
+            class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
             <!-- History items will be dynamically added here -->
           </ul>
         </div>
@@ -481,15 +449,15 @@
         </div>
       </div>
     </div>
-  <!-- Resizers -->
-  <div class="resizer top-left w-2 h-2 -top-1 -left-1 cursor-nwse-resize absolute z-10"></div>
-  <div class="resizer top-right w-2 h-2 -top-1 -right-1 cursor-nesw-resize absolute z-10"></div>
-  <div class="resizer bottom-left w-2 h-2 -bottom-1 -left-1 cursor-nesw-resize absolute z-10"></div>
-  <div class="resizer bottom-right w-2 h-2 -bottom-1 -right-1 cursor-nwse-resize absolute z-10"></div>
-  <div class="resizer top h-1 w-full -top-1 left-0 cursor-ns-resize absolute z-10"></div>
-  <div class="resizer bottom h-1 w-full -bottom-1 left-0 cursor-ns-resize absolute z-10"></div>
-  <div class="resizer left w-1 h-full top-0 -left-1 cursor-ew-resize absolute z-10"></div>
-  <div class="resizer right w-1 h-full top-0 -right-1 cursor-ew-resize absolute z-10"></div>
+    <!-- Resizers -->
+    <div class="resizer top-left w-2 h-2 -top-1 -left-1 cursor-nwse-resize absolute z-10"></div>
+    <div class="resizer top-right w-2 h-2 -top-1 -right-1 cursor-nesw-resize absolute z-10"></div>
+    <div class="resizer bottom-left w-2 h-2 -bottom-1 -left-1 cursor-nesw-resize absolute z-10"></div>
+    <div class="resizer bottom-right w-2 h-2 -bottom-1 -right-1 cursor-nwse-resize absolute z-10"></div>
+    <div class="resizer top h-1 w-full -top-1 left-0 cursor-ns-resize absolute z-10"></div>
+    <div class="resizer bottom h-1 w-full -bottom-1 left-0 cursor-ns-resize absolute z-10"></div>
+    <div class="resizer left w-1 h-full top-0 -left-1 cursor-ew-resize absolute z-10"></div>
+    <div class="resizer right w-1 h-full top-0 -right-1 cursor-ew-resize absolute z-10"></div>
   </div>
 
 </div>
