@@ -30,7 +30,7 @@
           <a href="<%= template[:url] %>" target="_blank" class="px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block text-sm sm:text-base">
             View
           </a>
-          <button class="use-template-btn px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out text-sm sm:text-base">
+          <button class="use-template-btn px-4 sm:px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out text-sm sm:text-base" data-template-content="<%= j template[:content] %>" data-template-name="<%= j template[:name] %>">
             Use this Template
           </button>
         </div>
@@ -40,6 +40,7 @@
 </div>
 
 <div class="mx-auto md:w-3/4 w-full px-4 sm:px-6 lg:px-8">
+  <span id="page_form_section">
   <%= render "form", page: @page %>
 
   <%= link_to "Back to Web Pages", pages_path, class: "mt-4 sm:mt-6 rounded-lg py-2 sm:py-3 px-4 sm:px-5 bg-gray-100 inline-block font-medium text-sm sm:text-base" %>
@@ -55,6 +56,29 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof editor !== 'undefined') {
         editor.setValue(decodedContent);
       }
+      
+      //navigate user to #page_form_section on this same page. 
+      document.getElementById('page_slug').scrollIntoView({ behavior: 'smooth' });
+
+      //fill out url with template name and random 4 letter string index to make it easier for user to save page & move forward
+      const templateName = this.getAttribute('data-template-name');
+      const random4LetterString = Math.random().toString(36).substring(2, 6);
+      document.getElementById('page_slug').value = templateName + "-" + random4LetterString;
+
+      //prettify the new content so it looks nice in the HTML format.
+      var currentContent = editor.getValue();
+      var prettifiedContent = prettier.format(currentContent, {
+        parser: "html",
+        plugins: prettierPlugins,
+        printWidth: 120,
+        tabWidth: 2,
+        useTabs: false,
+        singleQuote: true,
+        bracketSameLine: true,
+      });
+      editor.setValue(prettifiedContent);
+
+      showNotification('Successfully loaded template -- save to continue', 'success');
     });
   });
 
