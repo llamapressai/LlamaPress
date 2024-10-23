@@ -44,6 +44,13 @@ class LlamaBotController < ApplicationController
       # 2. Discuss with Danish - contenteditable so that users can edit content they select with llamabot.
         # 2a. Something to take HTML from llamabot js client and save to the webpage.
       
+      #TODO: Save llama_bot_response to the database. How do we do this? 
+      
+      # llama_message = LlamaMessage.new(user_message: user_message, bot_message: llama_bot_response, web_page_id: webPageId)
+      # llama_bot_message.save #user_id 
+      # from: llama_bot.rb
+      # llama_message.save
+
       render json: { response: llama_bot_response }
     end
 
@@ -66,7 +73,23 @@ class LlamaBotController < ApplicationController
 
     # get /llama_bot/templates
     def templates
+      # get html content from each file in templates folder
+        @templates = Dir.glob(Rails.root.join('app', 'views', 'llama_bot', 'templates', '*.html*')).map do |file|
+          {
+            url:  "/llama_bot/templates/" + file.split('/').last.chomp('.html'),
+            name: file.split('/').last.chomp('.html'),
+            content: File.read(file)
+          }
+        end
+
         render 'llama_bot/templates'
+    end
+
+    # get /llama_bot/templates/:template
+    def template
+      template_name = params[:template]
+      template_content = File.read(Rails.root.join('app', 'views', 'llama_bot', 'templates', "#{template_name}.html"))
+      render inline: template_content
     end
 
     private

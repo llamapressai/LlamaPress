@@ -36,6 +36,7 @@ Rails.application.routes.draw do
   get "llama_bot/models" => "llama_bot#models", as: :llama_bot_models
   get "llama_bot/database" => "llama_bot#database", as: :llama_bot_database
   get "llama_bot/templates" => "llama_bot#templates", as: :llama_bot_templates
+  get "llama_bot/templates/:template" => "llama_bot#template", as: :llama_bot_template
   get '/p/:id' => 'pages#show', as: :page_show #scope /w/ pages for easier page sharing
 
   get '/pages/:id/preview' => 'pages#preview', as: :page_preview

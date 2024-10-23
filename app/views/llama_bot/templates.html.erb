@@ -1,0 +1,24 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+  <% @templates.each do |template| %>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="aspect-[4/3] w-full">
+        <iframe 
+          src="<%= template[:url] %>" 
+          title="<%= template[:name] %>" 
+          class="w-full h-full border-0"
+        ></iframe>
+      </div>
+      <div class="p-6 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
+        <div class="space-x-3">
+          <button class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out">
+            View
+          </button>
+          <button class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
