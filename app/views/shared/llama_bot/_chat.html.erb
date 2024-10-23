@@ -60,7 +60,7 @@
     class="text-white text-xs md:text-sm whitespace-nowrap"
     data-llama="app/views/shared/_chat.html.erb"
   >
-    What do you want to build?
+    What do you want to change?
   </p>
   <!-- Bubble tail -->
   <div
@@ -120,7 +120,8 @@
         class="flex items-center"
         data-llama="app/views/shared/_chat.html.erb"
       >
-        <button
+      <!-- Temporarily Disabling until we have a better use for it -- History is now being added into the Chat Window Directly -->
+<!--        <button
           id="historyButton"
           class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
           title="Chat History"
@@ -140,7 +141,7 @@
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-        </button>
+        </button>-->
         <button
           id="expandButton"
           class="mr-2 text-xl hover:text-blue-200 transition-colors duration-200"
