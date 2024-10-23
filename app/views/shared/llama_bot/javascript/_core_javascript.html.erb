@@ -306,42 +306,76 @@
     }
 
     function addPageHistoryToMessagesArea(history) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "mb-4 flex flex-col items-end";
+      // Create header section if it doesn't exist
+      let headerSection = document.getElementById('pageHistoryHeader');
+      if (!headerSection) {
+        headerSection = document.createElement('div');
+        headerSection.id = 'pageHistoryHeader';
+        headerSection.className = 'mb-4 text-center font-bold text-lg';
+        headerSection.textContent = 'Page Change History';
+        chatbotMessages.appendChild(headerSection);
+      }
 
-      const labelContainer = document.createElement("div");
-      labelContainer.className = "flex items-center mb-1";
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mb-4 flex items-start';
 
-      const label = document.createElement("span");
-      label.className = "text-xs text-gray-500";
-      label.textContent = "Page Change:";
+      // Timeline visualization
+      const timeline = document.createElement('div');
+      timeline.className = 'mr-4 flex flex-col items-center';
+      
+      const dot = document.createElement('div');
+      dot.className = 'w-4 h-4 rounded-full bg-blue-500';
+      
+      const line = document.createElement('div');
+      line.className = 'w-0.5 h-full bg-gray-300 -mt-2';
+      
+      timeline.appendChild(dot);
+      timeline.appendChild(line);
 
-      const viewButton = document.createElement("button");
-      viewButton.className = "text-blue-500 hover:text-blue-700 text-xs underline ml-2";
-      viewButton.textContent = "View";
-      viewButton.addEventListener("click", function() {
-        console.log("History item clicked:", history);
-        const modal = document.getElementById("historyModal");
-        const mainIframe = document.getElementById("mainIframe");
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'flex-grow';
+
+      const labelContainer = document.createElement('div');
+      labelContainer.className = 'flex items-center mb-1';
+
+      const timestamp = document.createElement('span');
+      timestamp.className = 'text-xs text-gray-500 mr-2';
+      timestamp.textContent = new Date(history.created_at).toLocaleString();
+
+      const label = document.createElement('span');
+      label.className = 'text-xs text-gray-700 font-semibold';
+      label.textContent = 'Page Change:';
+
+      const viewButton = document.createElement('button');
+      viewButton.className = 'text-blue-500 hover:text-blue-700 text-xs underline ml-2';
+      viewButton.textContent = 'View';
+      viewButton.addEventListener('click', function() {
+        console.log('History item clicked:', history);
+        const modal = document.getElementById('historyModal');
+        const mainIframe = document.getElementById('mainIframe');
         mainIframe.innerHTML = atob(history.content);
-        document.getElementById("userPrompt").innerHTML = history.user_message;
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
+        document.getElementById('userPrompt').innerHTML = history.user_message;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document
-          .getElementById("restoreButton")
-          .setAttribute("llama-data-web-page-history-id", history.id);
+          .getElementById('restoreButton')
+          .setAttribute('llama-data-web-page-history-id', history.id);
       });
 
+      labelContainer.appendChild(timestamp);
       labelContainer.appendChild(label);
       labelContainer.appendChild(viewButton);
-      wrapper.appendChild(labelContainer);
+      contentWrapper.appendChild(labelContainer);
 
-      const pageHistoryDiv = document.createElement("div");
-      pageHistoryDiv.className = "mb-1 p-2 rounded bg-gray-100 text-xs text-center";
+      const pageHistoryDiv = document.createElement('div');
+      pageHistoryDiv.className = 'p-2 rounded bg-gray-100 text-sm';
       
       const prompt = history.prompt || history.user_message;
       pageHistoryDiv.innerHTML = `"${prompt}"`;
-      wrapper.appendChild(pageHistoryDiv);
+      contentWrapper.appendChild(pageHistoryDiv);
+
+      wrapper.appendChild(timeline);
+      wrapper.appendChild(contentWrapper);
 
       chatbotMessages.appendChild(wrapper);
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
@@ -750,5 +784,6 @@
       document.getElementById("historyDrawer").classList.add("hidden");
     });
 </script>
+
 
 
