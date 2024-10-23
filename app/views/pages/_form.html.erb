@@ -21,7 +21,7 @@
   <div class="inline">
     <%= form.submit "Save", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
     <button type="button" id="reset-content" class="rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2">Reset Content</button>
-    <button type="button" id="preview-content" class="rounded-lg py-3 px-5 bg-green-600 text-white inline-block font-medium cursor-pointer ml-2">Preview</button>
+    <button type="button" id="preview-content" class="rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2">Preview</button>
   </div>
 
   <div id="preview-container" class="my-5 hidden">
@@ -256,7 +256,7 @@
     // Add a new Prettify button
     var prettifyButton = document.createElement('button');
     prettifyButton.textContent = 'Prettify';
-    prettifyButton.className = 'rounded-lg py-3 px-5 bg-purple-600 text-white inline-block font-medium cursor-pointer ml-2';
+    prettifyButton.className = 'rounded-lg py-3 px-5 bg-gray-600 text-white inline-block font-medium cursor-pointer ml-2';
     prettifyButton.addEventListener('click', function(event) {
       event.preventDefault();
       var currentContent = editor.getValue();
