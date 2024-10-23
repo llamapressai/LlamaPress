@@ -32,34 +32,29 @@
 
 <div
   class="fixed bottom-4 right-4 z-50"
-  data-llama="app/views/shared/_chat.html.erb exclude_when_saving_contenteditable_edits"
->
+  data-llama="app/views/shared/_chat.html.erb exclude_when_saving_contenteditable_edits">
   <!-- Chat icon -->
   <div
     id="chatIcon"
     class="w-12 h-12 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer"
-    data-llama="app/views/shared/_chat.html.erb"
-  >
+    data-llama="app/views/shared/_chat.html.erb">
     <img
       src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7"
       alt="LlamaPress Logo"
       class="h-8 w-8 md:h-12 md:w-12 llama-prevent-img-resize"
-      data-llama="app/views/shared/_chat.html.erb"
-    />
+      data-llama="app/views/shared/_chat.html.erb"/>
   </div>
 
   <!-- Chat bubble -->
   <div
     class="absolute bottom-16 md:bottom-20 right-0 bg-gray-800 rounded-lg p-2 md:p-3 shadow-lg"
-    data-llama="app/views/shared/_chat.html.erb"
-  >
+    data-llama="app/views/shared/_chat.html.erb">
   <div role="status" class="hidden is-thinking">
     <svg aria-hidden="true" class="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg> <span class="sr-only">Loading...</span>
   </div>
   <p
     class="text-white text-xs md:text-sm whitespace-nowrap"
-    data-llama="app/views/shared/_chat.html.erb"
-  >
+    data-llama="app/views/shared/_chat.html.erb">
     What do you want to change?
   </p>
   <!-- Bubble tail -->
@@ -152,199 +147,110 @@
       id="chatbotMessages"
       class="flex-grow overflow-y-auto p-4 text-black"
       data-llama="app/views/shared/_chat.html.erb">
-      <div
-        id="historyDrawer"
-        class="hidden bg-white border-l border-gray-300 absolute right-0 top-0 h-full w-64 shadow-lg transition-all duration-300 ease-in-out">
-        <div class="p-4">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-semibold text-lg">Chat History</h3>
-            <button
-              id="closeHistoryDrawer"
-              class="text-gray-500 hover:text-gray-700 focus:outline-none">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <ul
-            id="historyList"
-            class="space-y-2 overflow-y-auto max-h-[calc(100vh-200px)]">
-            <!-- History items will be dynamically added here -->
-          </ul>
+      <!-- Messages and history will be here -->
+    </div>
+
+    <div id="llama-chat-toolbar">
+      <div id="imagesForUserToSelect" class="flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2">
+        <p id="imageUploadingLabel" class="text-red-500 text-center hidden mb-4 text-lg font-semibold">
+          Your images are being saved... please wait for them to finish uploading before submitting!
+        </p>
+        <p id="imagesDoneUploading" class="text-green-600 text-center hidden mb-4 text-lg font-semibold">
+          Your images are saved! You can now submit. 👍
+        </p>
+        <div class="upload flex flex-col items-center space-y-4">
+          <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+            <span id="file_name_show" class="text-xl">Upload your images</span>
+          </label>
+          <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
+        </div>
+      
+        <div id="upload-preview" class="hidden grid grid-cols-3 gap-4 mt-6 p-4 bg-white rounded-lg shadow-inner border border-gray-200">
+          <!-- Images will be displayed here -->
+        </div>
+      
+        <button id="submitButton" name="submit" class="w-4/5 mx-auto bg-green-500 hidden hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg mt-6 transform hover:scale-105 transition duration-300 ease-in-out" onclick="submitPreuploadedS3ImagesToServer()">
+          Submit <i id="submitIcon" class="gg-arrow-long-right ml-2"></i>
+        </button>
+      
+        <!-- this is where images load into -->
+        <div id="image-container" class="flex justify-around">
         </div>
       </div>
-    </div>
 
-
-    <div id="imagesForUserToSelect" class="flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2">
-      <p id="imageUploadingLabel" class="text-red-500 text-center hidden mb-4 text-lg font-semibold">
-        Your images are being saved... please wait for them to finish uploading before submitting!
-      </p>
-      <p id="imagesDoneUploading" class="text-green-600 text-center hidden mb-4 text-lg font-semibold">
-        Your images are saved! You can now submit. 👍
-      </p>
-      <div class="upload flex flex-col items-center space-y-4">
-        <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
-          <span id="file_name_show" class="text-xl">Upload your images</span>
-        </label>
-        <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
-      </div>
-    
-      <div id="upload-preview" class="hidden grid grid-cols-3 gap-4 mt-6 p-4 bg-white rounded-lg shadow-inner border border-gray-200">
-        <!-- Images will be displayed here -->
-      </div>
-    
-      <button id="submitButton" name="submit" class="w-4/5 mx-auto bg-green-500 hidden hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg mt-6 transform hover:scale-105 transition duration-300 ease-in-out" onclick="submitPreuploadedS3ImagesToServer()">
-        Submit <i id="submitIcon" class="gg-arrow-long-right ml-2"></i>
-      </button>
-    
-      <!-- this is where images load into -->
-      <div id="image-container" class="flex justify-around">
-      </div>
-    </div>
-
-    <div id="promptsContainer" class="py-4 bg-gray-50">
-      <div class="text-sm font-medium text-gray-600 mb-3 ml-4">Prompt Ideas:</div>
-      <div class="overflow-x-auto">
-        <div id="promptsList" class="inline-flex space-x-3 px-4"> 
-          <div data-llama-prompt="Improve this design 10x. Make it beautiful, modern, and use font awesome icons and aos animations." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-            💡 Improve design 10X
-          </div>
-          <div data-llama-prompt="Please add a cool fall animation overlay to this page with falling leaf and pumpkin emojis using css keyframe animations" class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-            🎃 Add Halloween animation
-          </div>
-          <div data-llama-prompt="Optimize this page for mobile devices with tailwind css. Ensure responsive design, improve load times, and enhance touch interactions." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-            Optimize for mobile
+      <div id="promptsContainer" class="py-4 bg-gray-50">
+        <div class="text-sm font-medium text-gray-600 mb-3 ml-4">Prompt Ideas:</div>
+        <div class="overflow-x-auto">
+          <div id="promptsList" class="inline-flex space-x-3 px-4"> 
+            <div data-llama-prompt="Improve this design 10x. Make it beautiful, modern, and use font awesome icons and aos animations." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
+              💡 Improve design 10X
+            </div>
+            <div data-llama-prompt="Please add a cool fall animation overlay to this page with falling leaf and pumpkin emojis using css keyframe animations" class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
+              🎃 Add Halloween animation
+            </div>
+            <div data-llama-prompt="Optimize this page for mobile devices with tailwind css. Ensure responsive design, improve load times, and enhance touch interactions." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
+              Optimize for mobile
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="flex flex-col"
-      data-llama="app/views/shared/_chat.html.erb"
-    >
       <div
-        class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100"
-        data-llama="app/views/shared/_chat.html.erb"
-      >
-        <button
-          onclick="toggleSelectionMode()"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
-          title="Select element"
-          data-llama="app/views/shared/_chat.html.erb"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            data-llama="app/views/shared/_chat.html.erb"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-              data-llama="app/views/shared/_chat.html.erb"
-            />
-          </svg>
-          <span class="text-xs mt-1 text-gray-600">Select</span>
-        </button>
-        <button
-          id="toggleImagesForUserToSelect"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
-          title="Insert image"
-          data-llama="app/views/shared/_chat.html.erb"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            data-llama="app/views/shared/_chat.html.erb"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              data-llama="app/views/shared/_chat.html.erb"
-            />
-          </svg>
-          <span class="text-xs mt-1 text-gray-600">Image</span>
-        </button>
-        <button
-          id="toggleCodeSnippets"
-          class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
-          title="Show code snippets"
-          data-llama="app/views/shared/_chat.html.erb"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            data-llama="app/views/shared/_chat.html.erb"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-              data-llama="app/views/shared/_chat.html.erb"
-            />
-          </svg>
-          <span class="text-xs mt-1 text-gray-600">Snippets</span>
-        </button>
-        <button
-          id="togglePrompts"
-          class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
-          title="Toggle prompt suggestions"
-          onclick="togglePromptsContainer()"
-          data-llama="app/views/shared/_chat.html.erb">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-            />
-          </svg>
-          <span class="text-xs mt-1 text-gray-600">Prompts</span>
-        </button>        
+        class="flex flex-col"
+        data-llama="app/views/shared/_chat.html.erb">
         <div
-          id="selectedElementContainer"
-          class="flex-grow rounded-md mx-2 p-2 flex items-center justify-center hidden relative"
-          style="max-width: 500px; max-height: 180px"
-          llama-tag="app/views/shared/_chat.html.erb"
-          data-llama="app/views/shared/_chat.html.erb"
-        >
+          class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100"
+          data-llama="app/views/shared/_chat.html.erb">
           <button
-            id="closeSelectedElement"
-            class="absolute top-0 left-0 text-red-500 hover:text-red-700 focus:outline-none z-10 p-1"
+            onclick="toggleSelectionMode()"
+            class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
+            title="Select element"
+            data-llama="app/views/shared/_chat.html.erb">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              data-llama="app/views/shared/_chat.html.erb">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                data-llama="app/views/shared/_chat.html.erb"/>
+            </svg>
+            <span class="text-xs mt-1 text-gray-600">Select</span>
+          </button>
+          <button
+            id="toggleImagesForUserToSelect"
+            class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
+            title="Insert image"
+            data-llama="app/views/shared/_chat.html.erb">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              data-llama="app/views/shared/_chat.html.erb">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                data-llama="app/views/shared/_chat.html.erb"/>
+            </svg>
+            <span class="text-xs mt-1 text-gray-600">Image</span>
+          </button>
+          <button
+            id="toggleCodeSnippets"
+            class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
+            title="Show code snippets"
             data-llama="app/views/shared/_chat.html.erb"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
+              class="h-5 w-5 text-gray-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -354,66 +260,119 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
+                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                 data-llama="app/views/shared/_chat.html.erb"
               />
             </svg>
+            <span class="text-xs mt-1 text-gray-600">Snippets</span>
           </button>
+          <button
+            id="togglePrompts"
+            class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center"
+            title="Toggle prompt suggestions"
+            onclick="togglePromptsContainer()"
+            data-llama="app/views/shared/_chat.html.erb">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+            <span class="text-xs mt-1 text-gray-600">Prompts</span>
+          </button>        
           <div
-            id="selectedElementContent"
-            class="text-sm overflow-auto w-full h-full"
+            id="selectedElementContainer"
+            class="flex-grow rounded-md mx-2 p-2 flex items-center justify-center hidden relative"
             style="max-width: 500px; max-height: 180px"
+            llama-tag="app/views/shared/_chat.html.erb"
             data-llama="app/views/shared/_chat.html.erb"
-          ></div>
+          >
+            <button
+              id="closeSelectedElement"
+              class="absolute top-0 left-0 text-red-500 hover:text-red-700 focus:outline-none z-10 p-1"
+              data-llama="app/views/shared/_chat.html.erb"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                data-llama="app/views/shared/_chat.html.erb"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                  data-llama="app/views/shared/_chat.html.erb"
+                />
+              </svg>
+            </button>
+            <div
+              id="selectedElementContent"
+              class="text-sm overflow-auto w-full h-full"
+              style="max-width: 500px; max-height: 180px"
+              data-llama="app/views/shared/_chat.html.erb"
+            ></div>
+          </div>
         </div>
-      </div>
 
-      <!-- New div for code snippets -->
-      <div id="codeSnippetsContainer" class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
-          <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
-          <% if current_user&.organization&.snippets&.any? %>
-              <ul class="space-y-2"> 
-                  <% current_user.organization.snippets.each do |snippet| %>
-                      <li class="bg-white p-2 rounded shadow">
-                          <h4 class="font-medium"><%= snippet.name %></h4>
-                          <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
-                          
-                          <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
-                          
-                          <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
-                          <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
-                      </li>
-                  <% end %>
-              </ul>
-              
-              <!-- TODO: Move JavaScript to separate file -->
-              <script>
-              function copyToClipboard(text) {
-                navigator.clipboard.writeText(text).then(function() {
-                  console.log('Copying to clipboard was successful!');
-                }, function(err) {
-                  console.error('Could not copy text: ', err);
-                });
-              }
+        <!-- New div for code snippets -->
+        <div id="codeSnippetsContainer" class="hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
+            <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
+            <% if current_user&.organization&.snippets&.any? %>
+                <ul class="space-y-2"> 
+                    <% current_user.organization.snippets.each do |snippet| %>
+                        <li class="bg-white p-2 rounded shadow">
+                            <h4 class="font-medium"><%= snippet.name %></h4>
+                            <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
+                            
+                            <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
+                            
+                            <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
+                            <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
+                        </li>
+                    <% end %>
+                </ul>
+                
+                <!-- TODO: Move JavaScript to separate file -->
+                <script>
+                function copyToClipboard(text) {
+                  navigator.clipboard.writeText(text).then(function() {
+                    console.log('Copying to clipboard was successful!');
+                  }, function(err) {
+                    console.error('Could not copy text: ', err);
+                  });
+                }
 
-              function toggleSnippetContent(snippetId) {
-                  var contentId = 'snippet-content-' + snippetId;
-                  var content = document.getElementById(contentId);
-                  var button = content.previousElementSibling;
-                  
-                  if (content.classList.contains('hidden')) {
-                      content.classList.remove('hidden');
-                      button.textContent = 'Hide';
-                  } else {
-                      content.classList.add('hidden');
-                      button.textContent = 'View';
-                  }
-              }
-              </script>
-          <% else %>
-              <p class="text-gray-600">No code snippets available.</p>
-          <% end %>
+                function toggleSnippetContent(snippetId) {
+                    var contentId = 'snippet-content-' + snippetId;
+                    var content = document.getElementById(contentId);
+                    var button = content.previousElementSibling;
+                    
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        button.textContent = 'Hide';
+                    } else {
+                        content.classList.add('hidden');
+                        button.textContent = 'View';
+                    }
+                }
+                </script>
+            <% else %>
+                <p class="text-gray-600">No code snippets available.</p>
+            <% end %>
       </div>
+    </div>
 
       <div
         class="p-2 md:p-4 border-t border-gray-300 flex flex-col"
