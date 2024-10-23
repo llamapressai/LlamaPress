@@ -1,5 +1,5 @@
 <div id="llama-chat-toolbar">
-    <div id="imagesForUserToSelect" class="flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2">
+    <div id="imagesForUserToSelect" class="llama-chat-toolbar-window flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2">
         <p id="imageUploadingLabel" class="text-red-500 text-center hidden mb-4 text-lg font-semibold">
             Your images are being saved... please wait for them to finish uploading before submitting!
         </p>
@@ -8,15 +8,14 @@
         </p>
 
         <div class="upload flex flex-col items-center space-y-4">
-
-        <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
-            <span id="file_name_show" class="text-xl">Upload your images</span>
-        </label>
-        <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
-    </div>
+            <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+                <span id="file_name_show" class="text-xl">Upload your images</span>
+            </label>
+            <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
+        </div>
         
         <div id="upload-preview" class="hidden grid grid-cols-3 gap-4 mt-6 p-4 bg-white rounded-lg shadow-inner border border-gray-200">
-            <!-- Images will be displayed here -->
+            <!-- Images about to be uploaded will be displayed here -->
         </div>
     
         <button id="submitButton" name="submit" class="w-4/5 mx-auto bg-green-500 hidden hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg mt-6 transform hover:scale-105 transition duration-300 ease-in-out" onclick="submitPreuploadedS3ImagesToServer()">
@@ -25,6 +24,7 @@
         
         <!-- this is where images load into -->
         <div id="image-container" class="flex justify-around">
+            <!-- Saved images show here -->
         </div>
     </div>
 
@@ -48,6 +48,7 @@
     </div>
 
     <div class="flex flex-col" data-llama="app/views/shared/llama_bot/chat/_chat_toolbar.html.erb">
+        <!-- Buttons container on chat toolbar -->
         <div class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100" data-llama="app/views/shared/_chat.html.erb">
             <!-- Button to Toggle Select Element Mode -->
             <button onclick="toggleSelectionMode()" class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center" title="Select element" data-llama="app/views/shared/_chat.html.erb">
@@ -157,7 +158,7 @@
 
         </div>
 
-        <!-- Code Snippets Window -->
+        <!-- Code Snippets Window (displays underneath toolbars) -->
         <div id="codeSnippetsContainer" class="llama-chat-toolbar-window hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
             <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
             <% if current_user&.organization&.snippets&.any? %>
@@ -175,27 +176,27 @@
                 
                 <!-- Code Snippets Javascript Logic -->
                 <script>
-                function copyToClipboard(text) {
-                    navigator.clipboard.writeText(text).then(function() {
-                    console.log('Copying to clipboard was successful!');
-                    }, function(err) {
-                    console.error('Could not copy text: ', err);
-                    });
-                }
-
-                function toggleSnippetContent(snippetId) {
-                    var contentId = 'snippet-content-' + snippetId;
-                    var content = document.getElementById(contentId);
-                    var button = content.previousElementSibling;
-                    
-                    if (content.classList.contains('hidden')) {
-                        content.classList.remove('hidden');
-                        button.textContent = 'Hide';
-                    } else {
-                        content.classList.add('hidden');
-                        button.textContent = 'View';
+                    function copyToClipboard(text) {
+                        navigator.clipboard.writeText(text).then(function() {
+                        console.log('Copying to clipboard was successful!');
+                        }, function(err) {
+                        console.error('Could not copy text: ', err);
+                        });
                     }
-                }
+
+                    function toggleSnippetContent(snippetId) {
+                        var contentId = 'snippet-content-' + snippetId;
+                        var content = document.getElementById(contentId);
+                        var button = content.previousElementSibling;
+                        
+                        if (content.classList.contains('hidden')) {
+                            content.classList.remove('hidden');
+                            button.textContent = 'Hide';
+                        } else {
+                            content.classList.add('hidden');
+                            button.textContent = 'View';
+                        }
+                    }
                 </script>
             <% else %>
                 <p class="text-gray-600">No code snippets available.</p>
