@@ -1,33 +1,43 @@
-
-<div class="mx-auto md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">New Web Page</h1>
-  <h2 class="font-bold text-2xl">Starting Templates:</h2>
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-8 mb-8">
+    <h1 class="font-bold text-4xl text-white mb-2 flex items-center">
+      <i class="fas fa-file-alt mr-4 text-yellow-300"></i>
+      Create a New Web Page
+    </h1>
+    <p class="text-blue-100 text-lg">Design your perfect web page with our easy-to-use templates</p>
   </div>
   
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-    <% @templates.each do |template| %>
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="aspect-[4/3] w-full border-1 border-gray-200">
-          <iframe 
-            src="<%= template[:url] %>" 
-            title="<%= template[:name] %>" 
-            class="w-full h-full border-0"
-          ></iframe>
-        </div>
-        <div class="p-6 flex justify-between items-center">
-          <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
-          <div class="space-x-3">
-            <a href="<%= template[:url] %>" target="_blank" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block">
-              View
-            </a>
-            <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
-              Use this Template
-            </button>
-          </div>
+  <h2 class="font-bold text-3xl text-gray-800 mb-6 flex items-center">
+    <i class="fas fa-th-large mr-4 text-blue-500"></i>
+    Choose a Starting Template
+  </h2>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+  <% @templates.each do |template| %>
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="aspect-[4/3] w-full border-1 border-gray-200">
+        <iframe 
+          src="<%= template[:url] %>" 
+          title="<%= template[:name] %>" 
+          class="w-full h-full border-0"
+        ></iframe>
+      </div>
+      <div class="p-6 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
+        <div class="space-x-3">
+          <a href="<%= template[:url] %>" target="_blank" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-block">
+            View
+          </a>
+          <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
+            Use this Template
+          </button>
         </div>
       </div>
-    <% end %>
-  </div>
+    </div>
+  <% end %>
+</div>
+
 <div class="mx-auto md:w-3/4 w-full">
   <%= render "form", page: @page %>
 
