@@ -73,16 +73,8 @@ class LlamaBotController < ApplicationController
 
     # get /llama_bot/templates
     def templates
-      # get html content from each file in templates folder
-        @templates = Dir.glob(Rails.root.join('app', 'views', 'llama_bot', 'templates', '*.html*')).map do |file|
-          {
-            url:  "/llama_bot/templates/" + file.split('/').last.chomp('.html'),
-            name: file.split('/').last.chomp('.html'),
-            content: File.read(file)
-          }
-        end
-
-        render 'llama_bot/templates'
+      @templates = PagesHelper.get_starting_templates # get html content from each file in templates folder
+      render 'llama_bot/templates'
     end
 
     # get /llama_bot/templates/:template

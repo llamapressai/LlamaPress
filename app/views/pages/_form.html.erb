@@ -67,6 +67,9 @@
     });
     editor.setSize("100%", "auto");
     
+    // make global
+    window.editor = editor; 
+    
     // Refresh the editor after a short delay to ensure proper sizing
     setTimeout(function() {
       editor.refresh();

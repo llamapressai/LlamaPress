@@ -91,6 +91,7 @@ class PagesController < ApplicationController
   def new
     @page = current_organization.pages.build
     @site_id = params[:site_id].present? ? params[:site_id] : current_site.id
+    @templates = PagesHelper.get_starting_templates # get html content from each file in templates folder
   end
 
   # GET /pages/1/edit

@@ -1,4 +1,17 @@
 module PagesHelper
+
+    def self.get_starting_templates
+        # get html content from each file in templates folder
+        templates = Dir.glob(Rails.root.join('app', 'views', 'llama_bot', 'templates', '*.html*')).map do |file|
+            {
+                url:  "/llama_bot/templates/" + file.split('/').last.chomp('.html'),
+                name: file.split('/').last.chomp('.html'),
+                content: File.read(file)
+            }
+        end
+        return templates
+    end
+
     def self.starting_html_content
         <<~HTML
 <!DOCTYPE html><html lang="en"><head data-llama-id="0">

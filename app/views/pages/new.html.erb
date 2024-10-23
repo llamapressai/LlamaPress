@@ -1,7 +1,54 @@
 <div class="mx-auto md:w-2/3 w-full">
   <h1 class="font-bold text-4xl">New Web Page</h1>
 
+  <h2 class="font-bold text-2xl">Starting Templates:</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+    <% @templates.each do |template| %>
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="aspect-[4/3] w-full">
+          <iframe 
+            src="<%= template[:url] %>" 
+            title="<%= template[:name] %>" 
+            class="w-full h-full border-0"
+          ></iframe>
+        </div>
+        <div class="p-6 flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-gray-800"><%= template[:name] %></h3>
+          <button class="use-template-btn px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out" data-template-content="<%= j template[:content] %>">
+            Use this Template
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
   <%= render "form", page: @page %>
 
   <%= link_to "Back to Web Pages", pages_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const useTemplateButtons = document.querySelectorAll('.use-template-btn');
+  useTemplateButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const templateContent = this.getAttribute('data-template-content');
+      const decodedContent = decodeDoubleEscapedHTML(templateContent);
+      if (typeof editor !== 'undefined') {
+        editor.setValue(decodedContent);
+      }
+    });
+  });
+
+  function decodeDoubleEscapedHTML(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text
+      .replace(/\\\\/g, '\\')
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+      .replace(/\\\//g, '/');  // New line to handle escaped forward slashes
+    return textarea.value;
+  }
+});
+</script>
