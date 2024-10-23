@@ -260,7 +260,6 @@
         </div>
       </div>
     </div>
-    
     <div
       class="flex flex-col"
       data-llama="app/views/shared/_chat.html.erb"
@@ -500,6 +499,6 @@
 <%= render partial: 'shared/llama_bot/chat_javascript' %>
 <% if current_user.present? && controller_name == 'pages' && action_name == 'show' %> 
   <%= render partial: 'shared/llama_bot/javascript/contenteditable_javascript' %> 
-  <%= render partial: 'shared/llama_bot/toolbar' %> 
+  <%= render partial: 'shared/llama_bot/floating_toolbar' %> 
   <%= render partial: 'shared/llama_bot/context_menu' %> 
 <% end %>
