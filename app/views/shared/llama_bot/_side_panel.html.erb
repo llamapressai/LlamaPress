@@ -1,32 +1,69 @@
 <!-- Side panel for the Llama Bot, includes the html and javascript for managing it -->
-<div id="llama-side-panel" class="fixed top-0 left-0 h-full w-72 bg-gray-100 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 text-gray-800" data-llama="exclude_when_saving_contenteditable_edits">
-  <button id="llama-toggle-panel" class="absolute right-0 top-4 -mr-10 bg-gray-100 p-2 rounded-r cursor-pointer">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-    </svg>
+<div id="llama-side-panel" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-br from-slate-800 to-slate-900 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 text-gray-100 shadow-2xl" data-llama="exclude_when_saving_contenteditable_edits">
+  <!-- Toggle Button with smooth hover effect -->
+  <button id="llama-toggle-panel" class="absolute right-0 top-6 -mr-12 bg-slate-800 p-3 rounded-r-lg cursor-pointer hover:bg-slate-700 transition-all duration-300 shadow-lg group">
+    <i class="fas fa-bars text-gray-300 group-hover:text-white"></i>
   </button>
   
-  <div class="h-full overflow-y-auto p-4">
-    <div class="mb-4">
-      <div class="flex flex-col space-y-2">
-        <a href="/pages" class="text-blue-500 hover:text-blue-600 font-bold flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-          </svg>
-          Home
+  <div class="h-full overflow-y-auto">
+    <!-- Header Section with gradient overlay -->
+    <div class="relative p-6 bg-gradient-to-br from-purple-600/10 to-blue-600/10">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-white mb-2 font-sans">
+          <i class="fas fa-paint-brush text-purple-400 mr-2"></i>
+          Page Builder
+        </h1>
+        <p class="text-gray-400 text-sm">Create and manage your pages</p>
+      </div>
+
+      <!-- Navigation Links with enhanced styling -->
+      <div class="space-y-3">
+        <a href="/pages" class="flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-all duration-300">
+            <i class="fas fa-home text-blue-400 group-hover:text-blue-300"></i>
+          </div>
+          <span class="ml-3 font-medium text-gray-200 group-hover:text-white">Dashboard</span>
+          <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
         </a>
-        <a href="/pages/new" class="text-green-500 hover:text-green-600 font-bold flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-          </svg>
-          New Page
+
+        <a href="/pages/new" class="flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-all duration-300">
+            <i class="fas fa-plus text-emerald-400 group-hover:text-emerald-300"></i>
+          </div>
+          <span class="ml-3 font-medium text-gray-200 group-hover:text-white">New Page</span>
+          <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
         </a>
       </div>
     </div>
-    <hr class="my-2"/>
-    <h2 class="text-xl font-bold mb-2">Your Pages</h2>
-    <!-- TODO: Show the site's actual name rather than generic name. <=# @page&.site&.name || "your site" %> -->
-    <div id="iframe-list" class="space-y-6">
+
+    <!-- Section Divider -->
+    <div class="px-6 py-4">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="px-3 bg-slate-800 text-gray-500 text-sm">Your Content</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages Section Header -->
+    <div class="px-6 mb-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white flex items-center">
+          <i class="fas fa-folder-open text-yellow-400 mr-2"></i>
+          Your Pages
+        </h2>
+        <button class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-400 hover:text-white transition-all duration-300">
+          <i class="fas fa-sort-amount-down"></i>
+        </button>
+      </div>
+      <p class="text-sm text-gray-500 mt-1">Manage your website pages</p>
+    </div>
+
+    <!-- Rest of your content -->
+    <div id="iframe-list" class="px-6 space-y-6">
       <!-- Iframe items will be dynamically added here -->
     </div>
     <hr class="my-2"/>
@@ -455,5 +492,6 @@
     }
   });
 </script>
+
 
 
