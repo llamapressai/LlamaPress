@@ -1,9 +1,35 @@
 <!-- Side panel for the Llama Bot, includes the html and javascript for managing it -->
 <div id="llama-side-panel" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-br from-slate-800 to-slate-900 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 text-gray-100 shadow-2xl" data-llama="exclude_when_saving_contenteditable_edits">
   <!-- Toggle Button with smooth hover effect -->
-  <button id="llama-toggle-panel" class="absolute right-0 top-6 -mr-12 bg-slate-800 p-3 rounded-r-lg cursor-pointer hover:bg-slate-700 transition-all duration-300 shadow-lg group">
-    <i class="fas fa-bars text-gray-300 group-hover:text-white"></i>
-  </button>
+  <div class="absolute right-0 top-6 -mr-16 flex flex-col items-end">
+    <!-- Main hover trigger button -->
+    <button id="llama-menu-trigger" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
+      <i class="fas fa-bars text-purple-400 group-hover:text-purple-300"></i>
+      <span class="text-xs text-purple-400 group-hover:text-purple-300">Menu</span>
+    </button>
+
+    <!-- Hidden menu items that appear on hover -->
+    <div id="llama-menu-items" class="hidden group-hover/menu:flex flex-col gap-2 absolute top-0 right-0 pt-16 z-10">
+    <!--Disable these additional menu items for now:-->
+      <!-- Pages Button -->
+      <!--<button id="llama-toggle-panel" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-file-alt text-purple-400 group-hover:text-purple-300"></i>
+        <span class="text-xs text-purple-400 group-hover:text-purple-300">Pages</span>
+      </button>-->
+      
+      <!-- Components Button -->
+      <!--<button id="llama-components" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-puzzle-piece text-blue-400 group-hover:text-blue-300"></i>
+        <span class="text-xs text-blue-400 group-hover:text-blue-300">Components</span>
+      </button>-->
+      
+      <!-- Settings Button -->
+      <!--<button id="llama-settings" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-cog text-green-400 group-hover:text-green-300"></i>
+        <span class="text-xs text-green-400 group-hover:text-green-300">Settings</span>
+      </button>-->
+    </div>
+  </div>
   
   <div class="h-full overflow-y-auto">
     <!-- Header Section with gradient overlay -->
@@ -419,10 +445,18 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const panel = document.getElementById('llama-side-panel');
-    const toggleBtn = document.getElementById('llama-toggle-panel');
+    const toggleButtons = [
+        //disable these for now
+      //document.getElementById('llama-toggle-panel'), 
+      //document.getElementById('llama-components'),
+      //document.getElementById('llama-settings'),
+      document.getElementById('llama-menu-trigger')
+    ];
     
-    toggleBtn.addEventListener('click', function() {
-      panel.classList.toggle('-translate-x-full');
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        panel.classList.toggle('-translate-x-full');
+      });
     });
 
     setPagesOnSidePanel();
@@ -493,5 +527,29 @@
   });
 </script>
 
-
+<style>
+  /* Add these styles to handle the hover menu */
+  #llama-menu-trigger:hover + #llama-menu-items,
+  #llama-menu-items:hover {
+    display: flex;
+  }
+  
+  /* Optional: Add animation for smooth appearance */
+  #llama-menu-items button {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  #llama-menu-trigger:hover + #llama-menu-items button,
+  #llama-menu-items:hover button {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  /* Stagger the animation for each button */
+  #llama-menu-items button:nth-child(1) { transition-delay: 0.1s; }
+  #llama-menu-items button:nth-child(2) { transition-delay: 0.2s; }
+  #llama-menu-items button:nth-child(3) { transition-delay: 0.3s; }
+</style>
 
