@@ -485,10 +485,16 @@
           //<iframe src="${iframe.previewUrl}" class="w-full h-64 border-0" frameborder="0" scrolling="no"></iframe>
           iframeItem.innerHTML = `
             <a href="${iframe.url}" class="block">
-              <h3 class="text-lg underline text-blue-500 font-semibold mb-2">${iframe.title}</h3>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg underline text-blue-500 font-semibold">
+                  ${iframe.title}
+                </h3>
+                <a href="/pages/${iframe.id}/edit" class="ml-2">
+                  <i class="fas fa-pencil-alt text-gray-400 hover:text-gray-300 text-sm"></i>
+                </a>
+              </div>
               <div class="iframe-wrapper relative">
-              <!-- insert iframe here -->
-
+                <!-- insert iframe here -->
                 <div class="absolute inset-0"></div>
               </div>
             </a>
@@ -562,5 +568,3 @@
   #llama-menu-items button:nth-child(2) { transition-delay: 0.2s; }
   #llama-menu-items button:nth-child(3) { transition-delay: 0.3s; }
 </style>
-
-
