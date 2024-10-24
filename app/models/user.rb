@@ -6,6 +6,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable, :trackable
 
   belongs_to :organization
+  has_many :sites, through: :organization
+
   accepts_nested_attributes_for :organization
   after_create :notify_registration
 
