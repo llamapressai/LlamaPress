@@ -39,12 +39,23 @@ class SitesController < ApplicationController
   # PATCH/PUT /sites/1 or /sites/1.json
   def update
     respond_to do |format|
-      if @site.update(site_params)
-        format.html { redirect_to site_url(@site), notice: "web site was successfully updated." }
-        format.json { render :show, status: :ok, location: @site }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @site.errors, status: :unprocessable_entity }
+      begin
+        if @site.update(site_params)
+          format.html { redirect_to site_url(@site), notice: "Web site was successfully updated." }
+          format.json { render :show, status: :ok, location: @site }
+        else
+          format.html { 
+            flash.now[:alert] = @site.errors.full_messages.to_sentence
+            render :edit, status: :unprocessable_entity 
+          }
+          format.json { render json: @site.errors, status: :unprocessable_entity }
+        end
+      rescue ActiveRecord::RecordNotUnique => e
+        format.html {
+          flash.now[:alert] = "This slug is already taken. Please choose a different one."
+          render :edit, status: :unprocessable_entity
+        }
+        format.json { render json: { error: "Slug already taken" }, status: :unprocessable_entity }
       end
     end
   end
@@ -112,7 +123,7 @@ class SitesController < ApplicationController
     render json: { url: @blob.service_url_for_direct_upload(expires_in: 30.minutes), headers: @blob.service_headers_for_direct_upload, signed_id: @blob.signed_id, key: @blob.key, blob_url: rails_blob_url(@blob, host: request.base_url)}, status: 200
   end
 
-  def list_images
+  def list_images #error -- this keeps getting hit 
     if params[:site_slug].present?
       page = params[:page] || 1
       per_page = 10

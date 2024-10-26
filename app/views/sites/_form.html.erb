@@ -1,3 +1,9 @@
+<% flash.each do |name, msg| %>
+  <div class="<%= name == 'notice' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500' %> px-3 py-2 font-medium rounded-lg mt-3">
+    <%= msg %>
+  </div>
+<% end %>
+
 <%= form_with(model: site, class: "contents") do |form| %>
   <% if site.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
