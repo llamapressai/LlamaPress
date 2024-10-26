@@ -21,6 +21,16 @@
   <div class="my-5">
     <%= form.label :slug, "Domain (e.g: example.com)" %>
     <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+  </div>  
+
+  <div class="my-5">
+    <%= form.label :home_page_id, "Home Page" %>
+    <%= form.collection_select :home_page_id, 
+        Page.where(site_id: site.id), 
+        :id, 
+        :slug, 
+        { prompt: "Select Home Page" }, 
+        { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
   </div>
 
   <div class="inline">

@@ -13,7 +13,8 @@ class PagesController < ApplicationController
     #If no user, no site, no page, no domain.
     if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
       puts 'site is present'
-      @page = current_site.pages.first
+      @page = current_site.home_page || current_site.pages.first # try to get home page if it's set, otherwise just get the first page.
+
       if @page.nil?
         puts 'no page in site'
         redirect_to llama_bot_home_path and return
@@ -63,11 +64,7 @@ class PagesController < ApplicationController
 
   # GET /pages or /pages.json
   def index
-    if current_site.present?
-      @pages = current_site.pages
-    else
-      @pages = current_organization.pages
-    end
+   @pages = current_organization.pages
 
     respond_to do |format|
       format.html
