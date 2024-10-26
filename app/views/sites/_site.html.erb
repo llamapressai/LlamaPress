@@ -34,12 +34,13 @@
         </div>
         <div class="p-6 border-t-2 border-gray-700">
           <div class="flex items-center mb-3">
-          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
-            <%# if web_page.organization.logo.attached? %>
-              <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
-            <%# else %>
-            <%# end %>
-            <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
+            <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
+            <div class="flex items-center">
+              <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
+              <% if site.home_page_id == web_page.id %>
+                <i class="fas fa-home text-yellow-400 ml-2" title="Home Page"></i>
+              <% end %>
+            </div>
           </div>
           <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
         </div>
