@@ -11,6 +11,24 @@
     <i class="fas fa-th-large mr-4 text-blue-500 text-lg sm:text-xl lg:text-2xl"></i>
     Choose a Starting Template
   </h2>
+
+  <div class="mb-8">
+    <h3 class="font-semibold text-xl text-gray-700 mb-3 flex items-center">
+      <i class="fas fa-copy mr-3 text-blue-500"></i>
+      Or, clone an existing page
+    </h3>
+    
+    <select id="clone-page-select" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      <option value="">Select a page to clone...</option>
+      <% existing_pages_to_clone = @site.pages || current_user.organization.pages%>
+      <% existing_pages_to_clone.each do |page| %>
+        <option value="<%= page.content %>" data-slug="<%= page.slug %>">
+          <%= page.slug %>
+        </option>
+      <% end %>
+    </select>
+  </div>
+
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6">
@@ -48,6 +66,37 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Add clone page select handler
+  const clonePageSelect = document.getElementById('clone-page-select');
+  clonePageSelect.addEventListener('change', function() {
+    const selectedContent = this.value;
+    if (selectedContent && typeof editor !== 'undefined') {
+      const decodedContent = decodeDoubleEscapedHTML(selectedContent);
+      editor.setValue(decodedContent);
+      
+      // Set the slug from the selected option
+      const selectedSlug = this.options[this.selectedIndex].getAttribute('data-slug');
+      document.getElementById('page_slug').value = selectedSlug + '-copy';
+      
+      // Prettify the content
+      var prettifiedContent = prettier.format(decodedContent, {
+        parser: "html",
+        plugins: prettierPlugins,
+        printWidth: 120,
+        tabWidth: 2,
+        useTabs: false,
+        singleQuote: true,
+        bracketSameLine: true,
+      });
+      editor.setValue(prettifiedContent);
+
+      // Scroll to form section
+      document.getElementById('page_form_section').scrollIntoView({ behavior: 'smooth' });
+      showNotification('Successfully loaded cloned page content -- save to continue', 'success');
+    }
+  });
+
+  // Add useTemplateButtons handler
   const useTemplateButtons = document.querySelectorAll('.use-template-btn');
   useTemplateButtons.forEach(button => {
     button.addEventListener('click', function() {
