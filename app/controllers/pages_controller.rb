@@ -115,7 +115,7 @@ class PagesController < ApplicationController
 
     respond_to do |format|
       if @page.save
-        format.html { redirect_to page_url(@page), notice: "web page was successfully created." }
+        format.html { redirect_to page_url(@page.id), notice: "web page was successfully created." }
         format.json { render :show, status: :created, location: @page }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -130,7 +130,7 @@ class PagesController < ApplicationController
     @page.save_history(message)
     respond_to do |format|
       if @page.update(page_params)
-        format.html { redirect_to page_url(@page), notice: "web page was successfully updated." }
+        format.html { redirect_to page_url(@page.id), notice: "web page was successfully updated." }
         format.json { render :show, status: :ok, location: @page }
       else
         format.html { render :edit, status: :unprocessable_entity }
