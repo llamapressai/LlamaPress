@@ -260,10 +260,8 @@
    * Fetches images that the user previoulsy uploaded for the user to use in the page
    */
   function fetchImagesForSite(page) {
-    debugger;
     console.log("fetching images for page: " + page);
     const csrfToken = "<%= form_authenticity_token %>";
-    <% byebug %>
     fetch('/sites/list_images.json', {
     method: 'POST',
     headers: {
