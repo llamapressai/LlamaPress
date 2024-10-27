@@ -148,17 +148,31 @@ class PagesController < ApplicationController
 
   def histories
     @page = Page.find(params[:id])
-    @page_histories = @page.page_histories.order(created_at: :desc)
+    @page_number = params[:page] || 1
+    @per_page = 10
+    
+    @page_histories = @page.page_histories
+      .order(created_at: :desc)
+      .page(@page_number)
+      .per(@per_page)
+    
     respond_to do |format|
-      format.html # Renders the default history.html.erb view
+      format.html
       format.json do
         encoded_histories = @page_histories.map do |history|
           history_data = history.as_json
           history_data['content'] = Base64.strict_encode64(history.content)
           history_data
         end
-        encoded_histories_json_object = { web_page_histories: encoded_histories }
-        render json: encoded_histories_json_object
+        render json: {
+          web_page_histories: encoded_histories,
+          meta: {
+            current_page: @page_histories.current_page,
+            total_pages: @page_histories.total_pages,
+            total_count: @page_histories.total_count,
+            per_page: @per_page
+          }
+        }
       end
     end
   end

@@ -188,7 +188,7 @@
       let selectedElementInnerHtml = selectedElement.innerHTML.replace(
         "selected-element",
         ""
-      ); 
+      );
       hideAllChatToolWindows();
 
       try {
@@ -270,13 +270,19 @@
       }
     });
 
+    let currentPageOfHistory = 1;
+    let isLoadingMoreHistory = false;
+    let hasMorePagesOfHistory = true;
+
     /**
      * Loads the chat history for the current web page and puts it into the modal history drawer.
      */
-    function loadChatHistory() {
+    function loadChatHistory(page = 1) {
       let webPageId = "<%=@page&.id%>";
-      if (webPageId) {
-        fetch(`/pages/${webPageId}/histories.json`)
+      if (webPageId && !isLoadingMoreHistory && hasMorePagesOfHistory) {
+        isLoadingMoreHistory = true;
+        
+        fetch(`/pages/${webPageId}/histories.json?page=${page}`)
           .then((response) => {
             if (!response.ok) {
               throw new Error("Network response was not ok");
@@ -284,24 +290,44 @@
             return response.json();
           })
           .then((data) => {
-            web_page_histories = data.web_page_histories;
-
-            //put chat history in the messages window to view & history
-            web_page_histories.reverse(); //reverse so it's in chronological order
-            web_page_histories.forEach((history) => {
+            const histories = data.web_page_histories;
+            
+            // Update pagination state
+            currentPageOfHistory = data.meta.current_page;
+            hasMorePagesOfHistory = currentPageOfHistory < data.meta.total_pages;
+            
+            // Add histories to the chat
+            histories.reverse().forEach((history) => {
               addPageHistoryToMessagesArea(history);
             });
 
-            //scroll to bottom of chatbot
-            const chatbotMessages = document.getElementById('chatbotMessages');            
-            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-
-            //ask the user what they want to change. We're ready to go.
-            addMessage("What do you want to change?", "bot");
-            document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded')); //we are done loading in LlamaBot hisory & other things -- tell the contenteditable to start observing for changes
+            if (page === 1) {
+              // Only do these for initial load
+              const chatbotMessages = document.getElementById('chatbotMessages');            
+              chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+              addMessage("What do you want to change?", "bot");
+              document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded'));
+            }
+          })
+          .catch(error => {
+            console.error('Error loading chat history:', error);
+          })
+          .finally(() => {
+            isLoadingMoreHistory = false;
           });
       }
     }
+
+    // Add scroll event listener to load more message history when user scrolls near the top
+    document.getElementById('chatbotMessages').addEventListener('scroll', function(e) {
+      const element = e.target;
+      // Load more when user scrolls near the top (for older messages)
+      if (element.scrollTop <= element.clientHeight * 0.05) { // when user is at least 5% from top, load more history
+        if (!isLoadingMoreHistory && hasMorePagesOfHistory) {
+          loadChatHistory(currentPageOfHistory + 1);
+        }
+      }
+    });
 
     /**
      * Creates a history in the chat window so user can see their page changes & restore if needed
@@ -581,6 +607,7 @@
 
   // Listen for custom elementSelected event
   document.addEventListener("elementSelected", (e) => {
+    hideAllChatToolWindows(); //close all chat tool windows to make room for selected element
     selectedElementHTML = e.detail;
 
     let selectedElementContainer = document.getElementById(
@@ -590,6 +617,7 @@
       "selectedElementContent"
     );
     if (selectedElementHTML != null && selectedElementContainer != null) {
+      //TODO: There is a bug if there's chat history that contains selected element in it and it's rendering the HTML in the chat history.
       selectedElementContainer.style.display = "block";
       selectedElementContent.innerHTML = selectedElementHTML.outerHTML;
       setSelectedElementContainerBackground(selectedElementHTML);
@@ -737,6 +765,7 @@
     });
   });
 </script>
+
 
 
 
