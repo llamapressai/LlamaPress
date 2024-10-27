@@ -20,7 +20,7 @@
     
     <select id="clone-page-select" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       <option value="">Select a page to clone...</option>
-      <% existing_pages_to_clone = @site.pages || current_user.organization.pages%>
+      <% existing_pages_to_clone = @site&.pages || current_user&.organization&.pages%>
       <% existing_pages_to_clone.each do |page| %>
         <option value="<%= page.content %>" data-slug="<%= page.slug %>">
           <%= page.slug %>
