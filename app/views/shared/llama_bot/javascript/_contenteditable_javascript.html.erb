@@ -268,6 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * 
      * We use the MutationObserver to watch for changes in the content editable nodes and add the data-llama-editable attribute
      * when we detect changes.
+     * 
+     * exclude_when_saving_contenteditable_edits provides a lot of protection from saving unintended changes, but it's not foolproof.
      */
     document.addEventListener('llamaChatHistoryLoaded', () => {
 

@@ -1,3 +1,8 @@
+<%# WARNING! It is vital that the following data-llama tag "exclude_when_saving_contenteditable_edits" is in all script tags that are injected into the page. 
+This is used to prevent Javascript scripts getting saved when the user makes edits using content editable. 
+Otherwise, Javascript code from LlamaBot will get saved in with the user's code, and it will be executed when the page loads, or even worse, 
+when it's included in an iframe on other pages, such as in chat history, or when viewing all pages in the account. %>
+
 <%# Loads in the Javascript <script> tags that are needed for the chatbot to function %>
 <%= render partial: 'shared/llama_bot/javascript/dependencies' %> 
 
@@ -5,7 +10,7 @@
 <%= render partial: 'shared/llama_bot/javascript/core_javascript' %> 
 <%= render partial: 'shared/llama_bot/javascript/images' %>
 
-<script>
+<script data-llama="exclude_when_saving_contenteditable_edits">
 document.addEventListener('DOMContentLoaded', function () {
     const element = document.getElementById('chatbotContainer');
     const resizers = document.querySelectorAll('#chatbotContainer .resizer');
@@ -105,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script>
+<script data-llama="exclude_when_saving_contenteditable_edits">
 // IMPORTANT! Don't move. We need the copyCode function outside of the DomContentLoad so that it's in the global scope. This is used when the LLM returns a code snippet for the user to copy -- mainly on pages/1/edit where you can view the code, but eventually we'll allow user to edit code on the show page as well.
 /**
  * This method copies the code from the element with the given ID and then changes the text of the button to say "Copied!"

@@ -1,4 +1,4 @@
-<script>    
+<script data-llama="exclude_when_saving_contenteditable_edits">    
   const chunkSize = 64 * 1024 * 1024;
   const fileReader = new FileReader();
   let hasher = null;
@@ -260,7 +260,10 @@
    * Fetches images that the user previoulsy uploaded for the user to use in the page
    */
   function fetchImagesForSite(page) {
+    debugger;
+    console.log("fetching images for page: " + page);
     const csrfToken = "<%= form_authenticity_token %>";
+    <% byebug %>
     fetch('/sites/list_images.json', {
     method: 'POST',
     headers: {
@@ -305,10 +308,17 @@ function closeImageUploadWindow() {
 }
 window.closeImageUploadWindow = closeImageUploadWindow; // make global
 
-const scrollContainer = document.getElementById('imagesForUserToSelect');
-scrollContainer.addEventListener('scroll', handleHorizontalScroll);
-  // Initial fetch
-  fetchImagesForSite(page);
-});
+ // Add check for existing scroll listener
+  const scrollContainer = document.getElementById('imagesForUserToSelect');
+  if (scrollContainer && !scrollContainer.hasScrollListener) {
+    scrollContainer.hasScrollListener = true;
+    scrollContainer.addEventListener('scroll', handleHorizontalScroll);
+  }
+
+  // If you want to run the initial fetch, uncomment this and remove the commented version
+  if (typeof initialFetchDone === 'undefined') {
+    window.initialFetchDone = true;
+    fetchImagesForSite(page);
+  }
 
 </script>
