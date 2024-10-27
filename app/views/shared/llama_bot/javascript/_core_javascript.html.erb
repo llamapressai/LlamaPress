@@ -298,6 +298,7 @@
 
             //ask the user what they want to change. We're ready to go.
             addMessage("What do you want to change?", "bot");
+            document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded')); //we are done loading in LlamaBot hisory & other things -- tell the contenteditable to start observing for changes
           });
       }
     }
@@ -500,7 +501,7 @@
         e.stopPropagation();
         toggleChat();
       }
-      else if ((e.key == "c" && e.altKey) || (e.key == "ç") || (e.key == "c" && e.metaKey && e.shiftKey)) {
+      else if (e.key == "ç") {
         e.preventDefault(); //prevent the ç key from being typed
         e.stopPropagation(); //prevent the ç key from being typed
         toggleSelectionMode();
