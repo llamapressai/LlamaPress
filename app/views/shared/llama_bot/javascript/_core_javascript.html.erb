@@ -296,9 +296,12 @@
             currentPageOfHistory = data.meta.current_page;
             hasMorePagesOfHistory = currentPageOfHistory < data.meta.total_pages;
             
-            // Add histories to the chat
-            histories.reverse().forEach((history) => {
-              addPageHistoryToMessagesArea(history);
+            // For first page, reverse to show newest at bottom
+            // For subsequent pages (older messages), maintain order
+            const orderedHistories = page === 1 ? histories.reverse() : histories;
+            
+            orderedHistories.forEach((history) => {
+              addPageHistoryToMessagesArea(history, page !== 1);
             });
 
             if (page === 1) {
@@ -332,7 +335,9 @@
     /**
      * Creates a history in the chat window so user can see their page changes & restore if needed
      */
-    function addPageHistoryToMessagesArea(history) {
+    function addPageHistoryToMessagesArea(history, insertAtTop = false) {
+      const chatbotMessages = document.getElementById('chatbotMessages');
+      
       // Create header section if it doesn't exist
       let headerSection = document.getElementById('pageHistoryHeader');
       if (!headerSection) {
@@ -398,14 +403,54 @@
       pageHistoryDiv.className = 'p-2 rounded bg-gray-100 text-sm';
       
       const prompt = history.prompt || history.user_message;
-      pageHistoryDiv.innerHTML = `"${prompt}"`;
+      
+      // Function to check if string contains HTML
+      function containsHTML(str) {
+        const htmlRegex = /<[a-z][\s\S]*>/i;
+        return htmlRegex.test(str);
+      }
+
+      // Render content based on whether it contains HTML. We do this because we want to show the HTML that was edited in the history item,
+      // but we want it sandboxed so it doesn't break any of the current page or chatbot functionality.
+      if (containsHTML(prompt)) {
+        // Create iframe for HTML content
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.border = 'none';
+        iframe.style.height = '100px';
+        iframe.style.maxWidth = '400px'; // Add max width
+        iframe.style.maxHeight = '300px'; // Add max height
+        iframe.style.overflow = 'auto'; // Add scrolling if content exceeds dimensions
+        iframe.srcdoc = prompt;
+        
+        pageHistoryDiv.innerHTML = '';
+        pageHistoryDiv.appendChild(iframe);
+        
+        iframe.onload = () => {
+          iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+        };
+      } else {
+        // Regular text content
+        pageHistoryDiv.textContent = `"${prompt}"`;
+      }
+
       contentWrapper.appendChild(pageHistoryDiv);
 
       wrapper.appendChild(timeline);
       wrapper.appendChild(contentWrapper);
 
-      chatbotMessages.appendChild(wrapper);
-      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      // Change the insertion point based on whether we're loading older messages
+      if (insertAtTop) {
+        // Insert after the header for older messages
+        headerSection.insertAdjacentElement('afterend', wrapper);
+      } else {
+        // Append to bottom for newest messages
+        chatbotMessages.appendChild(wrapper);
+      }
+
+      if (!insertAtTop) {
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
     }
 
     document
@@ -765,6 +810,12 @@
     });
   });
 </script>
+
+
+
+
+
+
 
 
 
