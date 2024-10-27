@@ -55,6 +55,22 @@
     </div>
 
     <div class="flex flex-col" data-llama="app/views/shared/llama_bot/chat/_chat_toolbar.html.erb">
+        <!-- Selected Element Container - Moved above toolbar -->
+        <div id="selectedElementContainer" class="hidden p-4 border-t border-gray-300 bg-gray-50">
+            <div class="relative bg-white rounded-lg p-2 shadow-sm">
+                <button id="closeSelectedElement" class="absolute top-2 right-2 text-red-500 hover:text-red-700 focus:outline-none z-10">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <!-- Selected element content -->
+                <!-- WARNING: DO NOT PUT ANYTHING ELSE INSIDE THIS DIV, OR IT WILL BREAK SELECTED ELEMENT LOGIC -->
+                <div id="selectedElementContent" class="text-sm overflow-auto max-h-[180px]">
+                </div>
+            </div>
+        </div>
+
         <!-- Buttons container on chat toolbar -->
         <div class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100" data-llama="app/views/shared/_chat.html.erb">
             <!-- Button to Toggle Select Element Mode -->
@@ -149,20 +165,6 @@
                 </span>
             </button>        
             
-            <!-- Window for Showing the User the Current Selected Element -->
-            <div id="selectedElementContainer" class="flex-grow rounded-md mx-2 p-2 flex items-center justify-center hidden relative" style="max-width: 500px; max-height: 180px" llama-tag="app/views/shared/_chat.html.erb" data-llama="app/views/shared/_chat.html.erb" >
-                <button id="closeSelectedElement" class="absolute top-0 left-0 text-red-500 hover:text-red-700 focus:outline-none z-10 p-1" data-llama="app/views/shared/_chat.html.erb" >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_chat.html.erb">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-llama="app/views/shared/_chat.html.erb"/>
-                    </svg>
-                </button>
-
-                <!-- This is where we inject the HTML for the selected element -->
-                <!-- WARNING: DO NOT PUT ANYTHING ELSE INSIDE THIS DIV, OR IT WILL BREAK SELECTED ELEMENT LOGIC -->
-                <div id="selectedElementContent" class="text-sm overflow-auto w-full h-full" style="max-width: 500px; max-height: 180px" data-llama="app/views/shared/_chat.html.erb">
-                </div>
-            </div>
-
         </div>
 
         <!-- Code Snippets Window (this displays underneath the chat toolbar) -->
