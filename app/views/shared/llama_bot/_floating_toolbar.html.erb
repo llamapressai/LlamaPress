@@ -16,7 +16,7 @@
                 <input type="text" id="llama-link-input" placeholder="Enter URL" class="w-full p-1 mb-2 border rounded">
                 <div class="max-h-32 overflow-y-auto mb-2">
                     <div class="text-sm font-bold mb-1">Common Links:</div>
-                    <% current_user.default_site&.pages.each do |page| %>
+                    <% current_user.organization&.pages&.each do |page| %>
                         <button onclick="insertLink('/<%= page.slug %>')" class="block w-full px-2 py-1 text-left hover:bg-gray-100 text-sm"><%= page.slug %></button>
                     <% end %>
                     <!-- Add more predefined links as needed -->
