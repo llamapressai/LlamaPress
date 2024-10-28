@@ -22,6 +22,23 @@
         <input type="color" id="llama-color-picker" class="hidden">
         <button onclick="changeFontSize(1)" class="px-2 py-1 bg-gray-200 rounded">A+</button>
         <button onclick="changeFontSize(-1)" class="px-2 py-1 bg-gray-200 rounded">A-</button>
+        <div class="relative inline-block">
+            <button onclick="showLinkDialog()" class="px-2 py-1 bg-gray-200 rounded">🔗</button>
+            <div id="llama-link-dialog" class="absolute hidden bg-white border rounded shadow-lg p-2 z-10" style="min-width: 200px;">
+                <input type="text" id="llama-link-input" placeholder="Enter URL" class="w-full p-1 mb-2 border rounded">
+                <div class="max-h-32 overflow-y-auto mb-2">
+                    <div class="text-sm font-bold mb-1">Common Links:</div>
+                    <% current_user.default_site&.pages.each do |page| %>
+                        <button onclick="insertLink('/<%= page.slug %>')" class="block w-full px-2 py-1 text-left hover:bg-gray-100 text-sm"><%= page.slug %></button>
+                    <% end %>
+                    <!-- Add more predefined links as needed -->
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cancelLink()" class="px-2 py-1 bg-gray-200 rounded text-sm">Cancel</button>
+                    <button onclick="insertLink()" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Insert</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -29,6 +46,8 @@
         const colorPicker = document.getElementById('llama-color-picker');
         const textDropdownButton = document.getElementById('llama-text-dropdown-button');
         const textDropdown = document.getElementById('llama-text-dropdown');
+
+        let selectedRange = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             const body = document.body;
@@ -214,4 +233,49 @@
             };
             return colorMap[color] || '';
         }
+
+        function showLinkDialog() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                selectedRange = selection.getRangeAt(0);
+                const linkDialog = document.getElementById('llama-link-dialog');
+                const linkInput = document.getElementById('llama-link-input');
+                linkDialog.classList.remove('hidden');
+                linkInput.value = '';
+                linkInput.focus();
+            }
+        }
+
+        function cancelLink() {
+            const linkDialog = document.getElementById('llama-link-dialog');
+            linkDialog.classList.add('hidden');
+            selectedRange = null;
+        }
+
+        function insertLink(predefinedUrl = null) {
+            if (selectedRange) {
+                const url = predefinedUrl || document.getElementById('llama-link-input').value.trim();
+                if (url) {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.className = 'text-blue-500 hover:underline';
+                    link.setAttribute('target', '_blank');
+                    link.appendChild(selectedRange.extractContents());
+                    selectedRange.insertNode(link);
+                    applyLlamaTags(link);
+                }
+            }
+            cancelLink();
+        }
+
+        // Add click handler to hide link dialog when clicking outside
+        document.addEventListener('click', function(e) {
+            const linkDialog = document.getElementById('llama-link-dialog');
+            const isClickInside = linkDialog.contains(e.target);
+            const isLinkButton = e.target.closest('button')?.innerText === '🔗';
+            
+            if (!isClickInside && !isLinkButton && !linkDialog.classList.contains('hidden')) {
+                cancelLink();
+            }
+        });
     </script>
