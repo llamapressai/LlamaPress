@@ -66,6 +66,7 @@
           })(window, document, "clarity", "script", "<%= ENV['CLARITY_TRACKING_ID'] %>");
       </script>
     <% end %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
 </head>
 <body class="flex flex-col min-h-screen" data-llama="app/views/layouts/llama_bot.html.erb">
   <nav class="bg-gray-800 p-4" data-llama="app/views/layouts/llama_bot.html.erb">

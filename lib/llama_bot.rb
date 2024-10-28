@@ -1,15 +1,23 @@
 require 'net/http'
 require 'uri'
 require 'json'
+require 'websocket-client-simple'
+require 'eventmachine'
+require 'websocket-eventmachine-client'
+require 'faye/websocket'
+require 'async'
+require 'async/websocket/client'
+require 'async/http/endpoint'
+
 
 module LlamaBot
     class << self
-        def completion(user_message, context=nil, selected_element=nil, web_page_id=nil)
+        def completion(user_message, context=nil, selected_element=nil, web_page_id=nil, session_id)
             file_contents = fetch_file_contents(context, web_page_id)
-            response = llama_bot_completion(user_message, context, file_contents, selected_element, web_page_id)
-            message_to_user = response['message']
-            handle_response!(response)
-            return message_to_user
+            
+            connect_to_websocket(user_message, context, file_contents, selected_element, web_page_id, session_id) do |message|
+                ActionCable.server.broadcast("chat_channel_#{session_id}", { message: message })
+            end
         end
 
         # Actions:
@@ -117,6 +125,59 @@ module LlamaBot
              return response
         end
 
+        def llama_bot_completion_websocket(user_message, context=nil, file_contents=nil, selected_element=nil, web_page_id=nil)
+            params = {
+                'user_message' => user_message,
+                'context' => context,
+                'selected_element' => selected_element,
+                'web_page_id' => web_page_id,
+                'file_contents' => file_contents
+            }.compact
+
+            ws_url = "#{ENV['LLAMABOT_API_URL']}/ws"
+            
+            response = ""
+            error = nil
+
+            EM.run do
+                ws = WebSocket::EventMachine::Client.connect(uri: ws_url)
+
+                ws.onopen do
+                    ws.send(params.to_json)
+                end
+
+                ws.onmessage do |msg, type|
+                    if msg == "EOF"
+                        ws.close
+                    else
+                        response += msg
+                        yield msg if block_given?
+                    end
+                end
+
+                ws.onerror do |e|
+                    error = e
+                    ws.close
+                end
+
+                ws.onclose do |code, reason|
+                    EM.stop
+                end
+            end
+
+            if error
+                Rails.logger.error("WebSocket error: #{error.message}")
+                return { 'error' => 'Error in WebSocket communication' }
+            end
+
+            begin
+                JSON.parse(response)
+            rescue JSON::ParserError => e
+                Rails.logger.error("JSON parsing error: #{e.message}")
+                { 'error' => 'Invalid JSON response from LlamaBot API' }
+            end
+        end
+
         # Make a POST request to the LlamaBot API
         def make_post_request(base_url, params)
             uri = URI.parse(base_url)
@@ -157,5 +218,44 @@ module LlamaBot
 
             return file_contents
         end
+
+        def connect_to_websocket(user_message, context, file_contents, selected_element, web_page_id, session_id)
+            Async do
+              # Create an endpoint for the WebSocket connection
+              endpoint = Async::HTTP::Endpoint.parse('ws://localhost:8000/ws')
+          
+              # Connect to the WebSocket server
+              Async::WebSocket::Client.connect(endpoint) do |connection|
+                puts "Connected to WebSocket server for session #{session_id}!"
+          
+                # Send the initial message
+                params = {
+                  'user_message' => user_message,
+                  'context' => context,
+                  'selected_element' => selected_element,
+                  'web_page_id' => web_page_id,
+                  'file_contents' => file_contents,
+                  'session_id' => session_id
+                }.compact
+                connection.write(params.to_json)
+          
+                # Listen for messages from the server
+                while (message = connection.read)
+                  begin
+                    data = JSON.parse(message)
+                    yield data if block_given?
+                  rescue JSON::ParserError
+                    puts "Received non-JSON message: #{message}"
+                  end
+                end
+          
+                puts "Connection closed for session #{session_id}"
+              end
+            end
+        end
     end
 end
+
+
+
+

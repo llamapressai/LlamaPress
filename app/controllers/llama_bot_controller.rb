@@ -2,6 +2,7 @@ require Rails.root.join('lib', 'llama_bot.rb')
 require 'securerandom'
 
 class LlamaBotController < ApplicationController
+    include ActionController::Live
     skip_before_action :verify_authenticity_token, only: [:message]
 
     #/home
@@ -17,10 +18,9 @@ class LlamaBotController < ApplicationController
       selectedElement = params[:selectedElement].present? && !params[:selectedElement].empty? ? params[:selectedElement] : nil
       webPageId = params[:webPageId]
       
-      if user_message.include?("ave snippet:") && selectedElement.present? # Save the snippet to the database
-
-
-          # Parse the selectedElement HTML
+      if user_message.include?("ave snippet:") && selectedElement.present?
+        # Save snippet logic (unchanged)
+        # Parse the selectedElement HTML
         doc = Nokogiri::HTML.fragment(selectedElement)
 
          # Find all elements with 'data-llama-id' and replace the value with a UUID
@@ -35,16 +35,11 @@ class LlamaBotController < ApplicationController
         snippet = Snippet.new(name: snippet_name, content: updated_selectedElement, site_id: page.site_id)
         snippet.save
         llama_bot_response = "Snippet saved"
+        render json: { response: llama_bot_response }
       else 
-        llama_bot_response = LlamaBot.completion(user_message, context, selectedElement, webPageId)
+        LlamaBot.completion(user_message, context, selectedElement, webPageId, session_id)
+        head :ok
       end
-
-      # Things needed: 
-      # 1. Stop Button (user can press LlamaBot Javascript button to stop the bot).
-      # 2. Discuss with Danish - contenteditable so that users can edit content they select with llamabot.
-        # 2a. Something to take HTML from llamabot js client and save to the webpage.
-      
-      render json: { response: llama_bot_response }
     end
 
 
@@ -79,4 +74,15 @@ class LlamaBotController < ApplicationController
           }
         end
       end
+
+    def send_message
+      message = params[:message]
+      session_id = params[:session_id]
+      
+      LlamaBot.completion(message, session_id: session_id) do |response|
+        ActionCable.server.broadcast("chat_channel_#{session_id}", { message: response })
+      end
+
+      head :ok
+    end
 end

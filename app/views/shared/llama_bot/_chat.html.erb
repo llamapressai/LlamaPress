@@ -441,3 +441,5 @@ Try me -- Redesign this page to be in crazy rainbow mode! Make it SUPER cool and
 'shared/llama_bot/chat_javascript' %> <% if current_user.present? &&
 controller_name == 'pages' && action_name == 'show' %> <%= render partial:
 'shared/llama_bot/chat_contenteditable_javascript' %> <% end %>
+
+<%= render partial: 'shared/llama_bot/websocket' %>
