@@ -201,7 +201,7 @@
   }
 
   // This is how you would call the function inside your success callback:
-// uploadToS3(data, file);
+  // uploadToS3(data, file);
   function hashChunk(chunk) {
     return new Promise((resolve, reject) => {
       fileReader.onload = async(e) => {
@@ -250,73 +250,76 @@
   }  
 
   document.addEventListener('DOMContentLoaded', function() {
-  let page = 1;
-  const imageContainer = document.getElementById('image-container');
-  const path = window.location.pathname;
-  const segments = path.split('/');
-  const slug = segments[segments.length - 1];
+    let page = 1;
+    const imageContainer = document.getElementById('image-container');
+    const path = window.location.pathname;
+    const segments = path.split('/');
+    const slug = segments[segments.length - 1];
 
-  /**
-   * Fetches images that the user previoulsy uploaded for the user to use in the page
-   */
-  function fetchImagesForSite(page) {
-    console.log("fetching images for page: " + page);
-    const csrfToken = "<%= form_authenticity_token %>";
-    fetch('/sites/list_images.json', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': csrfToken
-    },
-    body: JSON.stringify({
-      site_slug: slug,
-      page: page
+    /**
+     * Fetches images that the user previoulsy uploaded for the user to use in the page
+     */
+    function fetchImagesForSite(page) {
+      console.log("fetching images for page: " + page);
+      const csrfToken = "<%= form_authenticity_token %>";
+      fetch('/sites/list_images.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({
+        site_slug: slug,
+        page: page
+      })
     })
-  })
-  .then(response => response.json())
-  .then(data => {
-    data.forEach(image => {
-      const imgElement = document.createElement('img');
-      imgElement.src = image.url;
-      imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
-      imgElement.setAttribute('data-llama-editable', 'true');
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(image => {
+        const imgElement = document.createElement('img');
+        imgElement.src = image.url;
+        imgElement.className = 'w-24 h-24 object-cover rounded-lg m-2';
+        imgElement.setAttribute('data-llama-editable', 'true');
 
-      imageContainer.appendChild(imgElement);
-    });
-  })
-  .catch(error => console.error('Error fetching images:', error));
-}
-window.fetchImagesForSite = fetchImagesForSite; //make global
+        imageContainer.appendChild(imgElement);
+      });
+    })
+    .catch(error => console.error('Error fetching images:', error));
+    }
+    window.fetchImagesForSite = fetchImagesForSite; //make global
 
-function handleHorizontalScroll() {
-  console.log("Trigger horizontal scroll")
-  const scrollContainer = document.getElementById('imagesForUserToSelect');
-  const scrollPosition = scrollContainer.scrollLeft + scrollContainer.clientWidth;
-  const scrollWidth = scrollContainer.scrollWidth;
+    function handleHorizontalScroll() {
+      console.log("Trigger horizontal scroll")
+      const scrollContainer = document.getElementById('imagesForUserToSelect');
+      const scrollPosition = scrollContainer.scrollLeft + scrollContainer.clientWidth;
+      const scrollWidth = scrollContainer.scrollWidth;
 
-  // Check if the scroll position is near the end of the scrollable area
-  if (scrollWidth - scrollPosition <= 50) { // Adjust the threshold as needed
-    page += 1;
-    fetchImagesForSite(page);
-  }
-}
+      // Check if the scroll position is near the end of the scrollable area
+      if (scrollWidth - scrollPosition <= 50) { // Adjust the threshold as needed
+        page += 1;
+        fetchImagesForSite(page);
+      }
+    }
 
-function closeImageUploadWindow() {
-  hideAllChatToolWindows();
-}
-window.closeImageUploadWindow = closeImageUploadWindow; // make global
+    /**
+     * Closes the image upload window in the chat toolbar
+     */
+    function closeImageUploadWindow() {
+      hideAllChatToolWindows();
+    }
+    window.closeImageUploadWindow = closeImageUploadWindow; // make global
 
- // Add check for existing scroll listener
-  const scrollContainer = document.getElementById('imagesForUserToSelect');
-  if (scrollContainer && !scrollContainer.hasScrollListener) {
-    scrollContainer.hasScrollListener = true;
-    scrollContainer.addEventListener('scroll', handleHorizontalScroll);
-  }
+    // Add check for existing scroll listener
+    const scrollContainer = document.getElementById('imagesForUserToSelect');
+    if (scrollContainer && !scrollContainer.hasScrollListener) {
+      scrollContainer.hasScrollListener = true;
+      scrollContainer.addEventListener('scroll', handleHorizontalScroll);
+    }
 
-  // If you want to run the initial fetch, uncomment this and remove the commented version
-  if (typeof initialFetchDone === 'undefined') {
-    window.initialFetchDone = true;
-    fetchImagesForSite(page);
-  }
-
+    // If you want to run the initial fetch, uncomment this and remove the commented version
+    if (typeof initialFetchDone === 'undefined') {
+      window.initialFetchDone = true;
+      fetchImagesForSite(page);
+    }
+  });
 </script>
