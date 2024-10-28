@@ -64,7 +64,7 @@ class PagesController < ApplicationController
 
   # GET /pages or /pages.json
   def index
-   @pages = current_organization.pages
+   @pages = current_site&.pages || current_organization.pages
 
     respond_to do |format|
       format.html
