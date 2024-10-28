@@ -7,7 +7,7 @@ class PagesController < ApplicationController
 
   # GET /
   # Find and render the root page depending on the domain.
-  # If no root page is found, redirect to the llama press home page.
+  # If no root page is found, redirect to the llama press home
   def home
     #If the user is signed in, and they have a default site, redirect to that site's home page.
     #If no user, no site, no page, no domain.
@@ -77,10 +77,11 @@ class PagesController < ApplicationController
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
-
-    # Inject the chat partial
-    content += inject_chat_partial(content) if current_user.present?
-    content += inject_analytics_partial() if Rails.env.production?
+    if current_user.present? && @page.organization_id == current_user.organization_id
+      # Inject the chat partial
+      content += inject_chat_partial(content)
+      content += inject_analytics_partial() if Rails.env.production?
+    end
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -191,13 +192,16 @@ class PagesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_page
       @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
+      # @page = current_user.organization.pages.friendly.find(params[:id]) || Page.find(params[:id])
     end
 
     def set_site
       if page_params[:site_id].present?
         @site = Site.find(params[:site_id])
+        # @site = current_user.sites.find(params[:site_id])
       else
         @site = current_site || @page.site || current_organization.sites.first
+        # @site = current_site || @page.site || current_user.sites.first
       end
     end
 
