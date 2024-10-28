@@ -34,6 +34,19 @@
             const body = document.body;
             body.addEventListener('mouseup', handleMouseUp);
             body.addEventListener('click', hideToolbar);
+            
+            // Add click handler for text dropdown button
+            textDropdownButton.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent immediate hiding
+                textDropdown.classList.toggle('hidden');
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!textDropdownButton.contains(e.target)) {
+                    textDropdown.classList.add('hidden');
+                }
+            });
         });
 
         function handleMouseUp() {
@@ -69,30 +82,42 @@
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
-                const container = range.commonAncestorContainer;
-                const element = container.nodeType === 1 ? container : container.parentElement;
-
+                
+                // Create a span for the selected content
+                const span = document.createElement('span');
+                span.appendChild(range.extractContents());
+                
+                // Apply the formatting classes to the span
                 switch (command) {
                     case 'bold':
-                        toggleClass(element, 'font-bold');
+                        span.classList.add('font-bold');
                         break;
                     case 'italic':
-                        toggleClass(element, 'italic');
+                        span.classList.add('italic');
                         break;
                     case 'underline':
-                        toggleClass(element, 'underline');
+                        span.classList.add('underline');
                         break;
                     case 'strikethrough':
-                        toggleClass(element, 'line-through');
+                        span.classList.add('line-through');
                         break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
                     case 'p':
+                        // For headings and paragraphs, we still want to transform the entire block
+                        const container = range.commonAncestorContainer;
+                        const element = container.nodeType === 1 ? container : container.parentElement;
                         applyHeadingOrParagraph(element, command);
-                        break;
+                        return; // Exit early as we don't need to insert the span
                 }
-                applyLlamaTags(element);
+                
+                // Insert the formatted span
+                range.insertNode(span);
+                applyLlamaTags(span);
+                
+                // Clear the selection
+                selection.removeAllRanges();
             }
         }
 
