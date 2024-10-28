@@ -1,61 +1,128 @@
 <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-  <section class="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-6 sm:mb-12 text-center w-full max-w-4xl" data-aos="fade-up">
-    <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">How LlamaPress Works</h3>
-    <div class="flex justify-center">
-      <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/1ws6omjel5kus3akeqoflvp8eje4" alt="LlamaPress Workflow" class="w-full rounded-lg shadow-md" data-aos="zoom-in">
+
+<div class="relative overflow-hidden bg-gradient-to-b from-indigo-50 to-white py-16 sm:py-24" data-aos="fade-in">
+  <!-- Background decoration -->
+  <div class="absolute top-0 left-0 w-full h-full">
+    <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4">
+      <div class="w-48 h-48 md:w-96 md:h-96 bg-indigo-100 rounded-full opacity-50 blur-3xl"></div>
     </div>
-    <p class="mt-4 sm:mt-6 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">LlamaPress simplifies your digital marketing journey with AI-powered tools and expert guidance.</p>
-  </section>
+    <div class="absolute bottom-0 left-0 transform -translate-x-1/4 translate-y-1/4">
+      <div class="w-48 h-48 md:w-96 md:h-96 bg-purple-100 rounded-full opacity-50 blur-3xl"></div>
+    </div>
+  </div>
 
-  <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md w-full max-w-md">
-    <div class="text-center mb-6 sm:mb-8">
-      <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="mx-auto w-16 h-16 sm:w-24 sm:h-24 mb-3 sm:mb-4">
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Sign Up</h2>
+  <!-- Hero content -->
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="space-y-4 md:space-y-6" data-aos="fade-up" data-aos-delay="100">
+      <!-- Added logo/image -->
+      <div class="flex justify-center mb-6">
+        <img 
+          src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" 
+          alt="LlamaPress Logo" 
+          class="h-48 w-auto rounded-sm"
+        />
+      </div>
+      
+      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 tracking-tight">
+        Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">LlamaPress</span>
+      </h1>
+      <p class="mt-4 md:mt-6 text-lg sm:text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        Transform your ideas into stunning websites with the power of AI. 
+        <span class="block mt-2 text-indigo-600 font-medium">No coding required. Just pure creativity.</span>
+      </p>
+      
+      <!-- CTA Buttons -->
+      <div class="mt-6 md:mt-8 flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4" data-aos="fade-up" data-aos-delay="200">
+        <a href="#features" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 border border-transparent text-sm sm:text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-150 ease-in-out">
+          Get Started Free
+          <svg class="ml-2 -mr-1 w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+        <a href="#demo" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 border border-gray-300 text-sm sm:text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-150 ease-in-out">
+          Watch Demo
+        </a>
+        <a href="https://github.com/llamapressai/llamapress" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-6 sm:px-8 py-3 border border-gray-300 text-sm sm:text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-150 ease-in-out">
+          <i class="fab fa-github mr-2"></i>
+          View on GitHub
+        </a>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="mt-8 md:mt-12 grid grid-cols-2 md:flex md:justify-center gap-4 md:space-x-8" data-aos="fade-up" data-aos-delay="300">
+        <div class="text-gray-400 flex items-center justify-center">
+          <i class="fas fa-bolt mr-2"></i>
+          <span class="text-xs sm:text-sm">Lightning Fast Setup</span>
+        </div>
+        <div class="text-gray-400 flex items-center justify-center">
+          <i class="fas fa-clock mr-2"></i>
+          <span class="text-xs sm:text-sm">24/7 Support</span>
+        </div>
+        <a href="https://github.com/llamapressai/llamapress" target="_blank" rel="noopener" class="text-gray-400 flex items-center justify-center hover:text-indigo-600 transition-colors duration-150">
+          <i class="fab fa-github mr-2"></i>
+          <span class="text-xs sm:text-sm">Open Source</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-6 sm:mb-12 text-center w-full max-w-4xl" data-aos="fade-up">
+  <h3 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">How LlamaPress Works</h3>
+  <div class="flex justify-center">
+    <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/1ws6omjel5kus3akeqoflvp8eje4" alt="LlamaPress Workflow" class="w-full rounded-lg shadow-md" data-aos="zoom-in">
+  </div>
+  <p class="mt-4 sm:mt-6 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">LlamaPress simplifies your digital marketing journey with AI-powered tools and expert guidance.</p>
+</section>
+
+<div class="bg-white p-6 sm:p-8 rounded-lg shadow-md w-full max-w-md">
+  <div class="text-center mb-6 sm:mb-8">
+    <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaPress Logo" class="mx-auto w-16 h-16 sm:w-24 sm:h-24 mb-3 sm:mb-4">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Sign Up</h2>
+  </div>
+
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4 sm:space-y-6" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div>
+      <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-envelope text-gray-400"></i>
+        </div>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "you@example.com" %>
+      </div>
     </div>
 
-    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4 sm:space-y-6" }) do |f| %>
-      <%= render "devise/shared/error_messages", resource: resource %>
-
-      <div>
-        <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-envelope text-gray-400"></i>
-          </div>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "you@example.com" %>
+    <div>
+      <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+      <% if @minimum_password_length %>
+        <span class="text-xs text-gray-500">(<%= @minimum_password_length %> characters minimum)</span>
+      <% end %>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-lock text-gray-400"></i>
         </div>
+        <%= f.password_field :password, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
       </div>
-
-      <div>
-        <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
-        <% if @minimum_password_length %>
-          <span class="text-xs text-gray-500">(<%= @minimum_password_length %> characters minimum)</span>
-        <% end %>
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-lock text-gray-400"></i>
-          </div>
-          <%= f.password_field :password, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
-        </div>
-      </div>
-
-      <div>
-        <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700" %>
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-lock text-gray-400"></i>
-          </div>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
-        </div>
-      </div>
-
-      <div>
-        <%= f.submit "Sign up", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
-      </div>
-    <% end %>
-
-    <div class="mt-4 sm:mt-6">
-      <%= render "devise/shared/links" %>
     </div>
+
+    <div>
+      <%= f.label :password_confirmation, class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-lock text-gray-400"></i>
+        </div>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.submit "Sign up", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+    </div>
+  <% end %>
+
+  <div class="mt-4 sm:mt-6">
+    <%= render "devise/shared/links" %>
   </div>
 </div>
