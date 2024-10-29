@@ -47,7 +47,7 @@ console.log("Loaded...");
 
           case 'write_code':
             // Handle a command to finalize changes, maybe by calling an endpoint or initiating some process
-            finalizeChanges(parsedData.message);
+            addMessage("Recieved changes. Writing to the file system...", "system")
             break;
 
           default:

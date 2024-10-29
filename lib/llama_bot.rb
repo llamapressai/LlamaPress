@@ -14,7 +14,6 @@ module LlamaBot
     class << self
         def completion(user_message, context=nil, selected_element=nil, web_page_id=nil, session_id)
             file_contents = fetch_file_contents(context, web_page_id)
-            
             connect_to_websocket(user_message, context, file_contents, selected_element, web_page_id, session_id) do |message|
                 ActionCable.server.broadcast("chat_channel_#{session_id}", { message: message })
             end
