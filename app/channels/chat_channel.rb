@@ -84,7 +84,8 @@ class ChatChannel < ApplicationCable::Channel
 
   def receive(data)
     Rails.logger.info "Received data: #{data.inspect}"
-    data["user_message"] = data["message"]
+    data["web_page_id"] = data["webPageId"] #standardize 
+    data["user_message"] = data["message"] 
     data["file_contents"] =  fetch_file_contents(data["context"], data["webPageId"])
     send_to_external_application(data)
   end
@@ -132,7 +133,9 @@ class ChatChannel < ApplicationCable::Channel
         if parsed_message["type"] == "write_code"
           Rails.logger.info "---------Received write_code message!----------"
           response = parsed_message['content']
-          handle_response!(response)
+          Rails.logger.info "---------------------> Response: #{response}"
+          handle_write_code(response)
+          Rails.logger.info "--------Completed write_code message!----------"
           # Add any additional handling for write_code messages here
         end
       rescue JSON::ParserError => e
