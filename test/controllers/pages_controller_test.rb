@@ -23,7 +23,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
       post pages_url, params: { page: { content: @page.content, slug: @page.slug, site_id: @page.site_id } }
     end
 
-    assert_redirected_to page_url(Page.last)
+    assert_redirected_to page_url(Page.last.id)
   end
 
   test "should show page" do
@@ -39,7 +39,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   test "should update page" do
     patch page_url(@page), params: { page: { content: @page.content, slug: "#{@page.slug}-#{Time.now.to_i}", site_id: @page.site_id, organization_id: @page.organization_id } }
     @page.reload #Make sure we get the most up to date slug by reloading this page. Friendly id doesn't update immediately
-    assert_redirected_to page_url(@page)
+    assert_redirected_to page_url(@page.id)
   end
 
   test "should destroy page" do
@@ -61,7 +61,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     end
     
     assert_response :redirect
-    assert_redirected_to page_url(Page.last)
+    assert_redirected_to page_url(Page.last.id)
   end
 
   test "should find page by friendly id" do
