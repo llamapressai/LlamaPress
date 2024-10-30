@@ -421,6 +421,8 @@
         iframe.style.maxWidth = '400px'; // Add max width
         iframe.style.maxHeight = '300px'; // Add max height
         iframe.style.overflow = 'auto'; // Add scrolling if content exceeds dimensions
+        iframe.setAttribute('sandbox', 'allow-same-origin');
+
         iframe.srcdoc = prompt;
         
         pageHistoryDiv.innerHTML = '';

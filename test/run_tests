@@ -1,23 +1,13 @@
 #!/bin/bash
 set -e
 
-# These are the current tests that are passing and being run. We will add more as the current failing tests are updated.
-
-# Run the tests for the PagesController
-echo "Running PagesController tests..."
-rails test test/controllers/pages_controller_test.rb
-
-# Run the tests for the Page model
-echo "Running Page model tests..."
-rails test test/models/page_test.rb
-
-echo "Running Site model tests..."
-rails test test/models/site_test.rb
-
-echo "Running Site Controller tests..."
-rails test test/controllers/sites_controller_test.rb
-
-echo "Running User Sign In & Registration System tests..."
-rails test test/system/users_test.rb
+echo "Running all tests..."
+rails test \
+  test/controllers/pages_controller_test.rb \
+  test/controllers/application_controller_test.rb \
+  test/models/page_test.rb \
+  test/models/site_test.rb \
+  test/controllers/sites_controller_test.rb \
+  test/system/users_test.rb
 
 echo "All tests completed."

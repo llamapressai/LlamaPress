@@ -91,19 +91,100 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     # Ensure unique slugs for this test
 
     # Test resolving slug for the current site
-    host! @site1.slug
+    ENV["OVERRIDE_DOMAIN"] = @site1.slug #This is how we do it in testing/development.
     get "/#{@page1.slug}"
     assert_response :success
     assert_equal @page1, assigns(:page)
 
     # Test handling pages across different sites
-    host! @site2.slug
+    ENV["OVERRIDE_DOMAIN"] = @site2.slug #This is how we do it in testing/development.
     get "/#{@page2.slug}"
     assert_response :success
     assert_equal @page2, assigns(:page)
 
     # Test redirecting when no matching page is found
     get '/non-existent-page'
+    assert_response :not_found
+  end
+
+  test "should redirect signed in user to llama bot home" do
+    sign_in @user
+    get root_url
     assert_redirected_to llama_bot_home_path
+  end
+
+  test "should show home page for non-signed in user on custom domain" do
+    sign_out @user
+    @site = sites(:one)
+    @page = pages(:one)
+    @site.update(home_page_id: @page_id)
+    
+    ENV["OVERRIDE_DOMAIN"] = @site.slug #This is how we do it in testing/development.
+    get root_url
+    
+    assert_response :success
+    assert_equal @page, assigns(:page)
+  end
+
+  test "should fallback to first page when no home page is set" do
+    sign_out @user
+    @site = sites(:one)
+    @page = pages(:one)
+    @site.update(home_page: nil)
+    
+    ENV["OVERRIDE_DOMAIN"] = @site.slug #This is how we do it in development.
+    
+    #Error: it's not finding the @site domain in application_controller.rb.
+    get root_url
+    
+    assert_response :success
+    assert_equal @site.pages.first, assigns(:page)
+  end
+
+  test "should redirect to llama bot home when site has no pages" do
+    sign_out @user
+    @site = sites(:one)
+    @site.pages.destroy_all
+    
+    ENV["OVERRIDE_DOMAIN"] = @site.slug #This is how we do it in development.
+    get root_url
+    
+    assert_redirected_to llama_bot_home_path
+  end
+
+  test "should redirect signed in user to specific page URL" do
+    sign_in @user
+    @site = sites(:one)
+    @page = pages(:one)
+    @site.update(home_page_id: @page.id)
+    
+    ENV["OVERRIDE_DOMAIN"] = @site.slug #This is how we do it in development.
+    get root_url
+    
+    assert_redirected_to llama_bot_home_path
+  end
+
+  test "should render page with analytics in production" do
+    sign_out @user
+    @site = sites(:one)
+    @page = pages(:one)
+    
+    @site.update(home_page_id: @page.id)
+    
+    Rails.env.stubs(:production?).returns(true)
+
+    ENV["OVERRIDE_DOMAIN"] = @site.slug #This is how we do it in development.
+
+    get pages_url # will this set controller?
+
+    @page.stubs(:render_content).returns("<div>content</div>")
+    @controller.stubs(:inject_analytics_partial).returns("<script>analytics</script>")
+    
+    get "/#{@page.slug}"
+    
+    assert_response :success
+    assert_includes @response.body, "Put your analytics code here"
+    # assert_includes @response.body, "llamabot css"
+    assert_includes @response.body, @page.content
   end
 end

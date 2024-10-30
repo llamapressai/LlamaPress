@@ -8,11 +8,14 @@ class ApplicationController < ActionController::Base
 
   def current_site
     # Number One: Check Request Info for Domain.
+    
     if ENV["OVERRIDE_DOMAIN"].present? #This is used for development, use OVERRIDE_DOMAIN to test different sites
       domain = ENV["OVERRIDE_DOMAIN"]
     else
       domain = sanitize_domain(request.env["HTTP_HOST"].dup)
     end
+
+    Rails.logger.info("Domain request for: " + domain)
 
     @site = Site.find_by(slug: domain)
 
@@ -41,8 +44,19 @@ class ApplicationController < ActionController::Base
       @site = current_user&.organization&.sites&.first
     end
 
-    # If no user, no site, no page, no domain, then current_site is nil.
-    Rails.logger.info("Domain request for: " + domain)
+    if @site.nil?
+      # Number Six: Inspect the HOSTED_DOMAIN environment variable for a default site.
+      Rails.logger.info "No site found for domain #{domain}. Let's check if we have a domain set in HOSTED_DOMAIN environment"
+      @site = Site.find_by(slug: ENV["HOSTED_DOMAIN"]) unless ENV["HOSTED_DOMAIN"].blank?
+    end
+
+    if @site.nil?
+      # Number Seven: If no site is found, throw a 404 error.
+      Rails.logger.info "No site found for domain #{domain}. Taking them to llamapress home page"
+      # throw 404 error
+      raise ActionController::RoutingError.new('Not Found')
+    end
+
     return @site
   end
 
