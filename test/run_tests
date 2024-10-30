@@ -11,4 +11,13 @@ rails test test/controllers/pages_controller_test.rb
 echo "Running Page model tests..."
 rails test test/models/page_test.rb
 
+echo "Running Site model tests..."
+rails test test/models/site_test.rb
+
+echo "Running Site Controller tests..."
+rails test test/controllers/sites_controller_test.rb
+
+echo "Running User Sign In & Registration System tests..."
+rails test test/system/users_test.rb
+
 echo "All tests completed."
