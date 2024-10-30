@@ -66,12 +66,13 @@ class ChatChannel < ApplicationCable::Channel
     return "Got it! Snippets have been updated and here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
   end
 
+  # LlamaBot subscribes to this channel in _websocket.html.erb.
   def subscribed
-    stream_from "chat_channel_#{params[:session_id]}"
+    stream_from "chat_channel_#{params[:session_id]}" # Public stream for session-based messages <- this is the channel we're subscribing to in _websocket.html.erb
     Rails.logger.info "Subscribed to chat channel with session ID: #{params[:session_id]}"
-    stream_for current_user
+    stream_for current_user # Private stream for user-specific messages
 
-    setup_external_websocket
+    setup_external_websocket # Listen for messages from LlamaBot Backend
   end
 
   def unsubscribed
@@ -82,20 +83,30 @@ class ChatChannel < ApplicationCable::Channel
     end
   end
 
+  # Receive messages from the llamabot/_chat.html.erb chatbot.
   def receive(data)
+    # Log the incoming WebSocket data
     Rails.logger.info "Received data: #{data.inspect}"
-    data["web_page_id"] = data["webPageId"] #standardize 
+    
+    # Standardize field names so LlamaBot Backend can understand
+    data["web_page_id"] = data["webPageId"]
     data["user_message"] = data["message"] 
-    data["file_contents"] =  fetch_file_contents(data["context"], data["webPageId"])
+    
+    # Fetch the contents of the file or webpage that user is currently editing
+    data["file_contents"] = fetch_file_contents(data["context"], data["webPageId"])
+    
+    # Forward the processed data to the LlamaBot Backend Socket
     send_to_external_application(data)
   end
 
   private
 
+  # Setup the socket connection to the LlamaBot Backend
   def setup_external_websocket
     Rails.logger.info "Setting up external websocket"
 
-    endpoint = Async::HTTP::Endpoint.parse('ws://localhost:8000/ws')
+    #TODO: this will come from the ENV["LLAMABOT_BACKEND_URL"]
+    endpoint = Async::HTTP::Endpoint.parse('ws://localhost:8000/ws') 
 
     # Initialize the connection and store it in an instance variable
     @external_ws_task = Async do |task|
@@ -118,9 +129,11 @@ class ChatChannel < ApplicationCable::Channel
     end
   end
 
+  # Listen for messages from the LlamaBot Backend
   def listen_to_external_websocket(connection)
     while message = connection.read
       Rails.logger.info "Received from external WebSocket: #{message}"
+      
       # Extract the actual message content
       if message.buffer
         message_content = message.buffer  # Use .data to get the message content
@@ -142,12 +155,13 @@ class ChatChannel < ApplicationCable::Channel
         Rails.logger.error "Failed to parse message as JSON: #{e.message}"
       end
 
-
+      # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
       formatted_message = { message: message_content }.to_json
       ActionCable.server.broadcast "chat_channel_#{params[:session_id]}", formatted_message
     end
   end
 
+  # TODO: Send keep-alive pings to the LlamaBot Backend
   def send_keep_alive_pings(connection)
     loop do
       sleep 30
@@ -159,6 +173,7 @@ class ChatChannel < ApplicationCable::Channel
     Rails.logger.error "Error in keep-alive ping: #{e.message}"
   end
 
+  # Send messages from the user to the LlamaBot Backend Socket
   def send_to_external_application(message)
     payload = message.to_json
     if @external_ws_connection
