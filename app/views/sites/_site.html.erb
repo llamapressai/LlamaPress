@@ -92,7 +92,7 @@
           Submitted: <%= time_ago_in_words(submission.created_at) %> ago
         </p>
         <div class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
-          <% submission.data.each do |key, value| %>
+          <% submission.data&.each do |key, value| %>
             <p class="text-sm text-gray-300"><strong><%= key %>:</strong> <%= value %></p>
           <% end %>
         </div>

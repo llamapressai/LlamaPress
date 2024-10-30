@@ -14,7 +14,7 @@ class SitesController < ApplicationController
 
   # GET /sites/new
   def new
-    @site = Site.new
+    @site = current_user.organization.sites.new
   end
 
   # GET /sites/1/edit
@@ -23,7 +23,7 @@ class SitesController < ApplicationController
 
   # POST /sites or /sites.json
   def create
-    @site = Site.new(site_params)
+    @site = current_user.organization.sites.new(site_params)
 
     respond_to do |format|
       if @site.save
@@ -93,7 +93,7 @@ class SitesController < ApplicationController
 
     if params[:site_slug].present?
       slug = params[:site_slug]
-      @page = Page.find_by(slug: slug) || Page.find(slug)
+      @page = current_user.organization.pages.find_by(slug: slug) || current_user.organization.pages.find(slug)
       @site = @page.site || current_site
     else
       render json: { error: "No site slug provided" }, status: 400
@@ -129,7 +129,7 @@ class SitesController < ApplicationController
       per_page = 10
       offset = (page.to_i - 1) * per_page
       slug = params[:site_slug]
-      @page = Page.find_by(slug: slug) || Page.find(slug)
+      @page = current_user.organization.pages.find_by(slug: slug) || current_user.organization.pages.find(slug)
       @site = @page.site || current_site
       @images = @site.images.order(created_at: :desc).offset(offset).limit(per_page)
       render json: @images.map { |img|
@@ -149,7 +149,7 @@ class SitesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_site
-      @site = Site.find(params[:id])
+      @site = current_user.organization.sites.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
