@@ -1,90 +1,97 @@
 <script>
-let chatChannel;
-console.log("Loaded...");
+  let chatChannel;
+  console.log("Loaded...");
 
-    let isLoading = false;
-    function initializeChat() {
+  let isLoading = false;
+
+  /**
+   * Initialize the chat channel (ActionCable). This allows us to send and receive messages to LlamaBot Backend.
+   */
+  function initializeChat() {
     if (chatChannel) {
         console.log("ChatChannel already initialized.");
         return;
     }
-     console.log("Initializing Chat...");
-        const consumer = ActionCable.createConsumer();
     
-
+    console.log("Initializing Chat...");
     
-    // Initialize ActionCable
+    const consumer = ActionCable.createConsumer();
+    
+    // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
     chatChannel = consumer.subscriptions.create(
-  { channel: "ChatChannel", session_id: "<%= session.id %>" },
-  {
-    received(data) {
-      console.log("Received data:", data); 
-      try {
-        // Parse the incoming data
+      { channel: "ChatChannel", session_id: "<%= session.id %>" },
+      {
+        /**
+         * Receives message responses from LlamaBot Backend.
+         */
+        received(data) { // LlamaBot Backend is sending us a message -- let's handle it and format it so the user can see it
+          console.log("Received response from LlamaBot Backend:", data);
+          try {
+            
+            // Parse the incoming data
+            const parsedData2 = typeof data === "string" ? JSON.parse(data) : data;
+            const parsed = JSON.parse(data)
+            const parsedData = JSON.parse(parsed.message)
 
-        const parsedData2 = typeof data === "string" ? JSON.parse(data) : data;
-        const parsed = JSON.parse(data)
-        const parsedData = JSON.parse(parsed.message)
+            // Handle the message based on its type
+            switch (parsedData.type) {
+              case 'ai_message':
+                // Display AI-generated messages
+                addMessage(parsedData.content, "bot");
+                break;
 
-        // Handle the message based on its type
-        switch (parsedData.type) {
-          case 'ai_message':
-            // Display AI-generated messages
-            addMessage(parsedData.content, "bot");
-            break;
+              case 'system_message':
+                // Reflect system messages back to the user
+                addMessage(parsedData.content, "system");
+                break;
 
-          case 'system_message':
-            // Reflect system messages back to the user
-            addMessage(parsedData.content, "system");
-            break;
+              case 'user_input_required':
+                // Ask for user input if necessary
+                const userInputMessage = parsedData.content;
+                addMessage(userInputMessage, "bot");
+                // Optionally, you can trigger some action to collect input from the user here
+                break;
 
-          case 'user_input_required':
-            // Ask for user input if necessary
-            const userInputMessage = parsedData.content;
-            addMessage(userInputMessage, "bot");
-            // Optionally, you can trigger some action to collect input from the user here
-            break;
+              case 'write_code':
+                // Handle a command to finalize changes, maybe by calling an endpoint or initiating some process
+                addMessage("Recieved changes. Writing to the file system...", "system")
+                break;
 
-          case 'write_code':
-            // Handle a command to finalize changes, maybe by calling an endpoint or initiating some process
-            addMessage("Recieved changes. Writing to the file system...", "system")
-            break;
+              default:
+                console.warn("Unknown message type:", parsedData.type);
+                addMessage("Unknown message type received.", "system");
+            }
+          } catch (error) {
+            console.error("Error parsing or processing received data:", error);
+            addMessage("There was an error processing the message.", "bot");
+          }
 
-          default:
-            console.warn("Unknown message type:", parsedData.type);
-            addMessage("Unknown message type received.", "system");
+          // Optionally handle the 'message_complete' field if it exists
+          //   if (parsedData.message_complete) {
+          //     const streamContainer = document.getElementById("botStreamContainer");
+          //     if (streamContainer) {
+          //       streamContainer.id = "";
+          //     }
+          //   }
+        },
+
+        connected() {
+          console.log("Connected to ChatChannel");
+          // You can add any initialization code here
+        },
+
+        disconnected() {
+          console.log("Disconnected from ChatChannel");
+        },
+
+        rejected() {
+          console.log("Connection to ChatChannel rejected");
         }
-      } catch (error) {
-        console.error("Error parsing or processing received data:", error);
-        addMessage("There was an error processing the message.", "bot");
       }
-
-      // Optionally handle the 'message_complete' field if it exists
-    //   if (parsedData.message_complete) {
-    //     const streamContainer = document.getElementById("botStreamContainer");
-    //     if (streamContainer) {
-    //       streamContainer.id = "";
-    //     }
-    //   }
-    },
-
-    connected() {
-      console.log("Connected to ChatChannel");
-      // You can add any initialization code here
-    },
-
-    disconnected() {
-      console.log("Disconnected from ChatChannel");
-    },
-
-    rejected() {
-      console.log("Connection to ChatChannel rejected");
-    }
-  }
-);
+    );
 
     console.log("ChatChannel created:", chatChannel); // Add this line
-    }
+  }
 
     const textarea = document.getElementById('userInput');
     const maxRows = 10; // Set this to your desired maximum number of rows
