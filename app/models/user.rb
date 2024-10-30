@@ -17,8 +17,10 @@ class User < ApplicationRecord
   before_validation :create_default_organization, on: :create
 
   def notify_registration
-    Twilio.send_text("9152845787", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
-    Twilio.send_text("3853001203", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+    if Rails.env.production?
+      Twilio.send_text("9152845787", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+      Twilio.send_text("3853001203", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+    end
   end
 
   private
