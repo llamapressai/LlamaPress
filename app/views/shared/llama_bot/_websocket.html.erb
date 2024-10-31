@@ -61,11 +61,11 @@
 
               default:
                 console.warn("Unknown message type:", parsedData.type);
-                addMessage("Unknown message type received.", "system");
+                addMessage("Unknown: " + data, "system");
             }
           } catch (error) {
             console.error("Error parsing or processing received data:", error);
-            addMessage("There was an error processing the message.", "bot");
+            addMessage("Error: " + error, "bot");
           }
 
           // Optionally handle the 'message_complete' field if it exists
