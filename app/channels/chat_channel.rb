@@ -86,6 +86,7 @@ class ChatChannel < ApplicationCable::Channel
     Rails.logger.info "Received data: #{data.inspect}"
     data["web_page_id"] = data["webPageId"] #standardize 
     data["user_message"] = data["message"] 
+    data["selected_element"] = data["selectedElement"]
     data["file_contents"] =  fetch_file_contents(data["context"], data["webPageId"])
     send_to_external_application(data)
   end
