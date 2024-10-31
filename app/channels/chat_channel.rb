@@ -91,6 +91,7 @@ class ChatChannel < ApplicationCable::Channel
     # Standardize field names so LlamaBot Backend can understand
     data["web_page_id"] = data["webPageId"]
     data["user_message"] = data["message"] 
+    data["selected_element"] = data["selectedElement"] 
     
     # Fetch the contents of the file or webpage that user is currently editing
     data["file_contents"] = fetch_file_contents(data["context"], data["webPageId"])
