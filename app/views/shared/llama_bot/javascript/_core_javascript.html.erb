@@ -159,6 +159,7 @@
      * Hides the loading indicator for when llamabot is done thinking.
      */
     function hideLoadingIndicator() {
+      isLoading = false;
       // hide all instances of is-thinking class
       document.querySelectorAll(".is-thinking").forEach(element => {
         element.classList.add("hidden");
