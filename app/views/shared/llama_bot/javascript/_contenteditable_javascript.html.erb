@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastElementClicked = e.target;
         console.log("lastElementClicked", lastElementClicked);
         if (e.target.tagName === 'IMG' && e.target.parentElement.id !== 'image-container' && !e.target.classList.contains('llama-prevent-img-resize')) {
+            console.log("User is resizing image -- suppressing default behavior");
             isResizing = true;
             currentImage = e.target;
             startX = e.clientX;
@@ -249,42 +250,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add this function at the end of the DOMContentLoaded event listener
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits'); //Don't save these notifications to the page.
-        notification.textContent = message;
-        notification.style.position = 'fixed';
-        notification.style.top = '10px';
-        notification.style.right = '10px';
-        notification.style.padding = '10px';
-        notification.style.borderRadius = '5px';
-        notification.style.zIndex = '1000';
-        notification.style.opacity = '0';
-        notification.style.transition = 'opacity 0.3s ease-in-out';
+    /**
+     * The following code is to ensure a better user experience when editing content editable nodes. 
+     * 
+     * When the user changes the content of a node, the browser
+     * will sometimes merge, split, or otherwise change the node structure, resulting in new content that doesn't have the
+     * data-llama-editable attribute. If we don't handle this carefully, we can end up with unsaved changes the user wanted 
+     * to save. This code highlights those nodes so we can see them.
+     * 
+     * What's tricky is that we don't want to save HTML page changes injected from 3rd party sources such as plugins. 
+     * 
+     * We also don't want to save changes to nodes that are injected dynamically for LlamaBot such as the chat history, snippets, images, etc.
+     * 
+     * We have this debug mode to help us see what nodes are being edited, which ones won't be saved, etc. 
+     * 
+     * We also have this llamaChatHistoryLoaded event listener that fires when LlamaBot is fully loaded and is done with it's own dynamic Javascript things. 
+     * 
+     * We use the MutationObserver to watch for changes in the content editable nodes and add the data-llama-editable attribute
+     * when we detect changes.
+     * 
+     * exclude_when_saving_contenteditable_edits provides a lot of protection from saving unintended changes, but it's not foolproof.
+     */
+    document.addEventListener('llamaChatHistoryLoaded', () => {
 
-        if (type === 'success') {
-            notification.style.background = '#4CAF50';
-            notification.style.color = 'white';
-        } else if (type === 'error') {
-            notification.style.background = '#F44336';
-            notification.style.color = 'white';
+        const IN_DEBUG_MODE_FOR_CONTENT_EDITABLE_SAVING_NODES = false;
+
+        // CSS class to highlight unsaved nodes
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .unsaved-highlight {
+                background-color: rgba(255, 0, 0, 0.2); /* Light red background */
+                outline: 2px solid red; /* Red border */
+                position: relative;
+            }
+            .unsaved-highlight::after {
+                content: 'This content won't be saved';
+                color: white;
+                background-color: red;
+                position: absolute;
+                top: -20px;
+                left: 0;
+                font-size: 10px;  // Changed from 12px to 10px
+                padding: 2px 4px;
+                border-radius: 3px;
+                opacity: 0.8;
+            }
+        `;
+        document.head.appendChild(style);
+
+        
+
+        // Helper function to highlight unsaved nodes
+        function highlightUnsavedNode(node) {
+            if (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('data-llama-editable')) {
+                node.classList.add('unsaved-highlight');
+            }
         }
 
-        document.body.appendChild(notification);
+        // Helper function to add the data-llama-editable attribute to unsaved nodes
+        function addDataLlamaEditableAttribute(node) { //Warning: this might pick up on unintended nodes injected by 3rd party sources.
+            if (node.nodeType === Node.ELEMENT_NODE && !node.hasAttribute('data-llama-editable')) {
+                node.setAttribute('data-llama-editable', 'true'); //if the node doesn't have the data-llama-editable attribute, add it.
+            }
+        }
 
-        // Fade in
-        setTimeout(() => {
-            notification.style.opacity = '1';
-        }, 10);
+        // MutationObserver callback to detect relevant changes
+        const observerCallback = (mutations) => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (IN_DEBUG_MODE_FOR_CONTENT_EDITABLE_SAVING_NODES) {
+                        highlightUnsavedNode(node);
+                    }
+                    else {
+                        //highlightUnsavedNode(node);
+                        addDataLlamaEditableAttribute(node);
+                    }
+                });
 
-        // Remove the notification after 3 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
+                if (mutation.type === 'characterData') {
+                    const parent = mutation.target.parentElement;
+                    if (parent && !parent.hasAttribute('data-llama-editable')) {
+                        if (IN_DEBUG_MODE_FOR_CONTENT_EDITABLE_SAVING_NODES) {
+                            highlightUnsavedNode(parent);
+                        }
+                        else {
+                            //highlightUnsavedNode(node);
+                            addDataLlamaEditableAttribute(parent);
+                        }
+                    }
+                }
+            });
+        };
+
+        // Start observing for changes in the editable content
+        const observer = new MutationObserver(observerCallback);
+
+        // Find the content element or fallback to body
+        const contentElement = document.querySelector('#content') || document.body;
+
+        // Start observing
+        observer.observe(contentElement, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    });
+
 });
 </script>

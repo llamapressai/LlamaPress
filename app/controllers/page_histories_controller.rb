@@ -3,7 +3,7 @@ class PageHistoriesController < ApplicationController
 
   # GET /page_histories or /page_histories.json
   def index
-    @page_histories = PageHistory.all
+    # @page_histories = current_user.organization.page_histories
   end
 
   # GET /page_histories/1 or /page_histories/1.json
@@ -12,7 +12,7 @@ class PageHistoriesController < ApplicationController
 
   # GET /page_histories/new
   def new
-    @page_history = PageHistory.new
+    # @page_history = PageHistory.new
   end
 
   # GET /page_histories/1/edit
@@ -21,6 +21,11 @@ class PageHistoriesController < ApplicationController
 
   # POST /page_histories or /page_histories.json
   def create
+    #check page_id belongs to current_user's organization
+    # if Page.find(page_history_params[:page_id]).organization != current_user.organization
+    #   return redirect_to root_path, notice: "You are not authorized to access this page."
+    # end
+
     @page_history = PageHistory.new(page_history_params)
 
     respond_to do |format|

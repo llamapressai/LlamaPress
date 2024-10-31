@@ -2,6 +2,11 @@ require "test_helper"
 
 class PageTest < ActiveSupport::TestCase
 
+  def setup
+    @organization = organizations(:one)
+    @site = sites(:one)
+  end
+
   test 'render_content' do
     page = pages(:one)
     snippet = Snippet.create(content: '<p>Hello, World!</p>', name: 'hello_world', site_id: page.site_id)
@@ -50,4 +55,31 @@ class PageTest < ActiveSupport::TestCase
     page.ensure_doctype_html!
     assert_equal "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Document</title><script src=\"tailwind.js\"></script><script src=\"llama.js\"></script></head><body><p>Hello, World!</p></body></html>", page.content
   end
+
+  test "creates a unique slug when a duplicate exists" do
+    # Create an initial page with a slug
+    original_page = Page.create!(site: @site, slug: 'test-slug', organization: @organization)
+
+    # Create a new page with the same initial slug
+    new_page = Page.create!(site: @site, slug: 'test-slug', organization: @organization)
+
+    # Assert the new page has a unique slug
+    assert_equal 'test-slug-1', new_page.slug
+
+    # Create another page with the same initial slug
+    third_page = Page.create!(site: @site, slug: 'test-slug', organization: @organization)
+
+    # Assert the third page has a unique slug
+    assert_equal 'test-slug-2', third_page.slug
+  end
+
+  test "make_unique_slug does not modify the slug if it is already unique" do
+    # Create a page with a unique slug
+    unique_page = Page.new(site: @site, slug: 'unique-slug')
+    unique_page.send(:make_unique_slug)
+
+    # Assert the slug remains unchanged
+    assert_equal 'unique-slug', unique_page.slug
+  end
+
 end

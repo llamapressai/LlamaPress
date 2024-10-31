@@ -39,7 +39,7 @@
 
   <div class="my-5">
     <%= form.label :default_side_id, "Default Site" %>
-    <%= form.collection_select :default_site_id, user.organization.sites, :id, :name, 
+    <%= form.collection_select :default_site_id, user.organization.sites, :id, ->(site) { "#{site.name} (#{site.slug})" }, 
         { prompt: "Select Site" }, 
         { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
   </div>

@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+echo "Running all tests..."
+rails test \
+  test/controllers/pages_controller_test.rb \
+  test/controllers/application_controller_test.rb \
+  test/models/page_test.rb \
+  test/models/site_test.rb \
+  test/controllers/sites_controller_test.rb \
+  test/system/users_test.rb
+
+echo "All tests completed."

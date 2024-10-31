@@ -1,14 +1,23 @@
 class Page < ApplicationRecord
   include Rails.application.routes.url_helpers
   include ApplicationHelper
-
   extend FriendlyId
+
   belongs_to :site
   belongs_to :organization
+  
   has_many :page_histories, dependent: :destroy
+  has_many :posts, dependent: :nullify
+
   friendly_id :slug, use: :slugged
 
   before_validation :ensure_site, on: :create
+  
+  #TODO: Eventually we'll want it to be unique just for the individual sites -- validates :slug, uniqueness: { scope: :site_id, message: "must be unique within the site" }
+  validates :slug, uniqueness: { message: "must be unique across all sites" }
+
+  before_validation :make_unique_slug, on: :create
+
   after_initialize :set_default_html_content, if: :new_record?
   before_save :pre_save_processing, if: :content_changed?
 
@@ -20,16 +29,15 @@ class Page < ApplicationRecord
   end
 
   def render_snippets(content)
-    # a snippet is something like {{snippet:header}} or {{snippet:footer}}
-    # for each {{ in the content, see if there is a matching snippet
-    # if so, replace the {{snippet:name}} with the snippet content
+    # a snippet syntax looks like {{snippet_name:header}} or {{snippet_name:footer}}, or {{snippet_id:1}}
+    # for each {{snippet_name:name}} or {{snippet_id:id}} in the content, see if there is a matching snippet
+    # if so, replace the {{snippet_name:name}} or {{snippet_id:id}} with the snippet content
 
-    # make this work by snippet id, and by snippet name
+    # This works for both snippet id, and by snippet name
     # if the snippet name is not found, then don't replace it
     # if the snippet id is not found, then don't replace it
     # if the snippet id is found, then replace it
     # if the snippet name is found, then replace it
-
     content.gsub!(/\{\{snippet_id:(.*?)\}\}/) do |match|
       snippet_identifier = $1
       snippet = Snippet.find_by(id: snippet_identifier)
@@ -37,7 +45,7 @@ class Page < ApplicationRecord
         # Parse the snippet content as a fragment
         fragment = Nokogiri::HTML::DocumentFragment.parse(snippet.content)
         
-        # Add the data-llama-snippet-id attribute to each node in the fragment
+        # Add the data-llama-snippet-id attribute to each node in the fragment. This snippet id is used to prevent the user from overwriting the snippet when they edit the page, and to allow the user to edit the snippet from any page it's referenced.
         fragment.css('*').each do |node| #we inject this data-llama-snippet-id attribute to each node in the fragment so we know it's a global snippet. 
           node.set_attribute('data-llama-snippet-id', snippet_identifier)
         end
@@ -71,7 +79,7 @@ class Page < ApplicationRecord
     return content
   end
 
-  # LlamaPress allows the user can edit the document by clicking in the page, and typing changes. 
+  # LlamaPress allows the user to edit the document by clicking in the page, and typing changes. 
   # The javascript code in _chat_contenteditable_javascript.html.erb will save those changes to the database using a POST request.
   # This method adds data-llama-editable attributes to all nodes in the HTML document. These attributes prevent ALL the html code that's in the document from being saved into the page database.
   # This is needed because modern browser plugins inject extra things into the page, and we need to exclude those from being saved, otherwise they will be saved to the database.
@@ -189,6 +197,15 @@ class Page < ApplicationRecord
     end
 
     name
+  end
+
+  def make_unique_slug
+    original_slug = self.slug
+    counter = 1
+    while Page.exists?(slug: self.slug)
+      self.slug = "#{original_slug}-#{counter}"
+      counter += 1
+    end
   end
 
   def controller
