@@ -169,6 +169,7 @@
         loadingDiv.remove();
       }
     }
+    window.hideLoadingIndicator = hideLoadingIndicator;
 
     /**
      * Sends a message to the LLM and handles the response.
@@ -191,35 +192,10 @@
       );
       hideAllChatToolWindows();
 
-      try {
-        const response = await fetch("/llama_bot/message.json", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMessage,
-            context: "<%=@view_path%>",
-            selectedElement: selectedElementInnerHtml,
-            webPageId: "<%=@page&.id%>",
-          }),
-        });
-        const data = await response.json();
+      sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, (error) => {
+        console.error("Error sending message:", error);
+      });
 
-        // Only reload the window if we got a page replacement
-        // in the return
-        const dtIndex = data?.response?.indexOf("<!DOCTYPE") ?? -1;
-        if (dtIndex >= 0 && dtIndex < 50) {
-          window.location.reload();
-        }
-        addMessage(data.response, "bot");
-      } catch (error) {
-        console.error("Error sending message to ChatGPT:", error);
-      } finally {
-        isLoading = false;
-        hideLoadingIndicator();
-        //autoResizeUserInputArea();
-      }
     }
 
     /**
@@ -259,6 +235,7 @@
     window.hideAllChatToolWindows = hideAllChatToolWindows;
 
     sendButton.addEventListener("click", sendMessage);
+    
     userInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         if (e.shiftKey || e.altKey || e.metaKey) {
