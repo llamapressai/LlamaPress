@@ -40,7 +40,13 @@ class UsersController < ApplicationController
     @user = current_organization.users.find(params[:id])
     respond_to do |format|
       if @user.update(user_params)
-        format.html { redirect_to user_url(@user), notice: "User was successfully updated." }
+        format.html do
+          if request.referrer&.include?('default_site') # Allow user to update their default site easily with floating user menu
+            redirect_back(fallback_location: root_path, notice: 'Default site updated.')
+          else
+            redirect_to @user, notice: 'User was successfully updated.'
+          end
+        end
         format.json { render :show, status: :ok, location: @user }
       else
         format.html { render :edit, status: :unprocessable_entity }
