@@ -7,6 +7,7 @@ class Site < ApplicationRecord
   has_many :snippets, dependent: :destroy
   has_many_attached :images
   validates :name, presence: true
+  before_validation :make_unique_slug, on: :create
 
   # Helper method to extract image metadata and URL
   def extract_image_data(image)
@@ -18,5 +19,14 @@ class Site < ApplicationRecord
       content_type: image.blob.content_type,
       url: image.service.send(:object_for, image.key).public_url
     }
+  end
+
+  def make_unique_slug
+    original_slug = self.slug
+    counter = 1
+    while Site.exists?(slug: self.slug)
+      self.slug = "#{original_slug}-#{counter}"
+      counter += 1
+    end
   end
 end
