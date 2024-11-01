@@ -93,42 +93,7 @@
           <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database">
             <i class="fas fa-database"></i>
           </a>
-          <div class="relative" x-data="{ open: false }">
-            <button @click="open = !open" class="text-white hover:text-gray-300 focus:outline-none">
-              <i class="fas fa-user"></i>
-            </button>
-            
-            <div x-show="open" 
-                 @click.away="open = false"
-                 class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1"
-                 style="display: none;">
-              <div class="px-4 py-2 text-sm text-gray-700">
-                <p class="font-semibold"><%= current_user.email %></p>
-              </div>
-              
-
-              <div class="px-4 py-2">
-                <%= form_for current_user, html: { class: 'default-site-form' } do |f| %>
-                  <label class="block text-sm text-gray-700">Default Site:</label>
-                  <%= f.select :default_site_id,
-                    current_user.organization.sites.map { |site| [site.name, site.id] },
-                    { selected: current_user.default_site_id },
-                    class: "mt-1 block w-full text-sm border-gray-300 rounded-md",
-                    data: { action: "change->form#submit" }
-                  %>
-                <% end %>
-              </div>
-              
-              <hr class="my-1">
-              
-              <%= link_to "Edit Profile", edit_user_path(current_user), 
-                  class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" %>
-                  
-              <%= button_to "Sign Out", destroy_user_session_path, 
-                  method: :delete,
-                  class: "block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100" %>
-            </div>
-          </div>
+          <%= render partial: 'shared/llama_bot/user_menu' %>
           <!-- Add more navbar links here -->
         </div>
         <div class="md:hidden">
