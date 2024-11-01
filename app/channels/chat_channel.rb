@@ -110,9 +110,9 @@ class ChatChannel < ApplicationCable::Channel
         end
 
         # Optional: Set up a keep-alive ping
-        # task.async do
-        #   send_keep_alive_pings(@external_ws_connection)
-        # end
+        task.async do
+          send_keep_alive_pings(@external_ws_connection)
+        end
       rescue => e
         Rails.logger.error "Failed to connect to external WebSocket: #{e.message}"
       end
@@ -131,13 +131,17 @@ class ChatChannel < ApplicationCable::Channel
 
       begin
         parsed_message = JSON.parse(message_content)
-        if parsed_message["type"] == "write_code"
+        case parsed_message["type"]
+        when "write_code"
           Rails.logger.info "---------Received write_code message!----------"
           response = parsed_message['content']
           Rails.logger.info "---------------------> Response: #{response}"
           handle_write_code(response)
           Rails.logger.info "--------Completed write_code message!----------"
           # Add any additional handling for write_code messages here
+        when "pong"
+          Rails.logger.debug "Received pong response"
+          next  #skip broadcast on pong
         end
       rescue JSON::ParserError => e
         Rails.logger.error "Failed to parse message as JSON: #{e.message}"
