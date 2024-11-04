@@ -16,7 +16,7 @@
     <select id="site-select" name="page[site_id]" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       <option value="">Select a site...</option>
       <% current_user.organization.sites.each do |site| %>
-        <option value="<%= site.id %>" <%= 'selected' if @site&.id == site.id %>>
+        <option value="<%= site.id %>" <%= 'selected' if @site&.id == site.id || current_user.default_site_id == site.id %>>
           <%= site.name %>
         </option>
       <% end %>

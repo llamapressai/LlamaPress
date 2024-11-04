@@ -83,6 +83,13 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Add site select handler
+    const siteSelect = document.getElementById('site-select');
+    siteSelect.addEventListener('change', function() {
+      const selectedSiteId = this.value;
+      document.getElementById('page_site_id').value = selectedSiteId;
+    });
+
     var editor = CodeMirror.fromTextArea(document.getElementById('page_content'), {
       mode: 'htmlmixed',
       lineNumbers: true,

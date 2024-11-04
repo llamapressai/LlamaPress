@@ -1,6 +1,22 @@
 <div class="w-full">
   <h1 class="font-bold text-4xl">Editing web page</h1>
 
+  <div class="mb-8">
+    <h3 class="font-semibold text-xl text-gray-700 mb-3 flex items-center">
+      <i class="fas fa-globe mr-3 text-blue-500"></i>
+      What site is this page for?
+    </h3>
+    
+    <select id="site-select" name="page[site_id]" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      <option value="">Select a site...</option>
+      <% current_user.organization.sites.each do |site| %>
+        <option value="<%= site.id %>" <%= 'selected' if @page&.site&.id == site.id %>>
+          <%= site.name %>
+        </option>
+      <% end %>
+    </select>
+  </div>
+  
   <%= render "form", page: @page %>
 
   <%= link_to "Show this web page", @page, class: "mr-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
