@@ -80,15 +80,61 @@
           // You can add any initialization code here
         },
 
-        disconnected() {
-          console.log("Disconnected from ChatChannel");
-        },
+    disconnected() {
+      console.log("Disconnected from ChatChannel. Attempting to reconnect...");
+    // You can also implement exponential backoff for reconnection here
+      setTimeout(() => consumer.connection.reopen(), 5000);
+    },
 
-        rejected() {
-          console.log("Connection to ChatChannel rejected");
+    rejected() {
+      console.log("Connection to ChatChannel rejected");
+      // Add exponential backoff retry logic
+      const maxRetries = 5;
+      let retryCount = 0;
+      
+      const retry = () => {
+        if (retryCount < maxRetries) {
+          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 30000); // Cap at 30 seconds
+          console.log(`Retrying connection in ${backoffTime/1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`);
+          
+          setTimeout(() => {
+            retryCount++;
+            consumer.connection.reopen();
+          }, backoffTime);
+        } else {
+          console.log("Max retry attempts reached. Please refresh the page to try again.");
+          addMessage("Connection failed. Please refresh the page to try again.", "system");
         }
-      }
-    );
+      };
+      
+      retry();
+    }
+  }
+);
+
+
+// const idleTimeout = 5 * 60 * 1000; // 5 minutes
+//     let lastActivity = Date.now();
+
+//     document.addEventListener('mousemove', () => lastActivity = Date.now());
+//     document.addEventListener('keypress', () => lastActivity = Date.now());
+
+//     setInterval(() => {
+//       if (Date.now() - lastActivity > idleTimeout && !consumer.connection.isOpen()) {
+//         console.log("User idle for too long, attempting reconnection...");
+//         consumer.connection.reopen();
+//       }
+//     }, 5000); // Check every 5 seconds
+  
+
+document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === 'visible' && !consumer.connection.isOpen()) {
+            console.log("Tab is active. Reconnecting...");
+            consumer.connection.reopen();
+        }
+    });
+
+
 
     console.log("ChatChannel created:", chatChannel); // Add this line
   }
