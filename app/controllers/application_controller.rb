@@ -54,7 +54,7 @@ class ApplicationController < ActionController::Base
       # Number Seven: If no site is found, throw a 404 error.
       Rails.logger.info "No site found for domain #{domain}. Taking them to llamapress home page"
       # throw 404 error
-      raise ActionController::RoutingError.new('Not Found')
+      # raise ActionController::RoutingError.new('Not Found')
     end
 
     return @site
