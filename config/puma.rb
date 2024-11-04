@@ -32,3 +32,11 @@ plugin :tmp_restart
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+
+if ENV.fetch("RAILS_ENV") == "development"
+    worker_timeout 3600  # Set timeout in seconds (e.g., 3600 seconds = 1 hour)
+  end
+
+
+persistent_timeout 600 # Timeout in seconds (e.g., 600 seconds = 10 minutes)

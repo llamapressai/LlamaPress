@@ -106,18 +106,18 @@ console.log("Loaded...");
 );
 
 
-const idleTimeout = 5 * 60 * 1000; // 5 minutes
-    let lastActivity = Date.now();
+// const idleTimeout = 5 * 60 * 1000; // 5 minutes
+//     let lastActivity = Date.now();
 
-    document.addEventListener('mousemove', () => lastActivity = Date.now());
-    document.addEventListener('keypress', () => lastActivity = Date.now());
+//     document.addEventListener('mousemove', () => lastActivity = Date.now());
+//     document.addEventListener('keypress', () => lastActivity = Date.now());
 
-    setInterval(() => {
-      if (Date.now() - lastActivity > idleTimeout && !consumer.connection.isOpen()) {
-        console.log("User idle for too long, attempting reconnection...");
-        consumer.connection.reopen();
-      }
-    }, 5000); // Check every 5 seconds
+//     setInterval(() => {
+//       if (Date.now() - lastActivity > idleTimeout && !consumer.connection.isOpen()) {
+//         console.log("User idle for too long, attempting reconnection...");
+//         consumer.connection.reopen();
+//       }
+//     }, 5000); // Check every 5 seconds
   
 
 document.addEventListener("visibilitychange", function() {

@@ -70,15 +70,36 @@ class ChatChannel < ApplicationCable::Channel
     stream_from "chat_channel_#{params[:session_id]}"
     Rails.logger.info "Subscribed to chat channel with session ID: #{params[:session_id]}"
     stream_for current_user
-
-    setup_external_websocket
+    
+    # Create a unique identifier for this connection
+    @connection_id = SecureRandom.uuid
+    Rails.logger.info "Created new connection with ID: #{@connection_id}"
+    
+    @worker = Thread.new do
+      setup_external_websocket(@connection_id)
+    end
   end
 
   def unsubscribed
+    connection_id = @connection_id
+    Rails.logger.info "Unsubscribing connection: #{connection_id}"
+    
+    # Only kill the worker if it belongs to this connection
+    if @worker && @worker[:connection_id] == connection_id
+      @worker.kill
+      @worker = nil
+      Rails.logger.info "Killed worker thread for connection: #{connection_id}"
+    end
+
+    # Clean up async tasks
+    @listener_task&.stop
+    @keepalive_task&.stop
+    @external_ws_task&.stop
+    
     # Clean up the connection
     if @external_ws_connection
       @external_ws_connection.close
-      Rails.logger.info "Closed external WebSocket connection"
+      Rails.logger.info "Closed external WebSocket connection for: #{connection_id}"
     end
   end
 
@@ -93,8 +114,9 @@ class ChatChannel < ApplicationCable::Channel
 
   private
 
-  def setup_external_websocket
-    Rails.logger.info "Setting up external websocket"
+  def setup_external_websocket(connection_id)
+    Thread.current[:connection_id] = connection_id
+    Rails.logger.info "Setting up external websocket for connection: #{connection_id}"
 
     endpoint = Async::HTTP::Endpoint.parse('ws://localhost:8000/ws')
 
@@ -102,19 +124,26 @@ class ChatChannel < ApplicationCable::Channel
     @external_ws_task = Async do |task|
       begin
         @external_ws_connection = Async::WebSocket::Client.connect(endpoint)
-        Rails.logger.info "Connected to external WebSocket"
+        Rails.logger.info "Connected to external WebSocket for connection: #{connection_id}"
 
-        # Start listening for messages from the external server
-        task.async do
+        # Store tasks in instance variables so we can clean them up later
+        @listener_task = task.async do
           listen_to_external_websocket(@external_ws_connection)
         end
 
-        # Optional: Set up a keep-alive ping
-        task.async do
+        @keepalive_task = task.async do
           send_keep_alive_pings(@external_ws_connection)
         end
+
+        # Wait for tasks to complete or connection to close
+        [@listener_task, @keepalive_task].each(&:wait)
       rescue => e
-        Rails.logger.error "Failed to connect to external WebSocket: #{e.message}"
+        Rails.logger.error "Failed to connect to external WebSocket for connection #{connection_id}: #{e.message}"
+      ensure
+        # Clean up tasks if they exist
+        @listener_task&.stop
+        @keepalive_task&.stop
+        @external_ws_connection&.close
       end
     end
   end
@@ -156,12 +185,17 @@ class ChatChannel < ApplicationCable::Channel
   def send_keep_alive_pings(connection)
     loop do
       sleep 30
-      ping_message = { type: 'ping' }.to_json
+      ping_message = {
+        type: 'ping',
+        connection_id: @connection_id,
+        connection_state: !connection.closed? ? 'connected' : 'disconnected',
+        connection_class: connection.class.name
+      }.to_json
       connection.write(ping_message)
       Rails.logger.debug "Sent keep-alive ping: #{ping_message}"
     end
   rescue => e
-    Rails.logger.error "Error in keep-alive ping: #{e.message}"
+    Rails.logger.error "Error in keep-alive ping: #{e.message} | Connection type: #{connection.class.name}"
   end
 
   def send_to_external_application(message)
