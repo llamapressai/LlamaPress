@@ -52,4 +52,5 @@ Rails.application.routes.draw do
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && !request.path.start_with?('/cable')
   }
+  mount ActionCable.server => '/cable'
 end
