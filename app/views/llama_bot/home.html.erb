@@ -38,7 +38,7 @@
       
       <div id="site-<%= site.id %>" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <% pages.sort_by(&:updated_at).reverse.each do |web_page| %>
-          <%= link_to page_path(web_page.id), class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
+        <div class="bg-gray-700 p-2">
             <div class="aspect-w-16 aspect-h-24 bg-gray-700">
               <% if web_page.content.present? %>
                 <iframe srcdoc="<%= CGI.escapeHTML(web_page.content).html_safe %>" class="w-full h-full" sandbox="allow-scripts"></iframe>
@@ -50,16 +50,24 @@
             </div>
             <div class="p-6 border-t-2 border-gray-700">
               <div class="flex items-center mb-3">
-              <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
+                <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
                 <%# if web_page.organization.logo.attached? %>
                   <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
                 <%# else %>
                 <%# end %>
                 <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
               </div>
-              <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
+              <div class="flex items-center mb-3">
+                <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
+                <%= link_to page_path(web_page.id), class: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center" do %>
+                    <i class="fas fa-eye mr-2"></i> View Page
+                  <% end %>
+                  <%= link_to edit_page_path(web_page.id), class: "bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center" do %>
+                    <i class="fas fa-cog mr-2"></i> Settings
+                  <% end %>
+              </div>
             </div>
-          <% end %>
+          </div>
         <% end %>
       </div>
     </div>
