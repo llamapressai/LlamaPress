@@ -32,7 +32,7 @@
   <div id="template-applied-banner" class="my-5 w-full bg-green-100 text-green-800 p-4 rounded-lg mb-4 hidden shadow-md">
     <div class="flex items-center justify-center">
       <i class="fas fa-check-circle text-green-500 mr-2 text-xl"></i>
-      <p class="font-semibold">Template applied successfully!</p>
+      <p class="font-semibold">Applied successfully!</p>
       <i class="fas fa-arrow-right text-green-500 mx-2"></i>
       <button class="bg-green-200 hover:bg-green-300 text-green-800 font-semibold py-1 px-3 rounded-full transition duration-300 ease-in-out flex items-center">
         <i class="fas fa-save mr-1"></i>
@@ -83,6 +83,13 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Add site select handler
+    const siteSelect = document.getElementById('site-select');
+    siteSelect.addEventListener('change', function() {
+      const selectedSiteId = this.value;
+      document.getElementById('page_site_id').value = selectedSiteId;
+    });
+
     var editor = CodeMirror.fromTextArea(document.getElementById('page_content'), {
       mode: 'htmlmixed',
       lineNumbers: true,
@@ -320,5 +327,3 @@
 
 
 </script>
-
-

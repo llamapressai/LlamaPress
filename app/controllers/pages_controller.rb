@@ -34,7 +34,7 @@ class PagesController < ApplicationController
 
     if current_site.nil? || @page.nil? #what should we do if current_site is nil, and there's no page?
       Rails.logger.info 'no site found, taking them to llamapress home page'
-      raise ActionController::RoutingError.new('Not Found') # throw 404 error
+      redirect_to "/users/sign_up" and return
     end
 
     Rails.logger.info 'rendering page to a non-signed in user -- this is likely a public traffic visit going to a site\'s home page'

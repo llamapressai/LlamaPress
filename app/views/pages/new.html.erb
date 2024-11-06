@@ -6,7 +6,23 @@
     </h1>
     <p class="text-blue-100 text-base sm:text-lg lg:text-xl">Design your perfect web page with our easy-to-use templates</p>
   </div>
-  
+
+  <div class="mb-8">
+    <h3 class="font-semibold text-xl text-gray-700 mb-3 flex items-center">
+      <i class="fas fa-globe mr-3 text-blue-500"></i>
+      What site is this page for?
+    </h3>
+    
+    <select id="site-select" name="page[site_id]" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+      <option value="">Select a site...</option>
+      <% current_user.organization.sites.each do |site| %>
+        <option value="<%= site.id %>" <%= 'selected' if @site&.id == site.id || current_user.default_site_id == site.id %>>
+          <%= site.name %>
+        </option>
+      <% end %>
+    </select>
+  </div>
+
   <h2 class="font-bold text-2xl sm:text-3xl lg:text-4xl text-gray-800 mb-6 flex items-center">
     <i class="fas fa-th-large mr-4 text-blue-500 text-lg sm:text-xl lg:text-2xl"></i>
     Choose a Starting Template
@@ -20,11 +36,14 @@
     
     <select id="clone-page-select" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       <option value="">Select a page to clone...</option>
-      <% existing_pages_to_clone = @site&.pages || current_user&.organization&.pages%>
-      <% existing_pages_to_clone.each do |page| %>
-        <option value="<%= page.content %>" data-slug="<%= page.slug %>">
-          <%= page.slug %>
-        </option>
+      <% current_user.organization.sites.each do |site| %>
+        <optgroup label="<%= site.name %>">
+          <% site.pages.each do |page| %>
+            <option value="<%= page.content %>" data-slug="<%= page.slug %>">
+              <%= page.slug %>
+            </option>
+          <% end %>
+        </optgroup>
       <% end %>
     </select>
   </div>
@@ -93,6 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Scroll to form section
       document.getElementById('page_form_section').scrollIntoView({ behavior: 'smooth' });
       showNotification('Successfully loaded cloned page content -- save to continue', 'success');
+      const banner = document.getElementById('template-applied-banner');
+      banner.classList.remove('hidden');
     }
   });
 
