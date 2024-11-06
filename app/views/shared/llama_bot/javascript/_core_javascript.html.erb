@@ -187,10 +187,16 @@
 
       //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
       let selectedElement = document.getElementById("selectedElementContent");
-      let selectedElementInnerHtml = selectedElement.innerHTML.replace(
-        "selected-element",
-        ""
-      );
+
+      let selectedElementInnerHtml = selectedElement.innerHTML.trim() || null; //trim to remove any whitespace or newline characters
+
+      if (selectedElementInnerHtml) {
+        selectedElementInnerHtml = selectedElementInnerHtml.replace(
+          "selected-element",
+          ""
+        );
+      }
+
       hideAllChatToolWindows();
 
       sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, (error) => {
