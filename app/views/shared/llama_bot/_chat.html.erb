@@ -175,3 +175,7 @@
   <%= render partial: 'shared/llama_bot/floating_toolbar' %> 
   <%= render partial: 'shared/llama_bot/context_menu' %> 
 <% end %>
+
+<% if current_user.present? && current_user.needs_tutorial? %>
+  <%= render partial: 'shared/llama_bot/javascript/llama_tutorial' %>
+<% end %>

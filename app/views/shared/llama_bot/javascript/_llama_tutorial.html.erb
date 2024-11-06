@@ -1,0 +1,111 @@
+<!-- Add these in the header section, after the existing script and style tags -->
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
+
+<!-- Add this right before the closing </div> of the main container -->
+<script>
+  console.log("Loading llama tutorial");
+  document.addEventListener('DOMContentLoaded', function() {
+    const tour = new Shepherd.Tour({
+      useModalOverlay: true,
+      defaultStepOptions: {
+        classes: 'shadow-md bg-purple-dark',
+        scrollTo: true,
+        cancelIcon: {
+          enabled: true
+        }
+      }
+    });
+
+    tour.addStep({
+      id: 'welcome',
+      text: 'Welcome to LlamaPress! Let me show you around.',
+      buttons: [
+        {
+          text: 'Next',
+          action: tour.next
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'chat-icon',
+      attachTo: {
+        element: '#chatIcon',
+        on: 'bottom'
+      },
+      text: 'Click this icon anytime to open the chat window',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => {
+            tour.next();
+          }
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'chat-input',
+      attachTo: {
+        element: '#userInput',
+        on: 'top'
+      },
+      text: 'Type your messages here to interact with LlamaBot',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: tour.next
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'expand-button',
+      attachTo: {
+        element: '#expandButton',
+        on: 'bottom'
+      },
+      text: 'Click here to expand or collapse the chat window',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Done',
+          action: tour.complete
+        }
+      ]
+    });
+
+    // Start the tour when the chat icon is first clicked
+    const chatIcon = document.getElementById('chatIcon');
+    let tourStarted = false;
+
+    const disableTourAfterCompletionWithCookie = false; //if this is true, then tour won't be shown again after it's completed once (based on user cookie)
+    let skipTour = disableTourAfterCompletionWithCookie && localStorage.getItem('tourCompleted');
+
+    chatIcon.addEventListener('click', () => {
+      if (!tourStarted && !skipTour) {
+        setTimeout(() => {
+          tour.start();
+          tourStarted = true;
+        }, 500);
+      }
+    });
+
+    // Mark tour as completed when it ends
+    tour.on('complete', () => {
+      localStorage.setItem('tourCompleted', 'true');
+    });
+  });
+</script>

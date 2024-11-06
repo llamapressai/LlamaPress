@@ -23,6 +23,11 @@ class User < ApplicationRecord
     end
   end
 
+  def needs_tutorial?
+    #TODO: Put this into database somehow.
+    true
+  end
+
   private
 
   def create_default_organization
