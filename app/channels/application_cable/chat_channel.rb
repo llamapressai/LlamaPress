@@ -1,4 +1,5 @@
-class ChatChannel < ApplicationCable::Channel
+module ApplicationCable
+  class ChatChannel < ApplicationCable::Channel
     def subscribed
       stream_from "chat_channel_#{params[:session_id]}"
     end
@@ -6,4 +7,5 @@ class ChatChannel < ApplicationCable::Channel
     def unsubscribed
       # Any cleanup needed when channel is unsubscribed
     end
+  end
 end
