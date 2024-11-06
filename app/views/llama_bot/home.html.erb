@@ -1,6 +1,5 @@
 <div class="bg-[#ff6600] text-white py-4 mb-0">
   <div class="container mx-auto px-4 flex items-center">
-    <!--<div class="bg-white text-[#ff6600] font-bold text-2xl w-8 h-8 flex items-center justify-center mr-4">Y</div>-->
     <p class="text-lg">Welcome!</p>
   </div>
 </div>
@@ -10,45 +9,72 @@
 </div>
     <p id="notice" class="text-green-600"><%= notice %></p>
     <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-2">Your Active Websites</h1>
-        <h2 class="text-2xl text-center text-gray-600 mb-4">Each Page belongs to a website, you can have multiple websites.</h2>
+        <h1 class="text-4xl font-bold text-center mb-2">LlamaPress</h1>
+        <h2 class="text-2xl text-center text-gray-600 mb-4">Build Websites with a Chatbot</h2>
 
 <div class="container mx-auto px-4">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <% @sites&.order(updated_at: :desc)&.to_a&.sort_by! { |site| site == current_user.default_site ? 0 : 1 }&.each do |web_site| %>
-        <% root_web_page = web_site.pages.find_by(slug: '/') || web_site.pages.first %>
-      <%= link_to web_site, class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
-        <div class="aspect-w-16 aspect-h-24 bg-gray-700">
-          <% if root_web_page&.content.present? %>
-            <iframe srcdoc="<%= CGI.escapeHTML(root_web_page.content).html_safe %>" class="w-full h-full" sandbox="allow-scripts"></iframe>
-          <% else %>
-            <div class="flex items-center justify-center h-full text-gray-400">
-              <span>No preview available</span>
-            </div>
+  <% sorted_sites = @pages.group_by(&:site).sort_by { |site, _| site.id == current_user.default_site_id ? 0 : 1 } %>
+  <% sorted_sites.each do |site, pages| %>
+    <div class="mb-8">
+      <button onclick="toggleSite('<%= site.id %>')" class="w-full flex items-center justify-between bg-gray-900 p-4 rounded-t-lg text-white mb-2">
+        <div class="flex items-center">
+          <i class="fas fa-globe text-blue-400 mr-2"></i>
+          <a href="<%= site_path(site.id) %>" target="_blank" rel="noopener noreferrer" class="mr-2 text-gray-300 hover:text-white">    
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            <h3 class="text-xl font-bold text-blue-400 hover:text-blue-300 underline"><%= site.name %> (<%= site.slug %>)</h3>
+          </a>
+          <% if site.id == current_user.default_site_id %>
+            <svg class="w-6 h-6 ml-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
           <% end %>
         </div>
-        <div class="p-6 border-t-2 border-gray-700">
-          <div class="flex items-center mb-3">
-          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
-            <%# if web_site.organization.logo.attached? %>
-              <%# image_tag web_site.organization.logo, class: "h-12 mr-3 object-cover" %>
-            <%# else %>
-            <%# end %>
-            <h2 class="font-bold text-xl text-white">
-              <%= web_site.slug %>
-              <% if web_site == current_user.default_site %>
-                <span class="text-yellow-400 ml-1" title="Default Site">★</span>
+
+        <svg id="arrow-<%= site.id %>" class="w-6 h-6 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      
+      <div id="site-<%= site.id %>" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% pages.sort_by(&:updated_at).reverse.each do |web_page| %>
+          <%= link_to page_path(web_page.id), class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
+            <div class="aspect-w-16 aspect-h-24 bg-gray-700">
+              <% if web_page.content.present? %>
+                <iframe srcdoc="<%= CGI.escapeHTML(web_page.content).html_safe %>" class="w-full h-full" sandbox="allow-scripts"></iframe>
+              <% else %>
+                <div class="flex items-center justify-center h-full text-gray-400">
+                  <span>No preview available</span>
+                </div>
               <% end %>
-            </h2>
-          </div>
-          <p class="text-lg text-gray-300 mb-2"><%= web_site.name %></p>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
+            </div>
+            <div class="p-6 border-t-2 border-gray-700">
+              <div class="flex items-center mb-3">
+              <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
+                <%# if web_page.organization.logo.attached? %>
+                  <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
+                <%# else %>
+                <%# end %>
+                <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
+              </div>
+              <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 
   <br>
+  <%= link_to 'New Web Page', new_page_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+</div>
 
-  <%= link_to 'New Web Site', new_site_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
-</div>        
-    </main>
+<script>
+  function toggleSite(siteId) {
+    const content = document.getElementById(`site-${siteId}`);
+    const arrow = document.getElementById(`arrow-${siteId}`);
+    content.classList.toggle('hidden');
+    arrow.classList.toggle('rotate-180');
+  }
+</script>
