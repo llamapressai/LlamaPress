@@ -1,7 +1,7 @@
     <%# This is the toolbar that is displayed when the user is editing a page, and they highlight an area with their cursor %>
     <!-- Existing floating toolbar -->
     <div id="llama-toolbar" data-llama-editable="false" class="hidden flex space-x-2 text-black bg-gray-100 p-2 rounded-t-lg border border-gray-300 z-[1000]" contenteditable="false">
-        <div class="relative inline-block">
+<!--        <div class="relative inline-block">
             <button id="llama-text-dropdown-button" class="px-2 py-1 bg-gray-200 rounded">Tt</button>
             <div id="llama-text-dropdown" class="absolute hidden bg-white border rounded shadow-lg">
                 <button onclick="format('h1')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">H1</button>
@@ -9,7 +9,7 @@
                 <button onclick="format('h3')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">H3</button>
                 <button onclick="format('p')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">Paragraph</button>
             </div>
-        </div>
+        </div>-->
         <div class="relative inline-block">
             <button onclick="showLinkDialog()" class="px-2 py-1 bg-gray-200 rounded">🔗</button>
             <div id="llama-link-dialog" class="absolute hidden bg-white border rounded shadow-lg p-2 z-10" style="min-width: 200px;">
@@ -32,10 +32,10 @@
         <button onclick="format('strikethrough')" class="px-2 py-1 bg-gray-200 rounded line-through">S</button>
         <button onclick="createList('ul')" class="px-2 py-1 bg-gray-200 rounded">•</button>
         <button onclick="createList('ol')" class="px-2 py-1 bg-gray-200 rounded">1.</button>
-        <button onclick="setColor('color')" class="px-2 py-1 bg-gray-200 rounded">🎨</button>
-        <button onclick="setColor('backgroundColor')" class="px-2 py-1 bg-gray-200 rounded">🖌️</button>
-        <button onclick="document.execCommand('undo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↩️</button>
-        <button onclick="document.execCommand('redo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↪️</button>
+        <!--<button onclick="setColor('color')" class="px-2 py-1 bg-gray-200 rounded">🎨</button>-->
+        <!--<button onclick="setColor('backgroundColor')" class="px-2 py-1 bg-gray-200 rounded">🖌️</button>-->
+        <!--<button onclick="document.execCommand('undo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↩️</button>
+        <button onclick="document.execCommand('redo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↪️</button>-->
         <input type="color" id="llama-color-picker" class="hidden">
         <button onclick="changeFontSize(1)" class="px-2 py-1 bg-gray-200 rounded">A+</button>
         <button onclick="changeFontSize(-1)" class="px-2 py-1 bg-gray-200 rounded">A-</button>
