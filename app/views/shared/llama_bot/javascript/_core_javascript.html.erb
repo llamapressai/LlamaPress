@@ -1,0 +1,808 @@
+<script data-llama="exclude_when_saving_contenteditable_edits">
+  document.addEventListener("DOMContentLoaded", () => {
+    const chatIcon = document.getElementById("chatIcon");
+    const chatbotContainer = document.getElementById("chatbotContainer");
+    const closeButton = document.getElementById("closeButton");
+    const chatbotMessages = document.getElementById("chatbotMessages");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+
+    const modal = document.getElementById("historyModal");
+    const closeModal = document.getElementById("closeModal");
+    const leftArrow = document.getElementById("leftArrow");
+    const rightArrow = document.getElementById("rightArrow");
+
+    closeModal.addEventListener("click", () => {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    });
+
+    leftArrow.addEventListener("click", () => {
+      // Implement left navigation logic
+    });
+
+    rightArrow.addEventListener("click", () => {
+      // Implement right navigation logic
+    });
+
+    let isOpen = false;
+    let isLoading = false;
+    let messages = [];
+
+    /**
+     * Toggles the chat window to show llamabot chat
+     */
+    function toggleChat() {
+      console.log("Chat window has been toggled");
+      isOpen = !isOpen;
+      chatbotContainer.classList.toggle("hidden", !isOpen);
+
+      const chatbotMessages = document.getElementById('chatbotMessages');            
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    // Expose toggleChat to the global scope
+    window.toggleChat = toggleChat;
+
+    // Add event listeners to the chat icon and close button
+    chatIcon.addEventListener("click", toggleChat);
+    closeButton.addEventListener("click", toggleChat);
+
+    /**
+     * Formats the message to display code blocks properly
+     */
+    function formatMessage(text, sender) {
+      // Custom renderer to handle code blocks
+      const renderer = new marked.Renderer();
+      renderer.code = (code, language) => {
+        const validLanguage = Prism.languages[language] ? language : 'markup';
+        const highlightedCode = Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
+        const escapedCode = escapeHtml(highlightedCode);
+        const uniqueId = 'code-' + Math.random().toString(36).substr(2, 9);
+        return `
+          <div class="relative">
+            <pre class="language-${validLanguage}"><code id="${uniqueId}">${sender == "user" ? code : escapedCode}</code></pre>
+            <button class="copy-button absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm" onclick="copyCode('${uniqueId}')">Copy</button>
+          </div>
+        `;
+      };
+
+      // Configure marked options
+      marked.setOptions({
+        renderer: renderer,
+        highlight: (code, lang) => {
+          const language = Prism.languages[lang] ? lang : 'markup';
+          return Prism.highlight(code, Prism.languages[language], language);
+        },
+        breaks: true,
+        gfm: true
+      });
+
+      // Parse the markdown
+      if (sender == "user") {
+        return marked.parse(escapeHtml(text));
+      }
+      else {
+        return marked.parse(text);
+      }
+    }
+
+    /**
+     * Escapes HTML characters for code formatting
+     */
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    /**
+     * Adds a message to the chatbot messages container.
+     */
+    function addMessage(text, sender, onClickCallback = null) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `mb-2 p-2 rounded ${
+        sender === "bot" ? "bg-blue-100 self-start" : "bg-green-100 self-end"
+      }`;
+      
+      const formattedContent = formatMessage(text, sender);
+      messageDiv.innerHTML = formattedContent;
+      chatbotMessages.appendChild(messageDiv);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      if (onClickCallback) {
+        messageDiv.addEventListener("click", onClickCallback);
+      }
+    }
+
+    /**
+     * Creates a loading spinner for the chatbot.
+     */
+    function makeLoadingSpinner() {
+      const spinner = document.createElement("div");
+      spinner.innerHTML = `
+        <div class="grid grid-cols-[40px_auto] gap-4 items-center w-full">
+            <div class="grid min-h-[20px] w-full place-items-center overflow-hidden rounded-lg p-6">
+        <svg class="text-gray-300 animate-spin" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+            width="24" height="24">
+            <path
+            d="M32 3C35.8083 3 39.5794 3.75011 43.0978 5.20749C46.6163 6.66488 49.8132 8.80101 52.5061 11.4939C55.199 14.1868 57.3351 17.3837 58.7925 20.9022C60.2499 24.4206 61 28.1917 61 32C61 35.8083 60.2499 39.5794 58.7925 43.0978C57.3351 46.6163 55.199 49.8132 52.5061 52.5061C49.8132 55.199 46.6163 57.3351 43.0978 58.7925C39.5794 60.2499 35.8083 61 32 61C28.1917 61 24.4206 60.2499 20.9022 58.7925C17.3837 57.3351 14.1868 55.199 11.4939 52.5061C8.801 49.8132 6.66487 46.6163 5.20749 43.0978C3.7501 39.5794 3 35.8083 3 32C3 28.1917 3.75011 24.4206 5.2075 20.9022C6.66489 17.3837 8.80101 14.1868 11.4939 11.4939C14.1868 8.80099 17.3838 6.66487 20.9022 5.20749C24.4206 3.7501 28.1917 3 32 3L32 3Z"
+            stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path
+            d="M32 3C36.5778 3 41.0906 4.08374 45.1692 6.16256C49.2477 8.24138 52.7762 11.2562 55.466 14.9605C58.1558 18.6647 59.9304 22.9531 60.6448 27.4748C61.3591 31.9965 60.9928 36.6232 59.5759 40.9762"
+            stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-900">
+            </path>
+        </svg>
+        </div>
+        <span class="thinking-pulse">Thinking... (this may take a while)</span>
+        </div>`.trim();
+      return spinner.firstElementChild;
+    }    
+
+    /**
+     * Shows the loading indicator for when llamabot is thinking.
+     */
+    function showLoadingIndicator() {
+      // show all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
+        element.classList.remove("hidden");
+      });
+      const spinner = makeLoadingSpinner();
+      const loadingDiv = document.createElement("div");
+      loadingDiv.id = "loadingIndicator";
+      loadingDiv.classList.add("is-thinking");
+      loadingDiv.appendChild(spinner);
+      chatbotMessages.appendChild(loadingDiv);
+    }
+
+    /**
+     * Hides the loading indicator for when llamabot is done thinking.
+     */
+    function hideLoadingIndicator() {
+      isLoading = false;
+      // hide all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
+        element.classList.add("hidden");
+      });
+
+      const loadingDiv = document.getElementById("loadingIndicator");
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
+    window.hideLoadingIndicator = hideLoadingIndicator;
+
+    /**
+     * Sends a message to the LLM and handles the response.
+     * Handles the UI logic for sending the message, displaying the message, and hiding the loading indicator, hiding chat tool windows, etc.
+     */
+    async function sendMessage() {
+      if (userInput.value.trim() === "" || isLoading) return;
+      const userMessage = userInput.value;
+      addMessage(userMessage, "user");
+      userInput.value = "";
+      autoResizeUserInputArea();
+      isLoading = true;
+      showLoadingIndicator();
+
+      //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
+      let selectedElement = document.getElementById("selectedElementContent");
+
+      let selectedElementInnerHtml = selectedElement.innerHTML.trim() || null; //trim to remove any whitespace or newline characters
+
+      if (selectedElementInnerHtml) {
+        selectedElementInnerHtml = selectedElementInnerHtml.replace(
+          "selected-element",
+          ""
+        );
+      }
+
+      hideAllChatToolWindows();
+
+      sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, (error) => {
+        console.error("Error sending message:", error);
+      });
+
+    }
+
+    /**
+     * Toggles to show/hide the prompts container.
+     */
+    function togglePromptsContainer() {
+      document.getElementById('promptsContainer').classList.toggle("hidden");
+    }
+    //make global access to toggle prompts container
+    window.togglePromptsContainer = togglePromptsContainer;
+
+    /**
+     * Inserts a prompt into the user input area and sends the message to the LLM.
+     */
+    function insertPrompt(prompt) {
+      userInput.value = prompt;
+      sendMessage();
+    }
+    //make global access to insert prompt
+    window.insertPrompt = insertPrompt;
+
+    /**
+     * Hides all chat tool windows.
+     */
+    function hideAllChatToolWindows() {
+      //hide all chat tool windows
+      document.getElementById("promptsContainer").classList.add("hidden");
+      document.getElementById("imagesForUserToSelect").style.display = "none";
+      document.getElementById('codeSnippetsContainer').classList.add("hidden");
+      
+      // clear selected element 
+      document.getElementById("selectedElementContainer").style.display =
+        "none";
+      document.getElementById("selectedElementContent").innerHTML = "";
+    }
+    //make global access to hide all chat tool windows
+    window.hideAllChatToolWindows = hideAllChatToolWindows;
+
+    sendButton.addEventListener("click", sendMessage);
+    
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        if (e.shiftKey || e.altKey || e.metaKey) {
+          // Allow new line on Shift+Enter, Option(Alt)+Enter, or Command(Meta)+Enter
+          return;
+        }
+        e.preventDefault(); // Prevent default Enter behavior
+        sendMessage();
+      }
+    });
+
+    let currentPageOfHistory = 1;
+    let isLoadingMoreHistory = false;
+    let hasMorePagesOfHistory = true;
+
+    /**
+     * Loads the chat history for the current web page and puts it into the modal history drawer.
+     */
+    function loadChatHistory(page = 1) {
+      let webPageId = "<%=@page&.id%>";
+      if (webPageId && !isLoadingMoreHistory && hasMorePagesOfHistory) {
+        isLoadingMoreHistory = true;
+        
+        fetch(`/pages/${webPageId}/histories.json?page=${page}`)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const histories = data.web_page_histories;
+            
+            // Update pagination state
+            currentPageOfHistory = data.meta.current_page;
+            hasMorePagesOfHistory = currentPageOfHistory < data.meta.total_pages;
+            
+            // For first page, reverse to show newest at bottom
+            // For subsequent pages (older messages), maintain order
+            const orderedHistories = page === 1 ? histories.reverse() : histories;
+            
+            orderedHistories.forEach((history) => {
+              addPageHistoryToMessagesArea(history, page !== 1);
+            });
+
+            if (page === 1) {
+              // Only do these for initial load
+              const chatbotMessages = document.getElementById('chatbotMessages');            
+              chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+              addMessage("What do you want to change?", "bot");
+              document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded'));
+            }
+          })
+          .catch(error => {
+            console.error('Error loading chat history:', error);
+          })
+          .finally(() => {
+            isLoadingMoreHistory = false;
+          });
+      }
+    }
+
+    // Add scroll event listener to load more message history when user scrolls near the top
+    document.getElementById('chatbotMessages').addEventListener('scroll', function(e) {
+      const element = e.target;
+      // Load more when user scrolls near the top (for older messages)
+      if (element.scrollTop <= element.clientHeight * 0.05) { // when user is at least 5% from top, load more history
+        if (!isLoadingMoreHistory && hasMorePagesOfHistory) {
+          loadChatHistory(currentPageOfHistory + 1);
+        }
+      }
+    });
+
+    /**
+     * Creates a history in the chat window so user can see their page changes & restore if needed
+     */
+    function addPageHistoryToMessagesArea(history, insertAtTop = false) {
+      const chatbotMessages = document.getElementById('chatbotMessages');
+      
+      // Create header section if it doesn't exist
+      let headerSection = document.getElementById('pageHistoryHeader');
+      if (!headerSection) {
+        headerSection = document.createElement('div');
+        headerSection.id = 'pageHistoryHeader';
+        headerSection.className = 'mb-4 text-center font-bold text-lg';
+        headerSection.textContent = 'Page Change History';
+        chatbotMessages.appendChild(headerSection);
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mb-4 flex items-start';
+
+      // Timeline visualization
+      const timeline = document.createElement('div');
+      timeline.className = 'mr-4 flex flex-col items-center';
+      
+      const dot = document.createElement('div');
+      dot.className = 'w-4 h-4 rounded-full bg-blue-500';
+      
+      const line = document.createElement('div');
+      line.className = 'w-0.5 h-full bg-gray-300 -mt-2';
+      
+      timeline.appendChild(dot);
+      timeline.appendChild(line);
+
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'flex-grow';
+
+      const labelContainer = document.createElement('div');
+      labelContainer.className = 'flex items-center mb-1';
+
+      const timestamp = document.createElement('span');
+      timestamp.className = 'text-xs text-gray-500 mr-2';
+      timestamp.textContent = new Date(history.created_at).toLocaleString();
+
+      const label = document.createElement('span');
+      label.className = 'text-xs text-gray-700 font-semibold';
+      label.textContent = 'Page Change:';
+
+      const viewButton = document.createElement('button');
+      viewButton.className = 'text-blue-500 hover:text-blue-700 text-xs underline ml-2';
+      viewButton.textContent = 'View';
+      viewButton.addEventListener('click', function() {
+        console.log('History item clicked:', history);
+        const modal = document.getElementById('historyModal');
+        const mainIframe = document.getElementById('mainIframe');
+        mainIframe.innerHTML = atob(history.content);
+        document.getElementById('userPrompt').innerHTML = history.user_message;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document
+          .getElementById('restoreButton')
+          .setAttribute('llama-data-web-page-history-id', history.id);
+      });
+
+      labelContainer.appendChild(timestamp);
+      labelContainer.appendChild(label);
+      labelContainer.appendChild(viewButton);
+      contentWrapper.appendChild(labelContainer);
+
+      const pageHistoryDiv = document.createElement('div');
+      pageHistoryDiv.className = 'p-2 rounded bg-gray-100 text-sm';
+      
+      const prompt = history.prompt || history.user_message;
+      
+      // Function to check if string contains HTML
+      function containsHTML(str) {
+        const htmlRegex = /<[a-z][\s\S]*>/i;
+        return htmlRegex.test(str);
+      }
+
+      // Render content based on whether it contains HTML. We do this because we want to show the HTML that was edited in the history item,
+      // but we want it sandboxed so it doesn't break any of the current page or chatbot functionality.
+      if (containsHTML(prompt)) {
+        // Create iframe for HTML content
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.border = 'none';
+        iframe.style.height = '100px';
+        iframe.style.maxWidth = '400px'; // Add max width
+        iframe.style.maxHeight = '300px'; // Add max height
+        iframe.style.overflow = 'auto'; // Add scrolling if content exceeds dimensions
+        iframe.setAttribute('sandbox', 'allow-same-origin');
+
+        iframe.srcdoc = prompt;
+        
+        pageHistoryDiv.innerHTML = '';
+        pageHistoryDiv.appendChild(iframe);
+        
+        iframe.onload = () => {
+          iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+        };
+      } else {
+        // Regular text content
+        pageHistoryDiv.textContent = `"${prompt}"`;
+      }
+
+      contentWrapper.appendChild(pageHistoryDiv);
+
+      wrapper.appendChild(timeline);
+      wrapper.appendChild(contentWrapper);
+
+      // Change the insertion point based on whether we're loading older messages
+      if (insertAtTop) {
+        // Insert after the header for older messages
+        headerSection.insertAdjacentElement('afterend', wrapper);
+      } else {
+        // Append to bottom for newest messages
+        chatbotMessages.appendChild(wrapper);
+      }
+
+      if (!insertAtTop) {
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+    }
+
+    document
+      .getElementById("restoreButton")
+      .addEventListener("click", function () {
+        // Do a POST with the webPageHistory.id to /pages/restore
+        let webPageId = "<%=@page&.id%>";
+        // we save it to the restoreButton so that when the user clicks on the history item.. we have the ID.
+
+        const webPageHistoryId = document
+          .getElementById("restoreButton")
+          .getAttribute("llama-data-web-page-history-id");
+
+        fetch(
+          `/pages/${webPageId}/restore.json?page_history_id=${webPageHistoryId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              web_page_history_id: webPageHistoryId,
+            }),
+          }
+        )
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error("Couldn't restore");
+            }
+          })
+          .then((data) => {
+            alert("Web page restored");
+            console.log("Web page restored:", data);
+            location.reload();
+          });
+      });
+
+    /**
+     * Return Summary of Prompt so user understand chat history better.
+     * @param {string} prompt - The original prompt from the user.
+     * @returns {string} - A summary of the prompt.
+     */
+    function summarizePrompt(prompt) {
+      //if null, return empty string
+      if (prompt == null) {
+        return "";
+      }
+      // Split the text into sentences
+      const sentences = prompt.split(".");
+
+      // Take the first two sentences
+      const firstTwo = sentences.slice(0, 2);
+
+      // Join them back together and trim whitespace
+      let summary = firstTwo.join(".").trim() + ".";
+
+      // Truncate to a maximum of 50 words
+      const words = summary.split(/\s+/);
+      if (words.length > 50) {
+        summary = words.slice(0, 50).join(" ") + "...";
+      }
+
+      return summary;
+    }
+
+    const toggleCodeSnippetsButton = document.getElementById('toggleCodeSnippets');
+    const codeSnippetsContainer = document.getElementById('codeSnippetsContainer');
+
+    toggleCodeSnippetsButton.addEventListener('click', function() {
+        codeSnippetsContainer.classList.toggle('hidden');
+    });
+
+    // Initial bot message
+    loadChatHistory();
+
+    const textarea = document.getElementById('userInput');
+    const maxRows = 10; // Set this to your desired maximum number of rows
+
+    function autoResizeUserInputArea() {
+        textarea.style.height = 'auto';
+        const newHeight = Math.min(textarea.scrollHeight, textarea.rows * 24 * maxRows);
+        textarea.style.height = newHeight + 'px';
+        //minimum make it 2 rows
+        if (newHeight < 24) {
+          textarea.style.height = '24px';
+        }
+    }
+
+    textarea.addEventListener('input', autoResizeUserInputArea);
+    let lastElementClicked = null;
+    
+    document.addEventListener('mousedown', function(e) {
+      lastElementClicked = e.target;
+      console.log("lastElementClicked in Javascript.js", lastElementClicked);
+    });
+
+    document.addEventListener('keydown', function(e) {
+    // Check if Cmd+shift+L (Mac) or Ctrl+shift+L (Windows/Linux) is pressed to put content into chatbot container
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'l') {
+        e.preventDefault(); // Prevent default browser behavior
+        
+        //Get the current text selected by the cursor
+        const selectedText = `\`\`\`${window.getSelection().toString()}\`\`\` \n`;
+        //$("#chatbotContainer").show();
+        if (!isOpen) {
+            toggleChat();
+        }
+        
+        $("#userInput").val(selectedText);
+        $("#userInput").focus();
+        autoResizeUserInputArea();
+        inSelectionMode = true;
+        handleElementSelection({target: lastElementClicked, preventDefault: function() {}, stopPropagation: function() {}});
+      }
+      else if (e.key == "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleChat();
+      }
+      else if (e.key == "ç") {
+        e.preventDefault(); //prevent the ç key from being typed
+        e.stopPropagation(); //prevent the ç key from being typed
+        toggleSelectionMode();
+      }
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const menuToggle = document.getElementById("menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    menuToggle?.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+  });
+
+
+  let inSelectionMode = false;
+  let selectedElementHTML = null;
+
+  /**
+   * Toggle selection mode. This allows the user to select an element on the page that they want the LLM to edit.
+   */
+  function toggleSelectionMode() {
+    inSelectionMode = !inSelectionMode;
+    const chatbotContainer = document.getElementById("chatbotContainer");
+    if (inSelectionMode) {
+      document.body.classList.add("selection-mode");
+      chatbotContainer.classList.add("hidden");
+    }
+    if (!inSelectionMode) {
+      document.body.classList.remove("selection-mode");
+      chatbotContainer.classList.remove("hidden");
+    }
+
+    console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
+  }
+
+  /**
+   * Handle element selection. This fires when the user to selects an element on the page that they want the LLM to edit.
+   * @param {Event} event - The event object.
+   */
+  function handleElementSelection(event) {
+    console.log("Handle Elemenet Selection called");
+    console.log("inSelectionMode", inSelectionMode);
+    if (!inSelectionMode) return; //prevent from running if selection mode is off
+    event.preventDefault();
+    event.stopPropagation();
+
+    const selectedElement = event.target;
+    console.log("Selected element:", selectedElement);
+
+    // Remove the selection class from any previously selected element
+    const previouslySelected = document.querySelector(".selected-element");
+    if (previouslySelected) {
+      previouslySelected.classList.remove("selected-element");
+    }
+
+    // Add selection class to the newly selected element
+    selectedElement.classList.add("selected-element");
+
+    // Here you can do whatever you want with the selected element
+    window.lastSelectedElement = selectedElement;
+
+    // Trigger a custom event
+    const customEvent = new CustomEvent("elementSelected", {
+      detail: selectedElement,
+    });
+    document.dispatchEvent(customEvent);
+
+    // Turn off selection mode after selecting an element
+    toggleSelectionMode();
+  }
+
+  // Add necessary event listeners
+  document.addEventListener("click", handleElementSelection, true);
+
+  // Listen for custom elementSelected event
+  document.addEventListener("elementSelected", (e) => {
+    hideAllChatToolWindows(); //close all chat tool windows to make room for selected element
+    selectedElementHTML = e.detail;
+
+    let selectedElementContainer = document.getElementById(
+      "selectedElementContainer"
+    );
+    let selectedElementContent = document.getElementById(
+      "selectedElementContent"
+    );
+    if (selectedElementHTML != null && selectedElementContainer != null) {
+      //TODO: There is a bug if there's chat history that contains selected element in it and it's rendering the HTML in the chat history.
+      selectedElementContainer.style.display = "block";
+      selectedElementContent.innerHTML = selectedElementHTML.outerHTML;
+      setSelectedElementContainerBackground(selectedElementHTML);
+    }
+
+    console.log("Element selected event:", selectedElementHTML);
+  });
+
+  // Add this to the end of the script
+  document
+    .getElementById("closeSelectedElement")
+    .addEventListener("click", function () {
+      console.log("Selected element closed");
+      document.getElementById("selectedElementContainer").style.display =
+        "none";
+      document.getElementById("selectedElementContent").innerHTML = "";
+    });
+
+  let isExpanded = false;
+  const chatbotContainer = document.getElementById("chatbotContainer");
+  const expandButton = document.getElementById("expandButton");
+
+  /**
+   * Sets the default expanded size of the chatbot.
+   */
+  function setExpandedSize() {
+    isExpanded = true;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    if (screenWidth < 768) {
+      // Mobile devices
+      chatbotContainer.style.width = "80%";
+      chatbotContainer.style.height = "90%";
+      chatbotContainer.style.maxWidth = "none";
+      chatbotContainer.style.maxHeight = "none";
+    } else if (screenWidth < 1024) {
+      // Tablets
+      chatbotContainer.style.maxWidth = "600px";
+      chatbotContainer.style.maxHeight = "800px";
+    } else {
+      // Desktops
+      chatbotContainer.style.width = "800px";
+      chatbotContainer.style.height = "800px";
+    }
+  }
+
+  /**
+   * Sets the default collapsed size of the chatbot.
+   */
+  function setCollapsedSize() {
+    isExpanded = false;
+    const screenWidth = window.innerWidth;
+
+    if (screenWidth < 768) {
+      // Mobile devices
+      chatbotContainer.style.width = "100%";
+      chatbotContainer.style.height = "50%";
+    } else {
+      chatbotContainer.style.width = "480px";
+      chatbotContainer.style.height = "576px";
+    }
+  }
+
+  /**
+   * Toggle the chatbot size between expanded and collapsed. This fires when user clicks on the top right expand button.
+   */
+  function toggleExpand() {
+    if (isExpanded) {
+      setCollapsedSize();
+    } else {
+      setExpandedSize();
+    }
+  }
+
+  // Call this function initially and on window resize
+  function updateChatbotSize() {
+    if (isExpanded) {
+      setExpandedSize();
+    } else {
+      setCollapsedSize();
+    }
+  }
+
+  // Add event listeners
+  expandButton.addEventListener("click", toggleExpand);
+  window.addEventListener("resize", updateChatbotSize);
+
+  // Initial setup
+  document.addEventListener("DOMContentLoaded", () => {
+    setCollapsedSize(); // Start with collapsed size
+  });
+
+  // Add this function to the end of the script
+  function setSelectedElementContainerBackground(selectedElement) {
+    const container = document.getElementById("selectedElementContainer");
+    const content = document.getElementById("selectedElementContent");
+
+    // Get the background color of the parent element
+    let bgColor = window.getComputedStyle(
+      selectedElement.parentElement
+    ).backgroundColor;
+
+    // If the background is transparent, try to find the nearest parent with a background
+    let parent = selectedElement.parentElement;
+    while (bgColor === "rgba(0, 0, 0, 0)" && parent.parentElement) {
+      parent = parent.parentElement;
+      bgColor = window.getComputedStyle(parent).backgroundColor;
+    }
+
+    // Set the background color of the container
+    container.style.backgroundColor = bgColor;
+
+    // Adjust text color for better contrast
+    const rgb = bgColor.match(/\d+/g);
+    if (rgb) {
+      const brightness =
+        (parseInt(rgb[0]) * 299 +
+          parseInt(rgb[1]) * 587 +
+          parseInt(rgb[2]) * 114) /
+        1000;
+      content.style.color = brightness > 125 ? "black" : "white";
+    }
+  }
+
+  // Add this near the end of the script
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleImagesButton = document.getElementById(
+      "toggleImagesForUserToSelect"
+    );
+    const imagesContainer = document.getElementById("imagesForUserToSelect");
+
+    // Initially hide the images container
+    imagesContainer.style.display = "none";
+
+    toggleImagesButton.addEventListener("click", () => {
+      if (imagesContainer.style.display === "none") {
+        document.querySelectorAll('.llama-chat-toolbar-window').forEach(window => {
+          window.style.display = 'none';
+        });
+        imagesContainer.style.display = "block";
+      } else {
+        imagesContainer.style.display = "none";
+      }
+    });
+  });
+</script>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,570 @@
+<!-- Side panel for the Llama Bot, includes the html and javascript for managing it -->
+<div id="llama-side-panel" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-br from-slate-800 to-slate-900 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 text-gray-100 shadow-2xl" data-llama="exclude_when_saving_contenteditable_edits">
+  <!-- Toggle Button with smooth hover effect -->
+  <div class="absolute right-0 top-6 -mr-16 flex flex-col items-end">
+    <!-- Main hover trigger button -->
+    <button id="llama-menu-trigger" class="bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
+      <i class="fas fa-bars text-purple-400 group-hover:text-purple-300"></i>
+      <span class="text-xs text-purple-400 group-hover:text-purple-300">Menu</span>
+    </button>
+
+    <!-- Hidden menu items that appear on hover -->
+    <div id="llama-menu-items" class="hidden group-hover/menu:flex flex-col gap-2 absolute top-0 right-0 pt-16 z-10">
+    <!--Disable these additional menu items for now:-->
+      <!-- Pages Button -->
+      <!--<button id="llama-toggle-panel" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-file-alt text-purple-400 group-hover:text-purple-300"></i>
+        <span class="text-xs text-purple-400 group-hover:text-purple-300">Pages</span>
+      </button>-->
+      
+      <!-- Components Button -->
+      <!--<button id="llama-components" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-puzzle-piece text-blue-400 group-hover:text-blue-300"></i>
+        <span class="text-xs text-blue-400 group-hover:text-blue-300">Components</span>
+      </button>-->
+      
+      <!-- Settings Button -->
+      <!--<button id="llama-settings" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg flex flex-col items-center gap-1 pr-4 -mr-16">
+        <i class="fas fa-cog text-green-400 group-hover:text-green-300"></i>
+        <span class="text-xs text-green-400 group-hover:text-green-300">Settings</span>
+      </button>-->
+    </div>
+  </div>
+  
+  <div class="h-full overflow-y-auto">
+    <!-- Header Section with gradient overlay -->
+    <div class="relative p-6 bg-gradient-to-br from-purple-600/10 to-blue-600/10">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-white mb-2 font-sans">
+          <i class="fas fa-paint-brush text-purple-400 mr-2"></i>
+          Page Builder
+        </h1>
+        <p class="text-gray-400 text-sm">Create and manage your pages</p>
+      </div>
+
+      <!-- Navigation Links with enhanced styling -->
+      <div class="space-y-3">
+        <a href="/pages" class="flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 group-hover:bg-blue-500/20 transition-all duration-300">
+            <i class="fas fa-home text-blue-400 group-hover:text-blue-300"></i>
+          </div>
+          <span class="ml-3 font-medium text-gray-200 group-hover:text-white">Dashboard</span>
+          <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
+        </a>
+
+        <a href="/pages/new" class="flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-all duration-300">
+            <i class="fas fa-plus text-emerald-400 group-hover:text-emerald-300"></i>
+          </div>
+          <span class="ml-3 font-medium text-gray-200 group-hover:text-white">New Page</span>
+          <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="px-6 py-4">
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="px-3 bg-slate-800 text-gray-500 text-sm">Your Content</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages Section Header -->
+    <div class="px-6 mb-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-white flex items-center">
+          <i class="fas fa-folder-open text-yellow-400 mr-2"></i>
+          Your Pages
+        </h2>
+        <button class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-gray-400 hover:text-white transition-all duration-300">
+          <i class="fas fa-sort-amount-down"></i>
+        </button>
+      </div>
+      <p class="text-sm text-gray-500 mt-1">Manage your website pages</p>
+    </div>
+
+    <!-- Rest of your content -->
+    <div id="iframe-list" class="px-6 space-y-6">
+      <!-- Iframe items will be dynamically added here -->
+    </div>
+    <hr class="my-2"/>
+    <h2 class="text-xl font-bold mb-2">Drag and Drop</h2>
+    <div id="drag-and-drop-list" class="space-y-6">
+    <!-- Button Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Button</h3>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" draggable="true">
+        Click me
+      </button>
+    </div>
+
+    <!-- Card Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Card</h3>
+      <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white" draggable="true">
+        <div class="px-6 py-4">
+          <div class="font-bold text-xl mb-2">Card Title</div>
+          <p class="text-gray-700 text-base">
+            This is a sample card component that you can drag and drop onto your page.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Alert</h3>
+      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert" draggable="true">
+        <p class="font-bold">Warning</p>
+        <p>This is an example alert message.</p>
+      </div>
+    </div>
+
+    <!-- Form Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Contact Form</h3>
+      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" draggable="true">
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+            Name
+          </label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Your Name">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+            Email
+          </label>
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="your@email.com">
+        </div>
+        <div class="mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
+            Message
+          </label>
+          <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="message" placeholder="Your message"></textarea>
+        </div>
+        <div class="flex items-center justify-between">
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+            Send
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Navigation Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Navigation</h3>
+      <nav class="bg-gray-800 p-4" draggable="true">
+        <div class="flex items-center justify-between flex-wrap">
+          <div class="flex items-center flex-shrink-0 text-white mr-6">
+            <span class="font-semibold text-xl tracking-tight">Logo</span>
+          </div>
+          <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+            <div class="text-sm lg:flex-grow">
+              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">
+                Home
+              </a>
+              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">
+                About
+              </a>
+              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white">
+                Contact
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Testimonial Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Testimonial</h3>
+      <div class="bg-white shadow-lg rounded-lg p-6" draggable="true">
+        <div class="flex items-center mb-4">
+          <img class="h-12 w-12 rounded-full mr-4" src="https://via.placeholder.com/48" alt="Avatar">
+          <div>
+            <h4 class="text-lg font-bold">John Doe</h4>
+            <p class="text-gray-600">CEO, Example Company</p>
+          </div>
+        </div>
+        <p class="text-gray-700">"This product has completely transformed our business. We've seen amazing results and couldn't be happier!"</p>
+      </div>
+    </div>
+
+    <!-- Feature List Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Feature List</h3>
+      <div class="bg-white shadow rounded-lg p-6" draggable="true">
+        <h3 class="text-xl font-bold mb-4">Key Features</h3>
+        <ul class="list-disc list-inside text-gray-700">
+          <li class="mb-2">Easy to use interface</li>
+          <li class="mb-2">Advanced analytics</li>
+          <li class="mb-2">24/7 customer support</li>
+          <li class="mb-2">Seamless integrations</li>
+          <li>Regular updates</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Call to Action Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Call to Action</h3>
+      <div class="bg-blue-600 text-white text-center py-12 px-6 rounded-lg" draggable="true">
+        <h2 class="text-3xl font-bold mb-4">Ready to get started?</h2>
+        <p class="mb-6">Join thousands of satisfied customers today!</p>
+        <button class="bg-white text-blue-600 font-bold py-2 px-4 rounded hover:bg-blue-100 transition duration-300">
+          Sign Up Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Pricing Table Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Interactive Pricing Table</h3>
+      <div class="bg-gradient-to-br from-purple-600 to-indigo-700 p-8 rounded-xl shadow-2xl" draggable="true">
+        <h2 class="text-3xl font-extrabold text-white mb-6 text-center">Choose Your Plan</h2>
+        <div class="flex flex-col md:flex-row justify-center items-stretch space-y-6 md:space-y-0 md:space-x-6">
+          <div class="bg-white rounded-lg p-6 flex-1 transform transition duration-500 hover:scale-105">
+            <div class="text-center">
+              <i class="fas fa-rocket text-4xl text-purple-500 mb-4"></i>
+              <h3 class="text-2xl font-bold text-gray-800 mb-4">Starter</h3>
+              <p class="text-4xl font-bold text-purple-600 mb-6">$19<span class="text-gray-500 text-sm">/mo</span></p>
+            </div>
+            <ul class="text-sm text-gray-600 mb-6">
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> 10 Projects</li>
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> 5GB Storage</li>
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Basic Support</li>
+            </ul>
+            <button class="w-full bg-purple-600 text-white rounded-full py-2 font-semibold hover:bg-purple-700 transition duration-300">Choose Plan</button>
+          </div>
+          <div class="bg-white rounded-lg p-6 flex-1 transform transition duration-500 hover:scale-105 border-4 border-yellow-400">
+            <div class="text-center">
+              <i class="fas fa-crown text-4xl text-yellow-400 mb-4"></i>
+              <h3 class="text-2xl font-bold text-gray-800 mb-4">Pro</h3>
+              <p class="text-4xl font-bold text-purple-600 mb-6">$49<span class="text-gray-500 text-sm">/mo</span></p>
+            </div>
+            <ul class="text-sm text-gray-600 mb-6">
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Unlimited Projects</li>
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> 50GB Storage</li>
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Priority Support</li>
+              <li class="mb-2 flex items-center"><i class="fas fa-check text-green-500 mr-2"></i> Advanced Analytics</li>
+            </ul>
+            <button class="w-full bg-yellow-400 text-gray-800 rounded-full py-2 font-semibold hover:bg-yellow-500 transition duration-300">Choose Plan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animated Skill Showcase Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Animated Skill Showcase</h3>
+      <div class="bg-gray-900 p-8 rounded-xl shadow-2xl" draggable="true">
+        <h2 class="text-3xl font-extrabold text-white mb-8 text-center">Our Expertise</h2>
+        <div class="space-y-6">
+          <div class="skill-bar">
+            <div class="flex justify-between mb-1">
+              <span class="text-base font-medium text-white"><i class="fab fa-react mr-2 text-blue-400"></i>React</span>
+              <span class="text-sm font-medium text-white">90%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+              <div class="bg-blue-400 h-2.5 rounded-full animate-skill-90"></div>
+            </div>
+          </div>
+          <div class="skill-bar">
+            <div class="flex justify-between mb-1">
+              <span class="text-base font-medium text-white"><i class="fab fa-node mr-2 text-green-400"></i>Node.js</span>
+              <span class="text-sm font-medium text-white">85%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+              <div class="bg-green-400 h-2.5 rounded-full animate-skill-85"></div>
+            </div>
+          </div>
+          <div class="skill-bar">
+            <div class="flex justify-between mb-1">
+              <span class="text-base font-medium text-white"><i class="fas fa-database mr-2 text-yellow-400"></i>MongoDB</span>
+              <span class="text-sm font-medium text-white">80%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+              <div class="bg-yellow-400 h-2.5 rounded-full animate-skill-80"></div>
+            </div>
+            <style>
+                @keyframes fillSkill {
+                0% { width: 0; }
+                100% { width: var(--skill-percent); }
+                }
+
+                .animate-skill-90 { --skill-percent: 90%; animation: fillSkill 2s ease-out forwards; }
+                .animate-skill-85 { --skill-percent: 85%; animation: fillSkill 2s ease-out forwards; }
+                .animate-skill-80 { --skill-percent: 80%; animation: fillSkill 2s ease-out forwards; }
+            </style>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Team Showcase Component -->
+    <div class="draggable-component mb-4">
+      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Interactive Team Showcase</h3>
+      <div class="bg-gradient-to-r from-teal-400 to-blue-500 p-4 sm:p-8 rounded-xl shadow-2xl" draggable="true">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-4 sm:mb-8 text-center">Meet Our Team</h2>
+        <div class="grid grid-cols-1 gap-4 sm:gap-8">
+          <!-- Existing team member -->
+          <div class="team-member bg-white rounded-lg overflow-hidden shadow-lg transform transition duration-500 hover:scale-105">
+            <div class="flex flex-col sm:flex-row">
+              <div class="relative w-full sm:w-1/3">
+                <img src="https://via.placeholder.com/300x200" alt="Team Member" class="w-full h-48 sm:h-full object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div class="text-white text-center">
+                    <p class="font-bold">Jane Doe</p>
+                    <p class="text-sm">Lead Developer</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 sm:w-2/3">
+                <h3 class="font-bold text-xl mb-2">Jane Doe</h3>
+                <p class="text-gray-600 mb-4">10 years of experience in full-stack development</p>
+                <div class="flex justify-center sm:justify-start space-x-4">
+                  <a href="#" class="text-blue-500 hover:text-blue-600"><i class="fab fa-linkedin text-xl"></i></a>
+                  <a href="#" class="text-blue-400 hover:text-blue-500"><i class="fab fa-twitter text-xl"></i></a>
+                  <a href="#" class="text-gray-700 hover:text-gray-800"><i class="fab fa-github text-xl"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- New team member: John Smith -->
+          <div class="team-member bg-white rounded-lg overflow-hidden shadow-lg transform transition duration-500 hover:scale-105">
+            <div class="flex flex-col sm:flex-row">
+              <div class="relative w-full sm:w-1/3">
+                <img src="https://via.placeholder.com/300x200" alt="John Smith" class="w-full h-48 sm:h-full object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div class="text-white text-center">
+                    <p class="font-bold">John Smith</p>
+                    <p class="text-sm">UX Designer</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 sm:w-2/3">
+                <h3 class="font-bold text-xl mb-2">John Smith</h3>
+                <p class="text-gray-600 mb-4">7 years of experience in user experience design</p>
+                <div class="flex justify-center sm:justify-start space-x-4">
+                  <a href="#" class="text-blue-500 hover:text-blue-600"><i class="fab fa-linkedin text-xl"></i></a>
+                  <a href="#" class="text-blue-400 hover:text-blue-500"><i class="fab fa-twitter text-xl"></i></a>
+                  <a href="#" class="text-gray-700 hover:text-gray-800"><i class="fab fa-github text-xl"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- New team member: Emily Johnson -->
+          <div class="team-member bg-white rounded-lg overflow-hidden shadow-lg transform transition duration-500 hover:scale-105">
+            <div class="flex flex-col sm:flex-row">
+              <div class="relative w-full sm:w-1/3">
+                <img src="https://via.placeholder.com/300x200" alt="Emily Johnson" class="w-full h-48 sm:h-full object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                  <div class="text-white text-center">
+                    <p class="font-bold">Emily Johnson</p>
+                    <p class="text-sm">Backend Engineer</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 sm:w-2/3">
+                <h3 class="font-bold text-xl mb-2">Emily Johnson</h3>
+                <p class="text-gray-600 mb-4">5 years of experience in backend development</p>
+                <div class="flex justify-center sm:justify-start space-x-4">
+                  <a href="#" class="text-blue-500 hover:text-blue-600"><i class="fab fa-linkedin text-xl"></i></a>
+                  <a href="#" class="text-blue-400 hover:text-blue-500"><i class="fab fa-twitter text-xl"></i></a>
+                  <a href="#" class="text-gray-700 hover:text-gray-800"><i class="fab fa-github text-xl"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        let inDragDropModeForTemplate = false; //here to prevent any overriding of other drop events
+
+        const draggableComponents = document.querySelectorAll('.draggable-component > *[draggable="true"]');
+        
+        draggableComponents.forEach(component => {
+          component.addEventListener('dragstart', function(e) {
+            //document.getElementById('llama-side-panel').classList.add('hidden');
+            inDragDropModeForTemplate = true;
+            const panel = document.getElementById('llama-side-panel');
+            panel.classList.toggle('-translate-x-full');
+            console.log('Drag started');
+            e.dataTransfer.setData('text/plain', component.outerHTML);
+          });
+        });
+
+        // Use document.body as a fallback if #drop-target doesn't exist
+        const dropTarget = document.querySelector('#drop-target') || document.body;
+
+        dropTarget.addEventListener('dragover', function(e) {
+            if (inDragDropModeForTemplate){
+                e.preventDefault();
+                console.log('Dragging over drop target');
+            }
+        });
+
+        dropTarget.addEventListener('dragenter', function(e) {
+            if (inDragDropModeForTemplate){
+                e.preventDefault();
+                console.log('Entered drop target');
+            }
+        });
+
+        dropTarget.addEventListener('drop', function(e) { //how do we only allow this to happen if 
+          if (inDragDropModeForTemplate){
+              e.preventDefault();
+              inDragDropModeForTemplate = false;
+              console.log('Drop event fired');
+              const droppedHTML = e.dataTransfer.getData('text/plain');
+              let prompt = `the user has dragged this new element and dropped it onto the page at this element. Please merge this into the page. new element: \`\`\`${droppedHTML}\`\`\` should be inserted`
+              console.log('Dropped HTML:', droppedHTML);
+              console.log('Prompt:', prompt);
+              if (droppedHTML) {
+                // open chatbot
+                toggleChat();
+                let customEvent = new CustomEvent("elementSelected", {
+                  detail: e.target,
+                });
+                document.dispatchEvent(customEvent);
+                insertPrompt(prompt);
+                console.log('Component added to drop target');
+              } else {
+                console.log('No HTML data in drop event');
+              }
+          }
+        });
+
+        console.log('Event listeners for side panel set up');
+      });
+    </script>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const panel = document.getElementById('llama-side-panel');
+    const toggleButtons = [
+        //disable these for now
+      //document.getElementById('llama-toggle-panel'), 
+      //document.getElementById('llama-components'),
+      //document.getElementById('llama-settings'),
+      document.getElementById('llama-menu-trigger')
+    ];
+    
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        panel.classList.toggle('-translate-x-full');
+      });
+    });
+
+    setPagesOnSidePanel();
+
+    async function setPagesOnSidePanel() {
+      const iframeList = document.getElementById('iframe-list');
+      try {
+        const iframes = await getIFramesForThisSite();
+
+        // Dynamically create iframe items
+        iframes.forEach(iframe => {
+          const iframeItem = document.createElement('div');
+          iframeItem.className = 'iframe-item mb-6';
+
+          //TODO: I pulled out this iFrame because it was too large
+          //<iframe src="${iframe.previewUrl}" class="w-full h-64 border-0" frameborder="0" scrolling="no"></iframe>
+          iframeItem.innerHTML = `
+            <a href="${iframe.url}" class="block">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg underline text-blue-500 font-semibold">
+                  ${iframe.title}
+                </h3>
+                <a href="/pages/${iframe.id}/edit" class="ml-2">
+                  <i class="fas fa-pencil-alt text-gray-400 hover:text-gray-300 text-sm"></i>
+                </a>
+              </div>
+              <div class="iframe-wrapper relative">
+                <!-- insert iframe here -->
+                <div class="absolute inset-0"></div>
+              </div>
+            </a>
+          `;
+          iframeList.appendChild(iframeItem);
+        });
+
+        adjustIframeHeights();
+      } catch (error) {
+        console.error('Error setting pages on side panel:', error);
+      }
+    }
+    
+    
+    /**
+     * Fetch this pages siblings nested under this page's site, and put it into an iFrame format to display to the user.
+     */
+    async function getIFramesForThisSite() {
+        let pages = await getPagesForThisSite();
+        //return page.id == <%= @page&.id %> ? null : { id: page.id, title: page.slug, url: `/pages/${page.id}`, previewUrl: `/pages/${page.id}/preview`};
+        return pages.map(page => {
+            return { id: page.id, title: page.slug, url: `/pages/${page.id}`, previewUrl: `/pages/${page.id}/preview`};
+        });
+    }
+
+    /**
+     * Fetch the other sibling pages nested under this page's site.
+     */
+    async function getPagesForThisSite() {
+        return fetch(`/pages.json?site_id=<%=@page&.site_id%>`)
+            .then(response => response.json())
+            .then(data => {
+                return data;
+        });
+    }
+
+    // Adjust iframe heights to fit content without scrolling
+    function adjustIframeHeights() {
+      const iframes = document.querySelectorAll('#iframe-list iframe');
+      iframes.forEach(iframe => {
+        iframe.onload = function() {
+          iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Add these styles to handle the hover menu */
+  #llama-menu-trigger:hover + #llama-menu-items,
+  #llama-menu-items:hover {
+    display: flex;
+  }
+  
+  /* Optional: Add animation for smooth appearance */
+  #llama-menu-items button {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  #llama-menu-trigger:hover + #llama-menu-items button,
+  #llama-menu-items:hover button {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  /* Stagger the animation for each button */
+  #llama-menu-items button:nth-child(1) { transition-delay: 0.1s; }
+  #llama-menu-items button:nth-child(2) { transition-delay: 0.2s; }
+  #llama-menu-items button:nth-child(3) { transition-delay: 0.3s; }
+</style>

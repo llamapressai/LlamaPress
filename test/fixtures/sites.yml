@@ -3,9 +3,9 @@
 one:
   organization: one
   name: MyString
-  slug: MyString1
+  slug: MyString1.com
 
 two:
   organization: two
   name: MyString
-  slug: MyString2
+  slug: MyString2.com

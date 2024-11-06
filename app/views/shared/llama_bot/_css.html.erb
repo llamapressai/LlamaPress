@@ -1,14 +1,18 @@
-
-    <style type="text/css" id="selection-mode-styles">
+<style type="text/css" id="selection-mode-styles">
     .selection-mode * {
         cursor: pointer !important;
     }
+
     .selection-mode *:hover {
-        outline: 2px solid red !important;
+        background-color: rgba(255, 105, 180, 0.4); /* Bright pink with higher opacity */
+        box-shadow: 0 0 8px rgba(255, 105, 180, 0.8); /* Brighter, larger shadow */
+        outline: 2px solid #FF1493; /* Hot pink outline */
     }
+    
     .selected-element {
         position: relative;
     }
+
     .selected-element::after {
         content: "";
         position: absolute;
@@ -19,7 +23,14 @@
         border: 4px solid #3b82f6;
         background-color: rgba(59, 130, 246, 0.1);
         pointer-events: none;
-        z-index: 9999;
+        z-index: 998;
+    }
+    
+    /* TODO: this isn't working to give the visual feedback that the user can drop the element here, it's a work in progress. */
+    .drag-over {
+        background-color: rgba(255, 215, 0, 0.4); /* Gold color with opacity */
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); /* Bright gold shadow */
+        outline: 3px dashed #FFD700; /* Gold dashed outline */
     }
     
     </style>

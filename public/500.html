@@ -1,66 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>We're sorry, but something went wrong (500)</title>
+  <title>Oops! Page Not Found - LlamaPress</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-  .rails-default-error-page {
-    background-color: #EFEFEF;
-    color: #2E2F30;
-    text-align: center;
-    font-family: arial, sans-serif;
+  body {
+    background-color: #f0f0f0;
+    color: #333;
+    font-family: 'Arial', sans-serif;
     margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
   }
 
-  .rails-default-error-page div.dialog {
-    width: 95%;
-    max-width: 33em;
-    margin: 4em auto 0;
-  }
-
-  .rails-default-error-page div.dialog > div {
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-left-color: #999;
-    border-bottom-color: #BBB;
-    border-top: #B00100 solid 4px;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
+  .llamapress-error-page {
+    text-align: center;
     background-color: white;
-    padding: 7px 12% 0;
-    box-shadow: 0 3px 8px rgba(50, 50, 50, 0.17);
+    border-radius: 15px;
+    padding: 2em;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
   }
 
-  .rails-default-error-page h1 {
-    font-size: 100%;
-    color: #730E15;
-    line-height: 1.5em;
+  .llamapress-error-page h1 {
+    font-size: 3em;
+    color: #ff6b6b;
+    margin-bottom: 0.5em;
   }
 
-  .rails-default-error-page div.dialog > p {
-    margin: 0 0 1em;
+  .llamapress-error-page p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    margin-bottom: 1.5em;
+  }
+
+  .llamapress-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 1em;
+  }
+
+  .back-home {
+    display: inline-block;
+    background-color: #4ecdc4;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .back-home:hover {
+    background-color: #45b7aa;
+  }
+
+  .error-details {
+    background-color: #f8f9fa;
+    border-radius: 8px;
     padding: 1em;
-    background-color: #F7F7F7;
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-left-color: #999;
-    border-bottom-color: #999;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-top-color: #DADADA;
+    margin: 1em 0;
+    text-align: left;
+    font-family: monospace;
+    font-size: 0.9em;
     color: #666;
-    box-shadow: 0 3px 8px rgba(50, 50, 50, 0.17);
+    overflow-x: auto;
+  }
+
+  .error-details code {
+    color: #e83e8c;
+  }
+
+  .error-details-toggle {
+    background: none;
+    border: none;
+    color: #4ecdc4;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-bottom: 1em;
   }
   </style>
 </head>
 
-<body class="rails-default-error-page">
-  <!-- This file lives in public/500.html -->
-  <div class="dialog">
-    <div>
-      <h1>We're sorry, but something went wrong.</h1>
+<body>
+  <div class="llamapress-error-page">
+    <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/222i1sz0iob4jktmm8f8y7ot984p" alt="LlamaPress Logo" class="llamapress-logo">
+    <h1>500: Server Error</h1>
+    <p>Oops! Our llama servers are having a bit of trouble right now. We're working on getting things back to normal!</p>
+    <button onclick="toggleError()" class="error-details-toggle">Show Technical Details</button>
+    <div id="errorDetails" class="error-details" style="display: none;">
+      <strong>Error Type:</strong> <%= @error_type %><br>
+      <strong>Error ID:</strong> <%= @error_id %><br>
+      <strong>Controller:</strong> <%= @controller_name %><br>
+      <strong>Action:</strong> <%= @action_name %><br>
+      <strong>Stack Trace:</strong><br>
+      <code><%= @error_message %></code>
     </div>
-    <p>If you are the application owner check the logs for more information.</p>
+    <p>Please try refreshing the page or come back in a few minutes.</p>
+    <a href="javascript:location.reload()" class="back-home">Refresh Page</a>
   </div>
+
+  <script>
+    function toggleError() {
+      const details = document.getElementById('errorDetails');
+      const button = document.querySelector('.error-details-toggle');
+      if (details.style.display === 'none') {
+        details.style.display = 'block';
+        button.textContent = 'Hide Technical Details';
+      } else {
+        details.style.display = 'none';
+        button.textContent = 'Show Technical Details';
+      }
+    }
+  </script>
 </body>
 </html>

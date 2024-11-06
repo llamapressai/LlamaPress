@@ -6,7 +6,10 @@ class SubmissionsController < ApplicationController
 
   # GET /submissions or /submissions.json
   def index
-    @submissions = Submission.all
+    @submissions = []
+    current_user.sites.each do |site| 
+      @submissions += site.submissions
+    end
   end
 
   # GET /submissions/1 or /submissions/1.json
@@ -15,7 +18,6 @@ class SubmissionsController < ApplicationController
 
   # GET /submissions/new
   def new
-    @submission = Submission.new
   end
 
   # GET /submissions/1/edit

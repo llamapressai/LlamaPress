@@ -9,22 +9,13 @@
   </div>
 </div>
     <p id="notice" class="text-green-600"><%= notice %></p>
-  <header class="bg-gray-100 py-4">
-        <div class="container mx-auto text-center">
-            <!-- <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/iwe9n1t0842nqmfi7jzg96h2dzrz" alt="LlamaBergPress Logo" class="h-80 mx-auto"> -->
-            <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBergPress Logo" class="h-80 mx-auto">
-        </div>
-    </header>
-
     <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-2">LLamaPress</h1>
-        <h2 class="text-2xl text-center text-gray-600 mb-4">Build Websites with a Chatbot</h2>
+        <h1 class="text-4xl font-bold text-center mb-2">Your Active Websites</h1>
+        <h2 class="text-2xl text-center text-gray-600 mb-4">Each Page belongs to a website, you can have multiple websites.</h2>
 
 <div class="container mx-auto px-4">
-
-
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <% @sites&.order(updated_at: :desc)&.each do |web_site| %>
+    <% @sites&.order(updated_at: :desc)&.to_a&.sort_by! { |site| site == current_user.default_site ? 0 : 1 }&.each do |web_site| %>
         <% root_web_page = web_site.pages.find_by(slug: '/') || web_site.pages.first %>
       <%= link_to web_site, class: "block border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
         <div class="aspect-w-16 aspect-h-24 bg-gray-700">
@@ -43,7 +34,12 @@
               <%# image_tag web_site.organization.logo, class: "h-12 mr-3 object-cover" %>
             <%# else %>
             <%# end %>
-            <h2 class="font-bold text-xl text-white"><%= web_site.slug %></h2>
+            <h2 class="font-bold text-xl text-white">
+              <%= web_site.slug %>
+              <% if web_site == current_user.default_site %>
+                <span class="text-yellow-400 ml-1" title="Default Site">★</span>
+              <% end %>
+            </h2>
           </div>
           <p class="text-lg text-gray-300 mb-2"><%= web_site.name %></p>
         </div>
@@ -55,166 +51,4 @@
 
   <%= link_to 'New Web Site', new_site_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
 </div>        
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Why Open Source?</h3>
-            
-            <h4 class="text-xl font-semibold mb-2">Economic/Market Reasons</h4>
-            <p class="mb-4">Costs to develop software are going to 0. This is because of Open Source and LLMs. We're going to beat everyone there by combining an open source CRM/CMS with LLMs.</p>
-            
-            <h4 class="text-xl font-semibold mb-2">User-Centric Reasons</h4>
-            <ul class="list-disc list-inside mb-4">
-                <li>Freedom and Control</li>
-                <li>Privacy</li>
-                <li>Community Driven Innovation and Collaboration</li>
-                <li>Cost Savings</li>
-                <li>Security</li>
-                <li>Customizability and Flexibility</li>
-            </ul>
-            
-            <h4 class="text-xl font-semibold mb-2">Strategic Reasons</h4>
-            <p class="mb-4">Deep Network Effects when people build plugins on top of your open source ecosystem (like WordPress).</p>
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Why Ruby on Rails?</h3>
-            <ul class="list-disc list-inside mb-4">
-                <li>Strong Open Source Community, Historic Popularity, and High Quality Documentation</li>
-                <li>Rails is Optimized for the Developer Experience, Which Means It's Optimized for LLMs to Understand It</li>
-            </ul>
-            
-            <h3 class="text-2xl font-bold mb-4">Our Philosophy</h3>
-            <p class="mb-4">Ruby on Rails is unequivocally the most superior framework for LLM code generation, bar none. Its design philosophy and features make it the perfect match for AI-driven development:</p>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="flex items-start">
-                    <i class="fas fa-bolt mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Reduced Token Usage</h4>
-                        <p class="text-gray-700">Rails' "convention over configuration" principle and Ruby's expressive syntax results in dramatically reduced code verbosity. Fewer tokens allows the LLM to "see" more of the code or context at once.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-book-open mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Semantic Clarity</h4>
-                        <p class="text-gray-700">Ruby's natural language-like syntax aligns perfectly with LLMs' language understanding capabilities. </p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-forward mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Rapid Prototyping</h4>
-                        <p class="text-gray-700">Rails' scaffolding and generator tools are tailor-made for quick iterations - a crucial advantage when working with LLMs.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-check-circle mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Built-in Best Practices</h4>
-                        <p class="text-gray-700">Rails' opinionated nature embeds industry best practices into its core. This frees up the LLM to focus on higher level abstractions, rather than getting bogged down in non-standard implementations</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-box mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Comprehensive Ecosystem</h4>
-                        <p class="text-gray-700">The vast Ruby gems ecosystem provides a rich set of pre-built solutions.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-database mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Database Abstraction</h4>
-                        <p class="text-gray-700">ActiveRecord's powerful ORM capabilities allow LLMs to generate database interactions without getting bogged down in SQL specifics.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-check-square mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Testing Framework</h4>
-                        <p class="text-gray-700">Rails' integrated testing framework allows LLMs to simultaneously generate application code and corresponding tests.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-layer-group mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">RESTful Architecture</h4>
-                        <p class="text-gray-700">Rails' built-in support for RESTful design principles enables LLMs to generate well-structured, scalable APIs effortlessly.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-code mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Full-stack Capability</h4>
-                        <p class="text-gray-700">Rails' full-stack nature allows LLMs to generate cohesive, end-to-end solutions within a single framework.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-users mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Community and Documentation</h4>
-                        <p class="text-gray-700">The extensive Rails community and documentation serve as a rich knowledge base for LLMs.</p>
-                    </div>
-                </div>
-                <div class="flex items-start">
-                    <i class="fas fa-cogs mr-4 text-indigo-600 feature-icon"></i>
-                    <div>
-                        <h4 class="font-semibold mb-2">Metaprogramming</h4>
-                        <p class="text-gray-700">Ruby's powerful metaprogramming capabilities enable LLMs to generate highly dynamic and adaptable code.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-8">
-                <h4 class="text-xl font-semibold mb-4">In Conclusion</h4>
-                <p class="text-gray-700">Ruby on Rails isn't just a good choice for LLM code generation - it's the optimal choice. Its concise syntax, semantic clarity, and robust ecosystem create a synergy with AI that no other framework can match. As we move further into the age of AI-assisted development, Ruby on Rails stands out as the framework that will unlock the full potential of LLM-driven coding, revolutionizing the way we build and scale applications. Any other choice is simply settling for less.</p>
-            </div>
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">How Do We Make Money?</h3>
-            <p class="mb-4">We cater to less-technical users who need help building customizable software for cheap:</p>
-            <ul class="list-disc list-inside mb-4">
-                <li>Hosting & Deployment</li>
-                <li>Support</li>
-                <li>Users Who Need Deeper Custom Development</li>
-                <li>A Marketplace for Plugins to Extend LlamaPress</li>
-            </ul>
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">What's Not Open Sourced?</h3>
-            <p class="mb-4">Our Expert AI Agent, LlamaBot, that is Trained to be Your Expert CTO. LlamaBot is a Highly Opinionated Ruby on Rails and LlamaPress Expert. LlamaBot guides you through any LLamaPress project, and even acts as your very own custom software developer.</p>
-            <p>Even the most non-technical users can still build their own customized software solution on top of LlamaPress, using LlamaBot.</p>
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Our Vision</h3>
-            <p class="mb-4">LlamaPress is optimized for end-to-end user experience — from the Least Technical User to the Most Technical.</p>
-            <!-- <p class="font-bold">This is our Billion Dollar Vision.</p> -->
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Current State of Affairs: GTM</h3>
-            <ul class="list-disc list-inside mb-4">
-                <li>Our GTM is that we continue to use LlamaPress to build out our SaaS and marketing agency, along with helping new users build their own software on top of LlamaPress.</li>
-                <li>Our origin story: we had a massive problem with our own SaaS Startup/Agency.</li>
-            </ul>
-        </article>
-
-        <article class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h3 class="text-2xl font-bold mb-4">Llama Press was built to solve a massive problem we had with our own SaaS Startup/Agency</h3>
-            <ol class="list-decimal list-inside mb-4">
-                <li>Users needed customizations and new features all the time.</li>
-                <li>Building these features for users was conflicted. One user wants A, the other wants B.</li>
-                <li>Each company was slightly different. They'd want slightly different configurations and things.</li>
-                <li>Support was way too expensive, especially given many of their price points.</li>
-                <li>We built in a chat bot for our freemium tier users to interact with for support.</li>
-                <li>We began building in LLMs to take their requests and create a game plan for implementation.</li>
-                <li>We started letting the ChatBot implement changes under our supervision.</li>
-                <li>We found it was surprisingly good! And we realized it was because the code we were modifying was built on top of Ruby on Rails.</li>
-            </ol>
-            <!-- <p class="font-bold">We realized we have a billion dollar market opportunity in front of us.</p> -->
-        </article>
     </main>

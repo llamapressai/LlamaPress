@@ -8,11 +8,14 @@ class ApplicationController < ActionController::Base
 
   def current_site
     # Number One: Check Request Info for Domain.
+    
     if ENV["OVERRIDE_DOMAIN"].present? #This is used for development, use OVERRIDE_DOMAIN to test different sites
       domain = ENV["OVERRIDE_DOMAIN"]
     else
       domain = sanitize_domain(request.env["HTTP_HOST"].dup)
     end
+
+    Rails.logger.info("Domain request for: " + domain)
 
     @site = Site.find_by(slug: domain)
 
@@ -36,18 +39,35 @@ class ApplicationController < ActionController::Base
       @site = current_user&.default_site
     end
 
-    # If no user, no site, no page, no domain, then current_site is nil.
-    Rails.logger.info("Domain request for: " + domain)
+    if @site.nil?
+      #Number Five: Inspect the current_organization for their default site.
+      @site = current_user&.organization&.sites&.first
+    end
+
+    if @site.nil?
+      # Number Six: Inspect the HOSTED_DOMAIN environment variable for a default site.
+      Rails.logger.info "No site found for domain #{domain}. Let's check if we have a domain set in HOSTED_DOMAIN environment"
+      @site = Site.find_by(slug: ENV["HOSTED_DOMAIN"]) unless ENV["HOSTED_DOMAIN"].blank?
+    end
+
+    if @site.nil?
+      # Number Seven: If no site is found, throw a 404 error.
+      Rails.logger.info "No site found for domain #{domain}. Taking them to llamapress home page"
+      # throw 404 error
+      raise ActionController::RoutingError.new('Not Found')
+    end
+
     return @site
   end
 
   def set_context
     @context = request.path
-    @view_path = resolve_view_path
+    @view_path = resolve_view_path #this is used for LlamaBot to know what file to write code changes to.
   end
 
   private
-
+  # This is used to get the corresponding view file based on the controller route and action, so that LlamaBot can write 
+  # any code changes to the correct views file in the user's file system.
   def resolve_view_path
     route = Rails.application.routes.recognize_path(request.path, method: request.method)
     controller = route[:controller]
@@ -69,6 +89,10 @@ class ApplicationController < ActionController::Base
     nil
   end
 
+  # This is used to sanitize the domain to match the slug format of the site.
+  # To allow LlamaPress to properly route to the site, the domain must be saved to the user's Site record in the slug column, and not have a www., http://, or https://.
+  # The user must also have an A record in their DNS settings pointing to the IP address of the LlamaPress server.
+  # and the site must have a security certificate configured for the domain. 
   def sanitize_domain(domain)
     domain.slice! "www."
     domain.slice! "http://"

@@ -1,3 +1,5 @@
+<h1 class="text-4xl font-bold text-center mb-2"><%= site.name %></h1>
+
 <div id="<%= dom_id site %>">
   <p class="my-5">
     <strong class="block font-medium mb-1">Organization:</strong>
@@ -12,6 +14,18 @@
   <p class="my-5">
     <strong class="block font-medium mb-1">Slug:</strong>
     <%= site.slug %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Home Page:</strong>
+    <% if site.home_page_id.present? %>
+      <%= link_to page_path(site.home_page_id), class: "text-blue-500 hover:text-blue-600" do %>
+        <%=site.home_page.slug %> <i class="fas fa-external-link-alt ml-1"></i>
+      <% end %>
+    <% else %>
+      <span class="text-gray-500">No home page set</span>
+      <%= link_to "Set Home Page", edit_site_path(site), class: "ml-2 text-blue-500 hover:text-blue-600" %>
+    <% end %>
   </p>
 
     <%= link_to new_page_path(site_id: site.id), class: "inline-block mb-6 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-300" do %>
@@ -33,11 +47,17 @@
         <div class="p-6 border-t-2 border-gray-700">
           <div class="flex items-center mb-3">
           <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
+            <div class="flex items-center">
+
             <%# if web_page.organization.logo.attached? %>
               <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
             <%# else %>
             <%# end %>
             <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
+              <% if site.home_page_id == web_page.id %>
+                <i class="fas fa-home text-yellow-400 ml-2" title="Home Page"></i>
+              <% end %>
+            </div>
           </div>
           <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
         </div>
@@ -72,7 +92,7 @@
           Submitted: <%= time_ago_in_words(submission.created_at) %> ago
         </p>
         <div class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
-          <% submission.data.each do |key, value| %>
+          <% submission.data&.each do |key, value| %>
             <p class="text-sm text-gray-300"><strong><%= key %>:</strong> <%= value %></p>
           <% end %>
         </div>

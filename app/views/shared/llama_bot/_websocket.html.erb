@@ -26,6 +26,8 @@
          */
         received(data) { // LlamaBot Backend is sending us a message -- let's handle it and format it so the user can see it
           console.log("Received response from LlamaBot Backend:", data);
+          hideLoadingIndicator();
+          
           try {
             
             // Parse the incoming data
@@ -59,11 +61,11 @@
 
               default:
                 console.warn("Unknown message type:", parsedData.type);
-                addMessage("Unknown message type received.", "system");
+                addMessage("Unknown: " + data, "system");
             }
           } catch (error) {
             console.error("Error parsing or processing received data:", error);
-            addMessage("There was an error processing the message.", "bot");
+            addMessage("Error: " + error, "bot");
           }
 
           // Optionally handle the 'message_complete' field if it exists
@@ -258,22 +260,7 @@ document.addEventListener("visibilitychange", function() {
 /**
  * This is the button handler for when the user clicks "send" on the chatbot.
  */
-async function handleChatMessageSend() {
-  if (userInput.value.trim() === "" || isLoading) return;
-
-  const userMessage = userInput.value;
-  addMessage(userMessage, "user");
-  userInput.value = "";
-  autoResizeUserInputArea();
-
-  isLoading = true;
-  showLoadingIndicator();
-  let selectedElement = document.getElementById("selectedElementContent");
-  let selectedElementInnerHtml = selectedElement.innerHTML.replace(
-    "selected-element",
-    ""
-  );
-
+async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, errorCallback) {
   try {
     if (chatChannel && chatChannel.send) {
       chatChannel.send({
@@ -287,11 +274,11 @@ async function handleChatMessageSend() {
     }
   } catch (error) {
     console.error("Error sending message:", error);
+    errorCallback(error);
   } finally {
-    isLoading = false;
-    hideLoadingIndicator();
   }
 }
+window.sendUserMessageOverSocket = sendUserMessageOverSocket;
     
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.0.0" onload="initializeChat()"></script>
