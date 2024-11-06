@@ -45,6 +45,7 @@
           action: () => { //wrapped in a closure so we need to call getIsOpen() function to get the value of calling isOpen directly. 
             if (!getIsOpen()){ // we don't want to toggle chat if it's already open
               toggleChat();
+              document.getElementById('userInput').value = 'Redesign this page so its in nightmode';
             }
             tour.next();
           }
@@ -58,7 +59,44 @@
         element: '#userInput',
         on: 'top'
       },
-      text: 'Type your messages here to interact with LlamaBot',
+      text: 'Type & send messages to change anything you want about the page',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => {
+            //document.getElementById('userInput').value = 'Redesign this page so its in nightmode';
+            tour.next();  
+          }
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'send-button',
+      attachTo: {
+        element: '#sendButton',
+        on: 'bottom'
+      },
+      text: 'For example, send message to change page to nightmode',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: tour.next
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'wait-for-thinking',
+      text: 'Wait for LlamaBot to think... (this may take a while)',
       buttons: [
         {
           text: 'Back',
@@ -89,6 +127,9 @@
         }
       ]
     });
+
+    //TODO: prompt for when the user is editing the bio template: 
+    //Redesign this entire page to be for <Your Name or Paul Graham>, with the following Bio: <"Your Bio" or "Founder of Y Combinator, painter, writer, hacker>. Here is an image source of the profile picture to use: <image source>
 
     // Start the tour when the chat icon is first clicked
     const chatIcon = document.getElementById('chatIcon');
