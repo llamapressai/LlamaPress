@@ -42,7 +42,10 @@
         },
         {
           text: 'Next',
-          action: () => {
+          action: () => { //wrapped in a closure so we need to call getIsOpen() function to get the value of calling isOpen directly. 
+            if (!getIsOpen()){ // we don't want to toggle chat if it's already open
+              toggleChat();
+            }
             tour.next();
           }
         }
@@ -94,14 +97,15 @@
     const disableTourAfterCompletionWithCookie = false; //if this is true, then tour won't be shown again after it's completed once (based on user cookie)
     let skipTour = disableTourAfterCompletionWithCookie && localStorage.getItem('tourCompleted');
 
-    chatIcon.addEventListener('click', () => {
-      if (!tourStarted && !skipTour) {
+    //chatIcon.addEventListener('click', () => {
+      //if (!tourStarted && !skipTour) {
+      if (true) {
         setTimeout(() => {
           tour.start();
           tourStarted = true;
         }, 500);
       }
-    });
+    //});
 
     // Mark tour as completed when it ends
     tour.on('complete', () => {

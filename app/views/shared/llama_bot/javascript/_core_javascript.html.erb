@@ -25,20 +25,38 @@
       // Implement right navigation logic
     });
 
-    let isOpen = false;
+    var isOpen = false;
     let isLoading = false;
     let messages = [];
 
+    ///** global getter for isOpen, needed for accessing isOpen when in closures */
+    function getIsOpen(){
+      return isOpen;
+    }
+    window.getIsOpen = getIsOpen;
+  
     /**
      * Toggles the chat window to show llamabot chat
      */
-    function toggleChat() {
-      console.log("Chat window has been toggled");
-      isOpen = !isOpen;
-      chatbotContainer.classList.toggle("hidden", !isOpen);
+    function toggleChat(shouldOpen = null) {
+      //TODO: We should allow user to pass in boolean to toggle chat to open or closed, but right now it's always passing in a pointer event, which is confusing.
 
-      const chatbotMessages = document.getElementById('chatbotMessages');            
-      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      //if (shouldOpen === null) {
+      //  console.log("Chat window has been toggled");
+      //  isOpen = !isOpen;
+      //  chatbotContainer.classList.toggle("hidden", !isOpen);
+      //
+      //  const chatbotMessages = document.getElementById('chatbotMessages');            
+      //  chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      //}
+      //else {
+        isOpen = !isOpen;
+        chatbotContainer.classList.toggle("hidden", !isOpen);
+
+        console.log("Chat window has been toggled to " + (isOpen ? "open" : "closed"));
+        const chatbotMessages = document.getElementById('chatbotMessages');            
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      //}
     }
 
     // Expose toggleChat to the global scope
