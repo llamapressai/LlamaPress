@@ -9,8 +9,10 @@
 </div>
     <p id="notice" class="text-green-600"><%= notice %></p>
     <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-2">LlamaPress</h1>
-        <h2 class="text-2xl text-center text-gray-600 mb-4">Build Websites with a Chatbot</h2>
+        <h1 class="text-4xl font-semibold text-black flex items-center p-4">
+          <i class="fas fa-folder-open text-yellow-400 mr-2"></i>
+          Your Pages
+        </h1>
 
 <div class="container mx-auto px-4">
   <% sorted_sites = @pages.group_by(&:site).sort_by { |site, _| site.id == current_user.default_site_id ? 0 : 1 } %>
@@ -18,11 +20,8 @@
     <div class="mb-8">
       <button onclick="toggleSite('<%= site.id %>')" class="w-full flex items-center justify-between bg-gray-900 p-4 rounded-t-lg text-white mb-2">
         <div class="flex items-center">
-          <i class="fas fa-globe text-blue-400 mr-2"></i>
-          <a href="<%= site_path(site.id) %>" target="_blank" rel="noopener noreferrer" class="mr-2 text-gray-300 hover:text-white">    
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
+          <i class="fas fa-globe text-gray-300 mr-2"></i>
+          <a href="<%= site_path(site.id) %>" target="_blank" rel="noopener noreferrer" class="flex items-center mr-2 text-gray-300 hover:text-white">    
             <h3 class="text-xl font-bold text-blue-400 hover:text-blue-300 underline"><%= site.name %> (<%= site.slug %>)</h3>
           </a>
           <% if site.id == current_user.default_site_id %>
