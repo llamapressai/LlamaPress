@@ -133,7 +133,7 @@ module LlamaBot
                 'file_contents' => file_contents
             }.compact
 
-            ws_url = "#{ENV['LLAMABOT_API_URL']}/ws"
+            ws_url = "#{ENV['LLAMABOT_WEBSOCKET_URL']}"
             
             response = ""
             error = nil
