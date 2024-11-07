@@ -5,11 +5,9 @@ one:
   organization: one
   content: MyText
   slug: MyString1
-  prompt: MyString
 
 two:
   site: two
   organization: two
   content: MyText
   slug: MyString2
-  prompt: MyString

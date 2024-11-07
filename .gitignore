@@ -48,3 +48,5 @@ config/local_env.yml
 #ignore the start script
 start
 .prettierignore
+
+load_database_from_s3.sh

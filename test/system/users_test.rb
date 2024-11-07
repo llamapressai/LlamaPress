@@ -5,45 +5,22 @@ class UsersTest < ApplicationSystemTestCase
     @user = users(:one)
   end
 
-  test "visiting the index" do
-    visit users_url
-    assert_selector "h1", text: "Users"
+  test "should register user" do
+    visit "/users/sign_up"
+    fill_in "Email", with: "test@test.com"
+    fill_in "Password", with: "1234567890"
+    fill_in "Password confirmation", with: "1234567890"
+    click_on "Sign up"
+    assert_text "Welcome"
   end
 
-  test "should create user" do
-    visit users_url
-    click_on "New user"
-
+  test "should login user" do
+    @user.password = "1234567890"
+    @user.save
+    visit "/users/sign_in"
     fill_in "Email", with: @user.email
-    fill_in "First name", with: @user.first_name
-    fill_in "Last name", with: @user.last_name
-    fill_in "Organization", with: @user.organization_id
-    fill_in "Phone", with: @user.phone
-    click_on "Create User"
-
-    assert_text "User was successfully created"
-    click_on "Back"
-  end
-
-  test "should update User" do
-    visit user_url(@user)
-    click_on "Edit this user", match: :first
-
-    fill_in "Email", with: @user.email
-    fill_in "First name", with: @user.first_name
-    fill_in "Last name", with: @user.last_name
-    fill_in "Organization", with: @user.organization_id
-    fill_in "Phone", with: @user.phone
-    click_on "Update User"
-
-    assert_text "User was successfully updated"
-    click_on "Back"
-  end
-
-  test "should destroy User" do
-    visit user_url(@user)
-    click_on "Destroy this user", match: :first
-
-    assert_text "User was successfully destroyed"
+    fill_in "Password", with: "1234567890"
+    click_on "Log in"
+    assert_text "What do you want to change?"
   end
 end

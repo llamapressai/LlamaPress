@@ -7,31 +7,39 @@ class PagesController < ApplicationController
 
   # GET /
   # Find and render the root page depending on the domain.
-  # If no root page is found, redirect to the llama press home page.
+  # If no root page is found, redirect to the llama press home
   def home
     #If the user is signed in, and they have a default site, redirect to that site's home page.
-
     #If no user, no site, no page, no domain.
-    if current_site.present? #current_site is set in application_controller.rb, based on domain that's requesting.
-      @page = current_site.pages.first
-      if @page.nil?
-        redirect_to llama_bot_home_path and return
-      end
-    else # if no site is found for this domain, go to the default home page. 
-      if current_user.present?
-        if current_user.organization.pages.count == 0
+    # Found a signed in user -- let's take them to their home page.
+    if current_user.present?#current_site.present? && current_site.slug != 'llamapress.ai' #current_site is set in application_controller.rb, based on domain that's requesting.
+      Rails.logger.info "Current User Found! #{current_user.email}"
+      redirect_to llama_bot_home_path and return
+    else # if it's a non-signed in user, check the domain and serve them the home page for that domain.
+      Rails.logger.info "Non-User came to website #{request.domain} with route #{request.path}. Checking to see if we have a site that matches this domain now. Checking if we have a site with this domain already..."
+      Rails.logger.info "Site that was matched: #{current_site&.slug}" # this gets set in application_controller.rb
+      
+      # They came to a domain that has a site associated with it. (Excluding llamapress.ai)
+      if current_site.present? && current_site.slug != ENV["HOSTED_DOMAIN"]
+        Rails.logger.info "Found site #{current_site.slug} for domain #{request.domain}. Taking them to the home page for this site now"
+        @page = current_site.home_page || current_site.pages.first # try to get home page if it's set, otherwise just get the first page.
+        if @page.nil?
+          Rails.logger.info 'no page in site, taking them to llamapress home page'
           redirect_to llama_bot_home_path and return
-        else 
-          @page = current_user.organization.pages.first
-          redirect_to "/pages/#{@page.id}" and return
+        else
+          #pass through and render everything for a public visitor to this site.
         end
-      else
-        redirect_to new_user_registration_path and return 
       end
     end
 
-    content = @page.render_content
-    content += inject_chat_partial(content) if current_user.present?
+    if current_site.nil? || @page.nil? #what should we do if current_site is nil, and there's no page?
+      Rails.logger.info 'no site found, taking them to llamapress home page'
+      raise ActionController::RoutingError.new('Not Found') # throw 404 error
+    end
+
+    Rails.logger.info 'rendering page to a non-signed in user -- this is likely a public traffic visit going to a site\'s home page'
+    content = @page.render_content # we know @page is present, because we redirected above if it wasn't.
+    #content += inject_chat_partial(content) if current_user.present?
     content += inject_style()
     content += inject_analytics_partial() if Rails.env.production?
     render inline: content.html_safe, layout: 'page'
@@ -53,16 +61,24 @@ class PagesController < ApplicationController
 
   # GET /pages or /pages.json
   def index
-    @pages = current_organization.pages
+   @pages = current_organization.pages
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: @pages
+      end
+    end
   end
 
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
-
-    # Inject the chat partial
-    content += inject_chat_partial(content) if current_user.present?
-    content += inject_analytics_partial() if Rails.env.production?
+    if current_user.present? && @page.organization_id == current_user.organization_id
+      # Inject the chat partial
+      content += inject_chat_partial(content)
+      content += inject_analytics_partial() if Rails.env.production?
+    end
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -70,6 +86,7 @@ class PagesController < ApplicationController
   def new
     @page = current_organization.pages.build
     @site_id = params[:site_id].present? ? params[:site_id] : current_site.id
+    @templates = PagesHelper.get_starting_templates # get html content from each file in templates folder
   end
 
   # GET /pages/1/edit
@@ -93,7 +110,7 @@ class PagesController < ApplicationController
 
     respond_to do |format|
       if @page.save
-        format.html { redirect_to page_url(@page), notice: "web page was successfully created." }
+        format.html { redirect_to page_url(@page.id), notice: "web page was successfully created." }
         format.json { render :show, status: :created, location: @page }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -108,7 +125,7 @@ class PagesController < ApplicationController
     @page.save_history(message)
     respond_to do |format|
       if @page.update(page_params)
-        format.html { redirect_to page_url(@page), notice: "web page was successfully updated." }
+        format.html { redirect_to page_url(@page.id), notice: "web page was successfully updated." }
         format.json { render :show, status: :ok, location: @page }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -129,17 +146,31 @@ class PagesController < ApplicationController
 
   def histories
     @page = Page.find(params[:id])
-    @page_histories = @page.page_histories.order(created_at: :desc)
+    @page_number = params[:page] || 1
+    @per_page = 10
+    
+    @page_histories = @page.page_histories
+      .order(created_at: :desc)
+      .page(@page_number)
+      .per(@per_page)
+    
     respond_to do |format|
-      format.html # Renders the default history.html.erb view
+      format.html
       format.json do
         encoded_histories = @page_histories.map do |history|
           history_data = history.as_json
           history_data['content'] = Base64.strict_encode64(history.content)
           history_data
         end
-        encoded_histories_json_object = { web_page_histories: encoded_histories }
-        render json: encoded_histories_json_object
+        render json: {
+          web_page_histories: encoded_histories,
+          meta: {
+            current_page: @page_histories.current_page,
+            total_pages: @page_histories.total_pages,
+            total_count: @page_histories.total_count,
+            per_page: @per_page
+          }
+        }
       end
     end
   end
@@ -158,19 +189,22 @@ class PagesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_page
       @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
+      # @page = current_user.organization.pages.friendly.find(params[:id]) || Page.find(params[:id])
     end
 
     def set_site
       if page_params[:site_id].present?
         @site = Site.find(params[:site_id])
+        # @site = current_user.sites.find(params[:site_id])
       else
         @site = current_site || @page.site || current_organization.sites.first
+        # @site = current_site || @page.site || current_user.sites.first
       end
     end
 
     # Only allow a list of trusted parameters through.
     def page_params
-      params.require(:page).permit(:site_id, :content, :slug, :prompt, :organization_id)
+      params.require(:page).permit(:site_id, :content, :slug, :organization_id)
     end
 
     def inject_chat_partial(content)

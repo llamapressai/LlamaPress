@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
+ActiveRecord::Schema[7.2].define(version: 2024_10_26_213636) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,11 +80,22 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
     t.bigint "site_id", null: false
     t.text "content"
     t.string "slug"
-    t.string "prompt"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "organization_id"
     t.index ["site_id"], name: "index_pages_on_site_id"
+  end
+
+  create_table "posts", force: :cascade do |t|
+    t.string "title"
+    t.string "slug"
+    t.text "content"
+    t.bigint "page_id"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_id"], name: "index_posts_on_page_id"
+    t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
   create_table "sites", force: :cascade do |t|
@@ -93,6 +104,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "wordpress_api_encoded_token"
+    t.bigint "home_page_id"
+    t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
     t.index ["slug"], name: "index_sites_on_slug", unique: true
   end
@@ -127,10 +141,20 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.bigint "default_site_id"
+    t.string "public_id"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.datetime "mixpanel_profile_last_set_at"
+    t.string "api_token"
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["phone"], name: "index_users_on_phone"
+    t.index ["public_id"], name: "index_users_on_public_id", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
@@ -139,7 +163,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_09_175035) do
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"
+  add_foreign_key "posts", "pages"
+  add_foreign_key "posts", "users"
   add_foreign_key "sites", "organizations"
+  add_foreign_key "sites", "pages", column: "home_page_id"
   add_foreign_key "snippets", "sites"
   add_foreign_key "submissions", "sites"
   add_foreign_key "users", "organizations"

@@ -1,0 +1,281 @@
+    <%# This is the toolbar that is displayed when the user is editing a page, and they highlight an area with their cursor %>
+    <!-- Existing floating toolbar -->
+    <div id="llama-toolbar" data-llama-editable="false" class="hidden flex space-x-2 bg-gray-100 p-2 rounded-t-lg border border-gray-300 z-[1000]" contenteditable="false">
+        <div class="relative inline-block">
+            <button id="llama-text-dropdown-button" class="px-2 py-1 bg-gray-200 rounded">Tt</button>
+            <div id="llama-text-dropdown" class="absolute hidden bg-white border rounded shadow-lg">
+                <button onclick="format('h1')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">H1</button>
+                <button onclick="format('h2')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">H2</button>
+                <button onclick="format('h3')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">H3</button>
+                <button onclick="format('p')" class="block w-full px-4 py-2 text-left hover:bg-gray-100">Paragraph</button>
+            </div>
+        </div>
+        <div class="relative inline-block">
+            <button onclick="showLinkDialog()" class="px-2 py-1 bg-gray-200 rounded">🔗</button>
+            <div id="llama-link-dialog" class="absolute hidden bg-white border rounded shadow-lg p-2 z-10" style="min-width: 200px;">
+                <input type="text" id="llama-link-input" placeholder="Enter URL" class="w-full p-1 mb-2 border rounded">
+                <div class="max-h-32 overflow-y-auto mb-2">
+                    <div class="text-sm font-bold mb-1">Common Links:</div>
+                    <% current_user.organization&.pages&.each do |page| %>
+                        <button onclick="insertLink('/<%= page.slug %>')" class="block w-full px-2 py-1 text-left hover:bg-gray-100 text-sm"><%= page.slug %></button>
+                    <% end %>
+                    <!-- Add more predefined links as needed -->
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="cancelLink()" class="px-2 py-1 bg-gray-200 rounded text-sm">Cancel</button>
+                    <button onclick="insertLink()" class="px-2 py-1 bg-blue-500 text-white rounded text-sm">Insert</button>
+                </div>
+            </div>
+        </div>
+        <button onclick="format('bold')" class="px-2 py-1 bg-gray-200 rounded font-bold">B</button>
+        <button onclick="format('underline')" class="px-2 py-1 bg-gray-200 rounded underline">U</button>
+        <button onclick="format('strikethrough')" class="px-2 py-1 bg-gray-200 rounded line-through">S</button>
+        <button onclick="createList('ul')" class="px-2 py-1 bg-gray-200 rounded">•</button>
+        <button onclick="createList('ol')" class="px-2 py-1 bg-gray-200 rounded">1.</button>
+        <button onclick="setColor('color')" class="px-2 py-1 bg-gray-200 rounded">🎨</button>
+        <button onclick="setColor('backgroundColor')" class="px-2 py-1 bg-gray-200 rounded">🖌️</button>
+        <button onclick="document.execCommand('undo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↩️</button>
+        <button onclick="document.execCommand('redo', false, null)" class="px-2 py-1 bg-gray-200 rounded">↪️</button>
+        <input type="color" id="llama-color-picker" class="hidden">
+        <button onclick="changeFontSize(1)" class="px-2 py-1 bg-gray-200 rounded">A+</button>
+        <button onclick="changeFontSize(-1)" class="px-2 py-1 bg-gray-200 rounded">A-</button>
+    </div>
+
+    <script>
+        const toolbar = document.getElementById('llama-toolbar');
+        const colorPicker = document.getElementById('llama-color-picker');
+        const textDropdownButton = document.getElementById('llama-text-dropdown-button');
+        const textDropdown = document.getElementById('llama-text-dropdown');
+
+        let selectedRange = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            body.addEventListener('mouseup', handleMouseUp);
+            body.addEventListener('click', hideToolbar);
+            
+            // Add click handler for text dropdown button
+            textDropdownButton.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent immediate hiding
+                textDropdown.classList.toggle('hidden');
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!textDropdownButton.contains(e.target)) {
+                    textDropdown.classList.add('hidden');
+                }
+            });
+        });
+
+        function handleMouseUp() {
+            setTimeout(() => {
+                const selection = window.getSelection();
+                if (selection.toString().length > 0) {
+                    showToolbar();
+                } else {
+                    hideToolbar();
+                }
+            }, 0);
+        }
+
+        function showToolbar() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                toolbar.style.display = 'flex';
+                toolbar.style.position = 'absolute';
+                toolbar.style.top = `${rect.top + window.scrollY - toolbar.offsetHeight - 10}px`;
+                toolbar.style.left = `${rect.left + window.scrollX}px`;
+            }
+        }
+
+        function hideToolbar(e) {
+            if (e && !toolbar.contains(e.target) && e.target !== toolbar) {
+                toolbar.style.display = 'none';
+            }
+        }
+
+        function format(command, value = null) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                
+                // Create a span for the selected content
+                const span = document.createElement('span');
+                span.appendChild(range.extractContents());
+                
+                // Apply the formatting classes to the span
+                switch (command) {
+                    case 'bold':
+                        span.classList.add('font-bold');
+                        break;
+                    case 'italic':
+                        span.classList.add('italic');
+                        break;
+                    case 'underline':
+                        span.classList.add('underline');
+                        break;
+                    case 'strikethrough':
+                        span.classList.add('line-through');
+                        break;
+                    case 'h1':
+                    case 'h2':
+                    case 'h3':
+                    case 'p':
+                        // For headings and paragraphs, we still want to transform the entire block
+                        const container = range.commonAncestorContainer;
+                        const element = container.nodeType === 1 ? container : container.parentElement;
+                        applyHeadingOrParagraph(element, command);
+                        return; // Exit early as we don't need to insert the span
+                }
+                
+                // Insert the formatted span
+                range.insertNode(span);
+                applyLlamaTags(span);
+                
+                // Clear the selection
+                selection.removeAllRanges();
+            }
+        }
+
+        function createList(type) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const listElement = document.createElement(type);
+                listElement.className = type === 'ul' ? 'list-disc list-inside' : 'list-decimal list-inside';
+                
+                const listItem = document.createElement('li');
+                listItem.appendChild(range.extractContents());
+                listElement.appendChild(listItem);
+                
+                range.insertNode(listElement);
+                applyLlamaTags(listElement);
+            }
+        }
+
+        function setColor(property) {
+            currentColorProperty = property;
+            colorPicker.click();
+        }
+
+        colorPicker.addEventListener('change', (e) => {
+            const color = e.target.value;
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.style[currentColorProperty] = color;
+                span.appendChild(range.extractContents());
+                range.insertNode(span);
+                applyLlamaTags(span);
+            }
+        });
+
+        function changeFontSize(change) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const container = range.commonAncestorContainer;
+                const element = container.nodeType === 1 ? container : container.parentElement;
+
+                const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl'];
+                let currentSize = sizeClasses.findIndex(cls => element.classList.contains(cls));
+
+                if (currentSize === -1) currentSize = 2; // Default to 'text-base'
+
+                let newSize = Math.max(0, Math.min(currentSize + change, sizeClasses.length - 1));
+
+                sizeClasses.forEach(cls => element.classList.remove(cls));
+                element.classList.add(sizeClasses[newSize]);
+            }
+        }
+
+        function toggleClass(element, className) {
+            element.classList.toggle(className);
+        }
+
+        function applyHeadingOrParagraph(element, tag) {
+            const newElement = document.createElement(tag);
+            newElement.innerHTML = element.innerHTML;
+            element.parentNode.replaceChild(newElement, element);
+            
+            switch (tag) {
+                case 'h1':
+                    newElement.className = 'text-4xl font-bold mb-4';
+                    break;
+                case 'h2':
+                    newElement.className = 'text-3xl font-semibold mb-3';
+                    break;
+                case 'h3':
+                    newElement.className = 'text-2xl font-medium mb-2';
+                    break;
+                case 'p':
+                    newElement.className = 'text-base mb-4';
+                    break;
+            }
+        }
+
+        function applyLlamaTags(element) {
+            element.setAttribute('data-llama-editable', 'true');
+        }
+
+        function getColorClass(color, prefix) {
+            const colorMap = {
+                'rgb(255, 0, 0)': `${prefix}-red-500`,
+                'rgb(0, 0, 255)': `${prefix}-blue-500`,
+                'rgb(0, 128, 0)': `${prefix}-green-500`,
+                'rgb(255, 255, 0)': `${prefix}-yellow-200`,
+                'rgb(173, 216, 230)': `${prefix}-blue-200`,
+                'rgb(144, 238, 144)': `${prefix}-green-200`,
+            };
+            return colorMap[color] || '';
+        }
+
+        function showLinkDialog() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                selectedRange = selection.getRangeAt(0);
+                const linkDialog = document.getElementById('llama-link-dialog');
+                const linkInput = document.getElementById('llama-link-input');
+                linkDialog.classList.remove('hidden');
+                linkInput.value = '';
+                linkInput.focus();
+            }
+        }
+
+        function cancelLink() {
+            const linkDialog = document.getElementById('llama-link-dialog');
+            linkDialog.classList.add('hidden');
+            selectedRange = null;
+        }
+
+        function insertLink(predefinedUrl = null) {
+            if (selectedRange) {
+                const url = predefinedUrl || document.getElementById('llama-link-input').value.trim();
+                if (url) {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.className = 'text-blue-500 hover:underline';
+                    link.setAttribute('target', '_blank');
+                    link.appendChild(selectedRange.extractContents());
+                    selectedRange.insertNode(link);
+                    applyLlamaTags(link);
+                }
+            }
+            cancelLink();
+        }
+
+        // Add click handler to hide link dialog when clicking outside
+        document.addEventListener('click', function(e) {
+            const linkDialog = document.getElementById('llama-link-dialog');
+            const isClickInside = linkDialog.contains(e.target);
+            const isLinkButton = e.target.closest('button')?.innerText === '🔗';
+            
+            if (!isClickInside && !isLinkButton && !linkDialog.classList.contains('hidden')) {
+                cancelLink();
+            }
+        });
+    </script>

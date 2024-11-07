@@ -52,6 +52,9 @@ class SitesControllerTest < ActionDispatch::IntegrationTest
   test "should get current_site from application controller" do
     # Create a web site with a known slug. (Rails defaults to example.com in it's test setup for requests)
     site = Site.create!(name: "Test Site", slug: "example.com", organization: organizations(:one))
+
+    users(:one).default_site = site # set this new site as the default site for this user
+    users(:one).save
         
     # Make a request to any action in the controller to see if current_site is set correctly
     get sites_url
