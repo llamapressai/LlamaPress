@@ -178,6 +178,10 @@
   <%= render partial: 'shared/llama_bot/context_menu' %> 
 <% end %>
 
-<% if current_user.present? && current_user.needs_tutorial? %>
-  <%= render partial: 'shared/llama_bot/javascript/llama_tutorial' %>
+<% if current_user.present? && current_user.needs_tutorial? %> <%# This is just for the _chat.html.erb partial, there are other tutorials that are used for /pages/new, /home, /pages/:id/edit, and /3rd-party-recommendations%>
+  <%= render partial: 'shared/llama_bot/javascript/tutorials/tutorial_step_0_llama_bot' %>
+  <%= render partial: 'shared/llama_bot/javascript/tutorials/tutorial_step_1_llama_bot' %>
+  <%= render partial: 'shared/llama_bot/javascript/tutorials/tutorial_step_2_llama_bot' %>
+  <%= render partial: 'shared/llama_bot/javascript/tutorials/tutorial_step_4_llama_bot' %>
+
 <% end %>

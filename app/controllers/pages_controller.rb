@@ -12,9 +12,13 @@ class PagesController < ApplicationController
     #If the user is signed in, and they have a default site, redirect to that site's home page.
     #If no user, no site, no page, no domain.
     # Found a signed in user -- let's take them to their home page.
-    if current_user.present?#current_site.present? && current_site.slug != 'llamapress.ai' #current_site is set in application_controller.rb, based on domain that's requesting.
+    if current_user.present? #current_site.present? && current_site.slug != 'llamapress.ai' #current_site is set in application_controller.rb, based on domain that's requesting.
       Rails.logger.info "Current User Found! #{current_user.email}"
-      redirect_to llama_bot_home_path and return
+      if current_user.needs_tutorial? # routing for the tutorial steps depending on what step they're on.
+        redirect_to current_user.tutorial_step_path and return
+      else 
+        redirect_to llama_bot_home_path and return
+      end
     else # if it's a non-signed in user, check the domain and serve them the home page for that domain.
       Rails.logger.info "Non-User came to website #{request.domain} with route #{request.path}. Checking to see if we have a site that matches this domain now. Checking if we have a site with this domain already..."
       Rails.logger.info "Site that was matched: #{current_site&.slug}" # this gets set in application_controller.rb

@@ -2,9 +2,21 @@
 <script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 
-<!-- Add this right before the closing </div> of the main container -->
-<script>
-  console.log("Loading llama tutorial");
+<% if current_user.tutorial_step == 0 %>
+<script data-llama="exclude_when_saving_contenteditable_edits">
+  var globalTutorialStep = '<%= current_user.tutorial_step %>'; //global variable to track the tutorial step
+  globalTutorialStep = parseInt(globalTutorialStep);
+  
+  var doThisTour = true;
+
+  if (globalTutorialStep == null || globalTutorialStep != 0) {
+       doThisTour = false;
+  }
+
+  if (doThisTour){
+    console.log("Loading llama tutorial! Step 1");
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     const tour = new Shepherd.Tour({
       useModalOverlay: true,
@@ -19,7 +31,7 @@
 
     tour.addStep({
       id: 'welcome',
-      text: 'Welcome to LlamaPress! Let me show you around.',
+      text: 'Welcome to LlamaPress! Let me show you around',
       buttons: [
         {
           text: 'Next',
@@ -59,7 +71,7 @@
         element: '#userInput',
         on: 'top'
       },
-      text: 'Type & send messages to change anything you want about the page',
+      text: 'Type & send messages to change anything about the page',
       buttons: [
         {
           text: 'Back',
@@ -69,19 +81,25 @@
           text: 'Next',
           action: () => {
             //document.getElementById('userInput').value = 'Redesign this page so its in nightmode';
-            tour.next();  
+
+            document.getElementById('sendButton').addEventListener('click', () => {
+              tour.next();
+            }); //we need Next and Send button to do the same thing.
+
+            tour.next();
           }
         }
       ]
     });
 
+    
     tour.addStep({
       id: 'send-button',
       attachTo: {
         element: '#sendButton',
         on: 'bottom'
       },
-      text: 'For example, send message to change page to nightmode',
+      text: 'Send this message to change page to nightmode',
       buttons: [
         {
           text: 'Back',
@@ -99,7 +117,7 @@
       text: 'Wait for LlamaBot to think... (this may take a while)',
       buttons: [
         {
-          text: 'Back',
+          text: 'Back', //TODO: I want to force them to wait until thinking is completed, then I want to auto-refresh the page.
           action: tour.back
         },
         {
@@ -109,48 +127,26 @@
       ]
     });
 
-    tour.addStep({
-      id: 'expand-button',
-      attachTo: {
-        element: '#expandButton',
-        on: 'bottom'
-      },
-      text: 'Click here to expand or collapse the chat window',
-      buttons: [
-        {
-          text: 'Back',
-          action: tour.back
-        },
-        {
-          text: 'Done',
-          action: tour.complete
-        }
-      ]
-    });
+    if (doThisTour) {
+      setTimeout(() => {
+        tour.start();
+        tourStarted = true;
+      }, 500);
+    }
 
-    //TODO: prompt for when the user is editing the bio template: 
-    //Redesign this entire page to be for <Your Name or Paul Graham>, with the following Bio: <"Your Bio" or "Founder of Y Combinator, painter, writer, hacker>. Here is an image source of the profile picture to use: <image source>
-
-    // Start the tour when the chat icon is first clicked
-    const chatIcon = document.getElementById('chatIcon');
-    let tourStarted = false;
-
-    const disableTourAfterCompletionWithCookie = false; //if this is true, then tour won't be shown again after it's completed once (based on user cookie)
-    let skipTour = disableTourAfterCompletionWithCookie && localStorage.getItem('tourCompleted');
-
-    //chatIcon.addEventListener('click', () => {
-      //if (!tourStarted && !skipTour) {
-      if (true) {
-        setTimeout(() => {
-          tour.start();
-          tourStarted = true;
-        }, 500);
-      }
-    //});
-
-    // Mark tour as completed when it ends
+    // Move tutorial step forward when the tour is completed.
     tour.on('complete', () => {
-      localStorage.setItem('tourCompleted', 'true');
+      //TODO: do a PUT to /users/set_tutorial_step with tutorial_step = 1 (increment to next step in the tutorial)
+      fetch('/users/set_tutorial_step', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include CSRF token if your Rails app requires it
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+        },
+        body: JSON.stringify({ tutorial_step: 1 })
+      });
     });
   });
 </script>
+<% end %>

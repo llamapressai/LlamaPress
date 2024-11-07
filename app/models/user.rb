@@ -23,9 +23,28 @@ class User < ApplicationRecord
     end
   end
 
+  # Determines if the user needs to still go through the tutorial.
   def needs_tutorial?
-    #TODO: Put this into database somehow.
-    true
+    return self.tutorial_step >= 0 && self.tutorial_step <= 10 #if tutorial step < 0, then user opted out. If tutorial step > 10, then user has completed the tutorial.
+  end
+
+  # This is the path that the user will be redirected to based on the tutorial step they're on.
+  def tutorial_step_path
+    if self.tutorial_step >= 0 && self.tutorial_step < 2
+      "/pages/#{self.organization.sites.first.pages.first.id}"
+    elsif self.tutorial_step == 3
+      "/pages/new"
+    elsif self.tutorial_step == 4
+      "/pages/#{self.organization.sites.first.pages.second.id}"
+    elsif self.tutorial_step == 5
+      llama_bot_home_path
+    elsif self.tutorial_step == 6
+      "/recommended-3rd-party-apps"
+    elsif self.tutorial_step == 7
+      "/pages/#{self.organization.sites.first.pages.second.id}/edit"
+    else
+      llama_bot_home_path
+    end
   end
 
   private

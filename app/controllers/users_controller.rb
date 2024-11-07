@@ -65,6 +65,14 @@ class UsersController < ApplicationController
     end
   end
 
+  # PUT /users/set_tutorial_step
+  def set_tutorial_step
+    if params[:tutorial_step].present? && current_user.present?
+      current_user.tutorial_step = params[:tutorial_step]
+      current_user.save!
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
