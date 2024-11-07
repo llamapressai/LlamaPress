@@ -37,13 +37,13 @@ class User < ApplicationRecord
     elsif self.tutorial_step == 4
       "/pages/#{self.organization.sites.first.pages.second.id}"
     elsif self.tutorial_step == 5
-      llama_bot_home_path
+      "/home"
     elsif self.tutorial_step == 6
       "/recommended-3rd-party-apps"
     elsif self.tutorial_step == 7
       "/pages/#{self.organization.sites.first.pages.second.id}/edit"
     else
-      llama_bot_home_path
+      "/home"
     end
   end
 
