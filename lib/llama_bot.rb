@@ -132,7 +132,6 @@ module LlamaBot
                 'web_page_id' => web_page_id,
                 'file_contents' => file_contents
             }.compact
-
             ws_url = "#{ENV['LLAMABOT_WEBSOCKET_URL']}"
             
             response = ""
