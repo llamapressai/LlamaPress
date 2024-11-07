@@ -11,7 +11,11 @@ Rails.application.routes.draw do
   resources :sites
   resources :page_histories
   devise_for :users, controllers: { registrations: 'users/registrations' }
-  resources :users
+  
+  resources :users do
+    put 'set_tutorial_step', on: :collection
+  end
+  
   resources :organizations
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

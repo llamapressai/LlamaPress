@@ -81,17 +81,30 @@
           text: 'Next',
           action: () => {
             //document.getElementById('userInput').value = 'Redesign this page so its in nightmode';
-
+            
+            //we need the next and send button to do the same thing on that step.
             document.getElementById('sendButton').addEventListener('click', () => {
-              tour.next();
-            }); //we need Next and Send button to do the same thing.
+              console.log("User clicked send button from tutorial!")
+              tour.show('wait-for-thinking');//wrap tour.next in a closure so it gets called on next step if the user chooses to press send instead of next button
+              
+              // set the tutorial step to 1 to move on to the next step of the tutorial
+              fetch('/users/set_tutorial_step', {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  // Include CSRF token if your Rails app requires it
+                  'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+                },
+                body: JSON.stringify({ tutorial_step: 1 })
+              });
+//              tour.complete();//complete tour to fire the onComplete event and update the server that we're done with this part of tutoriald
+            });
 
             tour.next();
           }
         }
       ]
     });
-
     
     tour.addStep({
       id: 'send-button',
@@ -107,24 +120,59 @@
         },
         {
           text: 'Next',
-          action: tour.next
+          action: () => {
+            tour.next();
+            document.getElementById('sendButton').click(); //trigger send message if the user clicks next button
+        
+            fetch('/users/set_tutorial_step', { //complete tour to fire the onComplete event and update the server that we're done with this part of tutorial
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                // Include CSRF token if your Rails app requires it
+                'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+              },
+              body: JSON.stringify({ tutorial_step: 1 })
+            });
+            
+          }
         }
       ]
     });
 
     tour.addStep({
       id: 'wait-for-thinking',
-      text: 'Wait for LlamaBot to think... (this may take a while)',
+      text: 'Wait for LlamaBot to implement your changes... (this one shouldn\'t take long)',
+      cancelIcon: {
+        enabled: false
+      },
+      canClickTarget: false,
       buttons: [
         {
-          text: 'Back', //TODO: I want to force them to wait until thinking is completed, then I want to auto-refresh the page.
+          text: 'Back',
+          classes: 'shepherd-button-waiting',
+          disabled: true,
           action: tour.back
         },
         {
           text: 'Next',
+          classes: 'shepherd-button-waiting',
+          disabled: true,
           action: tour.next
         }
       ]
+    });
+
+    // Add event listener for when LlamaBot finishes processing
+    document.addEventListener('llamaBotResponseReceived', function() {
+      const waitingStep = tour.steps.find(step => step.id === 'wait-for-thinking');
+      if (waitingStep) {
+        waitingStep.options.buttons.forEach(button => {
+          button.disabled = false;
+          button.classes = button.classes.replace('shepherd-button-waiting', '');
+        });
+        // Force update the step to reflect the button changes
+        tour.show('wait-for-thinking');
+      }
     });
 
     if (doThisTour) {
