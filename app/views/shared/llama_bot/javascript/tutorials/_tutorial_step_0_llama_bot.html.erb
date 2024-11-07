@@ -14,7 +14,7 @@
   }
 
   if (doThisTour){
-    console.log("Loading llama tutorial! Step 1");
+    console.log("Loading llama tutorial! Step 0");
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -162,6 +162,8 @@
       ]
     });
 
+
+    //TODO: This isn't doing anything right now because we're not firing a llamaBotResponseReceived event
     // Add event listener for when LlamaBot finishes processing
     document.addEventListener('llamaBotResponseReceived', function() {
       const waitingStep = tour.steps.find(step => step.id === 'wait-for-thinking');
@@ -182,6 +184,8 @@
       }, 500);
     }
 
+
+    //TODO: This isn't doing anything right now because we're manually doing this in the right step completion in the tutorial.
     // Move tutorial step forward when the tour is completed.
     tour.on('complete', () => {
       //TODO: do a PUT to /users/set_tutorial_step with tutorial_step = 1 (increment to next step in the tutorial)

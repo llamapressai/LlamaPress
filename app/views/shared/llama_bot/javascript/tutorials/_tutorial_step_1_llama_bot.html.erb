@@ -1,0 +1,212 @@
+<!-- Add these in the header section, after the existing script and style tags -->
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
+
+<% if current_user.tutorial_step == 1 %>
+<script data-llama="exclude_when_saving_contenteditable_edits">
+  var globalTutorialStep = '<%= current_user.tutorial_step %>'; //global variable to track the tutorial step
+  globalTutorialStep = parseInt(globalTutorialStep);
+  
+  var doThisTour = true;
+
+  if (globalTutorialStep == null || globalTutorialStep != 1) {
+       doThisTour = false;
+  }
+
+  if (doThisTour){
+    console.log("Loading llama tutorial! Step 1");
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const tour = new Shepherd.Tour({
+      useModalOverlay: true,
+      defaultStepOptions: {
+        classes: 'shadow-md bg-purple-dark',
+        scrollTo: true,
+        cancelIcon: {
+          enabled: true
+        }
+      }
+    });
+
+    tour.addStep({
+      id: 'done-with-dark-mode',
+      text: 'You\'ve successfully changed the page to nightmode!',
+      buttons: [
+        {
+          text: 'Next',
+          action: tour.next
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'open-chatbot-2nd-time',
+      attachTo: {
+        element: '#chatIcon',
+        on: 'bottom'
+      },
+      text: 'Open the chat window again by clicking the icon',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => { //wrapped in a closure so we need to call getIsOpen() function to get the value of calling isOpen directly. 
+            if (!getIsOpen()){ // we don't want to toggle chat if it's already open
+              toggleChat();
+            }
+            tour.next();
+          }
+        }
+      ]
+    });
+
+    document.getElementById('selectElementButton').addEventListener('click', () => {
+      tour.next();
+    });
+
+    tour.addStep({
+      id: 'enter-selection-mode',
+      attachTo: {
+        element: '#selectElementButton',
+        on: 'top'
+      },
+      text: 'Click here to select a specific element',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => {
+            // toggle selection mode
+            if (!getIsInSelectionMode()){
+              toggleSelectionMode();
+            }
+
+            tour.next();
+          }
+        }
+      ]
+    });
+    
+    tour.addStep({
+      id: 'select-an-element',
+      attachTo: {
+        element: 'header',  // Just use the element name
+        on: 'bottom'
+      },
+      text: 'Select this header to focus LlamaBot on it',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => { 
+            document.getElementById('userInput').value = 'Please change this header text to say, "Hello World!"';
+            tour.next();
+          }
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'send-message',
+      attachTo: {
+        element: '#userInput',  // Just use the element name
+        on: 'bottom'
+      },
+      text: 'Ask LlamaBot to change the header text',
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          action: () => {
+            fetch('/users/set_tutorial_step', { //complete tour to fire the onComplete event and update the server that we're done with this part of tutorial
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                // Include CSRF token if your Rails app requires it
+                'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+              },
+              body: JSON.stringify({ tutorial_step: 2 }) //move to next step in the tutorial
+            });
+            
+            tour.next();
+
+            document.getElementById('sendButton').click(); //trigger send message if the user clicks next button
+          }
+        }
+      ]
+    });
+
+    tour.addStep({
+      id: 'wait-for-thinking',
+      text: 'Wait for LlamaBot to implement your changes... (this one shouldn\'t take long)',
+      cancelIcon: {
+        enabled: false
+      },
+      canClickTarget: false,
+      buttons: [
+        {
+          text: 'Back',
+          classes: 'shepherd-button-waiting',
+          disabled: true,
+          action: tour.back
+        },
+        {
+          text: 'Next',
+          classes: 'shepherd-button-waiting',
+          disabled: true,
+          action: tour.next
+        }
+      ]
+    });
+
+//TODO: This isn't doing anything right now because we're not firing a llamaBotResponseReceived event
+    // Add event listener for when LlamaBot finishes processing
+    document.addEventListener('llamaBotResponseReceived', function() {
+      const waitingStep = tour.steps.find(step => step.id === 'wait-for-thinking');
+      if (waitingStep) {
+        waitingStep.options.buttons.forEach(button => {
+          button.disabled = false;
+          button.classes = button.classes.replace('shepherd-button-waiting', '');
+        });
+        // Force update the step to reflect the button changes
+        tour.show('wait-for-thinking');
+      }
+    });
+
+    if (doThisTour) {
+      setTimeout(() => {
+        tour.start();
+        tourStarted = true;
+      }, 500);
+    }
+
+    //TODO: This isn't doing anything right now because we're manually doing this in the right step completion in the tutorial.
+    // Move tutorial step forward when the tour is completed.
+    tour.on('complete', () => {
+      //TODO: do a PUT to /users/set_tutorial_step with tutorial_step = 1 (increment to next step in the tutorial)
+      fetch('/users/set_tutorial_step', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include CSRF token if your Rails app requires it
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+        },
+        body: JSON.stringify({ tutorial_step: 1 })
+      });
+    });
+  });
+</script>
+<% end %>

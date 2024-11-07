@@ -594,8 +594,13 @@
   });
 
 
-  let inSelectionMode = false;
+  var inSelectionMode = false;
   let selectedElementHTML = null;
+
+  function getIsInSelectionMode(){ //needed for tutorial to check if we're in selection mode
+    return inSelectionMode;
+  }
+  window.getIsInSelectionMode = getIsInSelectionMode;
 
   /**
    * Toggle selection mode. This allows the user to select an element on the page that they want the LLM to edit.
@@ -614,6 +619,7 @@
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
   }
+  window.toggleSelectionMode = toggleSelectionMode;
 
   /**
    * Handle element selection. This fires when the user to selects an element on the page that they want the LLM to edit.
