@@ -139,7 +139,7 @@ class ChatChannel < ApplicationCable::Channel
               ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
               ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
             else
-              ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+              ctx.ca_file ='/etc/ssl/certs/ca-certificates.crt'
             end
         end
     )
