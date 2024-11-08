@@ -126,7 +126,27 @@ class ChatChannel < ApplicationCable::Channel
   def setup_external_websocket(connection_id)
     Thread.current[:connection_id] = connection_id
     Rails.logger.info "Setting up external websocket for connection: #{connection_id}"
-    endpoint = Async::HTTP::Endpoint.parse(ENV['LLAMABOT_WEBSOCKET_URL']) 
+    # endpoint = Async::HTTP::Endpoint.parse(ENV['LLAMABOT_WEBSOCKET_URL']) 
+    uri = URI(ENV['LLAMABOT_WEBSOCKET_URL'])
+    uri.scheme = 'wss'
+    endpoint = Async::HTTP::Endpoint.new(
+        uri,
+        ssl_context: OpenSSL::SSL::SSLContext.new.tap do |ctx|
+            ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+            
+            # Use system certificates from macOS
+            # ctx.ca_path = '/etc/ssl/certs'  # Try this first
+            # If the above doesn't work, try these alternatives:
+            # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
+            ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+            # ctx.ca_file = '/etc/ssl/certs/ca-certificates.crt'
+            
+            # Certificate and key setup
+            # ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
+            # ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+        end
+    )
+
 
     # Initialize the connection and store it in an instance variable
     @external_ws_task = Async do |task|
