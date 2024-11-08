@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_26_213636) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_06_233246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -149,6 +149,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_26_213636) do
     t.string "last_sign_in_ip"
     t.datetime "mixpanel_profile_last_set_at"
     t.string "api_token"
+    t.integer "tutorial_step", default: 0
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
