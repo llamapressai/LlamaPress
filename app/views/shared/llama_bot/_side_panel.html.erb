@@ -8,6 +8,14 @@
       <span class="text-xs text-purple-400 group-hover:text-purple-300">Menu</span>
     </button>
 
+    <% if @page.present? %>
+    <button id="llama-select-mode-button" onclick="toggleSelectionMode()" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_chat.html.erb">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-llama="app/views/shared/_chat.html.erb"></path>
+      </svg>
+      <span class="text-xs mt-1 text-purple-400"> Select </span>
+    </button>
+    <% end %>
     <!-- Hidden menu items that appear on hover -->
     <div id="llama-menu-items" class="hidden group-hover/menu:flex flex-col gap-2 absolute top-0 right-0 pt-16 z-10">
     <!--Disable these additional menu items for now:-->
