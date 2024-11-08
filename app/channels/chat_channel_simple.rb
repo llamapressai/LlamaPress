@@ -1,7 +1,7 @@
 require 'websocket-client-simple'
 require 'json'
 
-class ChatChannel < ApplicationCable::Channel
+class ChatChannelSimple < ApplicationCable::Channel
   def fetch_file_contents(context, web_page_id=nil)
     file_path = context || "app/views/llama_bot/home.html.erb"
 
