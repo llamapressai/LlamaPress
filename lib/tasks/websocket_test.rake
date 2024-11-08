@@ -28,9 +28,8 @@ namespace :websocket do
                     # If the above doesn't work, try these alternatives:
                     # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
 
-
                     # to test this command, run: rails websocket:monitor
-                    DEVELOPMENT_ENVIRONMENT = true
+                    DEVELOPMENT_ENVIRONMENT = false
                     
                     # Certificate and key setup
                       if DEVELOPMENT_ENVIRONMENT
