@@ -61,42 +61,43 @@ namespace :websocket do
               
               Async::WebSocket::Client.connect(endpoint) do |connection|
                 logger.info "WebSocket connection opened"
-                # Set up ping/pong handling
-                # connection.on(:pong) do |data|
-                #   logger.info "Received pong: #{data}"
-                # end
                 
-                # Send initial ping with message ID
-                message = {
-                  type: "ping",
-                  id: Time.now.to_i
-                }
-                logger.info "Sending message: #{message}"
-                connection.write(message.to_json)
-                
-                # Add message timeout
-                start_time = Time.now
-                timeout = 30  # seconds
-                
-                # Read messages with timeout
-                while Time.now - start_time < timeout
-                  message = connection.read
-                  break unless message
+                # Run continuous ping loop
+                loop do
+                  message = {
+                    type: "ping",
+                    id: Time.now.to_i
+                  }
+                  logger.info "Sending message: #{message}"
+                  connection.write(message.to_json)
                   
-                  logger.info "Received message: #{message}"
-                  parsed_message = JSON.parse(message) rescue nil
+                  # Read response with timeout
+                  start_time = Time.now
+                  timeout = 30  # seconds
                   
-                  if parsed_message && parsed_message['type'] == 'pong'
-                    logger.info "Received valid pong response"
-                    break
+                  # Read messages with timeout
+                  response_received = false
+                  while Time.now - start_time < timeout && !response_received
+                    message = connection.read
+                    break unless message
+                    
+                    logger.info "Received message: #{message}"
+                    parsed_message = JSON.parse(message) rescue nil
+                    
+                    if parsed_message && parsed_message['type'] == 'pong'
+                      logger.info "Received valid pong response"
+                      response_received = true
+                    end
                   end
+                  
+                  if Time.now - start_time >= timeout
+                    logger.error "Timeout waiting for response"
+                  end
+
+                  # Wait 10 seconds before sending next ping
+                  sleep 10
                 end
-                
-                if Time.now - start_time >= timeout
-                  logger.error "Timeout waiting for response"
-                end
-                
-                # connection.close
+
                 logger.info "Connection closed normally"
               end
             end

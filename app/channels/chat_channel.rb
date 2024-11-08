@@ -133,17 +133,14 @@ class ChatChannel < ApplicationCable::Channel
         uri,
         ssl_context: OpenSSL::SSL::SSLContext.new.tap do |ctx|
             ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
-            
-            # Use system certificates from macOS
-            # ctx.ca_path = '/etc/ssl/certs'  # Try this first
-            # If the above doesn't work, try these alternatives:
-            # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
-            ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
-            # ctx.ca_file = '/etc/ssl/certs/ca-certificates.crt'
-            
-            # Certificate and key setup
-            # ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
-            # ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+            if ENV['DEVELOPMENT_ENVIRONMENT'] == 'true'
+              ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+                # M2 Air : ctx.ca_file = '/etc//ssl/cert.pem'
+              ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
+              ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+            else
+              ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+            end
         end
     )
 
