@@ -104,7 +104,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_06_233246) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "wordpress_api_encoded_token"
     t.bigint "home_page_id"
     t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
