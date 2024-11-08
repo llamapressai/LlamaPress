@@ -29,12 +29,15 @@ namespace :websocket do
                     # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
 
                     # to test this command, run: rails websocket:monitor
-                    DEVELOPMENT_ENVIRONMENT = false
+                    DEVELOPMENT_ENVIRONMENT = true
                     
                     # Certificate and key setup
                       if DEVELOPMENT_ENVIRONMENT
                       #MacOS:
-                        ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+                        #ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+
+                        #Brian's Nightmare mode 
+                        ctx.ca_file = '/etc//ssl/cert.pem'
                         #run rails with ssl mode: 
                         # rails s -b 'ssl://127.0.0.1:3000?key=config/local-certs/localhost-key.pem&cert=config/local-certs/localhost.pem'
                         # to generate these, run:  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=stagingbot.llamapress.ai"
