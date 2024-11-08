@@ -2,7 +2,8 @@
 <script src="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/js/shepherd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@10.0.1/dist/css/shepherd.css"/>
 
-<% if current_user.tutorial_step == 0 %>
+<% if current_user.tutorial_step == -10 %>
+<%# disable tutorial for now, while we deploy. %>
 <script data-llama="exclude_when_saving_contenteditable_edits">
   var globalTutorialStep = '<%= current_user.tutorial_step %>'; //global variable to track the tutorial step
   globalTutorialStep = parseInt(globalTutorialStep);
