@@ -88,6 +88,8 @@ GEM
       protocol-http1 (>= 0.28.1)
       protocol-http2 (~> 0.19)
       traces (~> 0.10)
+    async-io (1.43.2)
+      async
     async-pool (0.10.1)
       async (>= 1.25)
       traces
@@ -439,6 +441,7 @@ PLATFORMS
 DEPENDENCIES
   async
   async-http
+  async-io
   async-websocket
   aws-sdk-s3
   bootsnap
