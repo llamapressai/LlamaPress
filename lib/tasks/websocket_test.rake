@@ -28,6 +28,7 @@ namespace :websocket do
                     # If the above doesn't work, try these alternatives:
                     # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
                     # ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+                    ctx.ca_file = '/etc/ssl/certs/ca-certificates.crt'
                     
                     # Certificate and key setup
                     # ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
