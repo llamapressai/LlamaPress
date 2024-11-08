@@ -27,12 +27,22 @@ namespace :websocket do
                     # ctx.ca_path = '/etc/ssl/certs'  # Try this first
                     # If the above doesn't work, try these alternatives:
                     # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
-                    # ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
-                    ctx.ca_file = '/etc/ssl/certs/ca-certificates.crt'
+
+                    DEVELOPMENT_ENVIRONMENT = true
                     
                     # Certificate and key setup
-                    # ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
-                    # ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+                      if DEVELOPMENT_ENVIRONMENT
+                      #MacOS:
+                        ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+                        #run rails with ssl mode: 
+                        # rails s -b 'ssl://127.0.0.1:3000?key=config/local-certs/localhost-key.pem&cert=config/local-certs/localhost.pem'
+                        # to generate these, run:  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=stagingbot.llamapress.ai"
+                        ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
+                        ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+                      else
+                        #Ubuntu: 
+                        ctx.ca_file = '/etc/ssl/certs/ca-certificates.crt'
+                      end
                 end
                 )
 
