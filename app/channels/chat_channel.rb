@@ -126,7 +126,7 @@ class ChatChannel < ApplicationCable::Channel
   def setup_external_websocket(connection_id)
     Thread.current[:connection_id] = connection_id
     Rails.logger.info "Setting up external websocket for connection: #{connection_id}"
-    endpoint = Async::HTTP::Endpoint.parse("#{ENV['LLAMABOT_WEBSOCKET_UPGRADE_URL']}") 
+    endpoint = Async::HTTP::Endpoint.parse(ENV['LLAMABOT_WEBSOCKET_UPGRADE_URL']) 
 
     # Initialize the connection and store it in an instance variable
     @external_ws_task = Async do |task|
