@@ -27,11 +27,11 @@ namespace :websocket do
                     # ctx.ca_path = '/etc/ssl/certs'  # Try this first
                     # If the above doesn't work, try these alternatives:
                     # ctx.ca_file = '/usr/local/etc/openssl/cert.pem'  # Homebrew OpenSSL
-                    ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
+                    # ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
                     
                     # Certificate and key setup
-                    ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
-                    ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
+                    # ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
+                    # ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
                 end
                 )
 
