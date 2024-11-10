@@ -555,7 +555,7 @@
 
     document.addEventListener('keydown', function(e) {
     // Check if Cmd+shift+L (Mac) or Ctrl+shift+L (Windows/Linux) is pressed to put content into chatbot container
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'l') {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'l') {
         e.preventDefault(); // Prevent default browser behavior
         
         //Get the current text selected by the cursor
@@ -571,15 +571,20 @@
         inSelectionMode = true;
         handleElementSelection({target: lastElementClicked, preventDefault: function() {}, stopPropagation: function() {}});
       }
-      else if (e.key == "Escape") {
+      else if (e.key == "Escape") { //toggle the chat window to open and close
         e.preventDefault();
         e.stopPropagation();
         toggleChat();
       }
-      else if (e.key == "ç") {
+      else if (e.key == "ç") { //selection mode -- this is option + c on mac
         e.preventDefault(); //prevent the ç key from being typed
         e.stopPropagation(); //prevent the ç key from being typed
         toggleSelectionMode();
+      }
+      else if ((e.metaKey || e.ctrlKey) && e.key == 's') { //save button -- this is cmd + s on mac
+        e.preventDefault(); //prevent the s key from being typed
+        e.stopPropagation(); //prevent the s key from being typed
+        saveChanges();
       }
     });
   });

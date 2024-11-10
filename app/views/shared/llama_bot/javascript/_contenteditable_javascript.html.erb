@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    window.saveChanges = saveChanges; //make this available to the core javascript file
 
     function saveSnippetChanges(element) {
         const snippetId = element.getAttribute('data-llama-snippet-id');
