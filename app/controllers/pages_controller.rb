@@ -1,4 +1,5 @@
 require 'diffy'
+require 'builder'
 
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore preview]
@@ -187,6 +188,58 @@ class PagesController < ApplicationController
       format.html { redirect_to page_path(@page), notice: "web page was successfully restored." }
       format.json { render json: { message: "web page restored successfully", page: @page }, status: :ok }
     end
+  end
+
+  def sitemap_xml
+    @pages = current_site.pages
+    
+    # Build XML using Builder
+    xml = Builder::XmlMarkup.new(indent: 2)
+    xml.instruct!
+
+    # Create urlset with necessary namespaces
+    xml.urlset(
+      'xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9',
+      'xmlns:image' => 'http://www.google.com/schemas/sitemap-image/1.1',
+      'xmlns:news' => 'http://www.google.com/schemas/sitemap-news/0.9',
+      'xmlns:video' => 'http://www.google.com/schemas/sitemap-video/1.1'
+    ) do
+      # Add home page as highest priority
+      xml.url do
+        xml.loc("https://" + current_site.slug)
+        xml.lastmod(Time.current.strftime('%Y-%m-%d'))
+        xml.changefreq('daily')
+        xml.priority(1.0)
+      end
+
+      # Add each page
+      @pages.each do |page|
+        xml.url do
+          xml.loc("https://" + current_site.slug + "/" + page.slug)
+          xml.lastmod(page.updated_at.strftime('%Y-%m-%d'))
+          xml.changefreq('weekly')
+          xml.priority(0.8)
+
+          # If page has attached images, add them
+          if page.respond_to?(:images) && page.images.attached?
+            page.images.each do |image|
+              xml.image :image do
+                xml.image :loc, url_for(image)
+                xml.image :title, image.filename.to_s
+                xml.image :caption, "Image for #{page.slug}"
+              end
+            end
+          end
+        end
+      end
+    end
+
+    # Render XML with proper content type
+    render xml: xml.target!, content_type: 'application/xml'
+  end
+
+  def robots_txt
+    render plain: "User-agent: *\nAllow: /"
   end
 
   private
