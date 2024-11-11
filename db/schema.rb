@@ -146,10 +146,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_06_233246) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.datetime "mixpanel_profile_last_set_at"
-    t.string "api_token"
     t.integer "tutorial_step", default: 0
-    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
