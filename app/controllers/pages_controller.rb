@@ -3,7 +3,7 @@ require 'builder'
 
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore preview]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt]
   skip_before_action :verify_authenticity_token, only: [:restore, :update]
 
   # GET /

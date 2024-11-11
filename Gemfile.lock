@@ -446,6 +446,7 @@ DEPENDENCIES
   aws-sdk-s3
   bootsnap
   brakeman
+  builder
   byebug
   capybara
   charlock_holmes
