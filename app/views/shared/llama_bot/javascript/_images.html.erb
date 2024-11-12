@@ -23,11 +23,18 @@
               site_slug: slug
             }),
           success: function(response) {
-          console.log("Images attached to site successfully!");
+            console.log("Images attached to site successfully!");
 
-          $('#submitButton').hide();
-          fetchImagesForSite(<%=@page&.id%>);
-          // Handle success response, e.g., show success message to user
+            $('#submitButton').hide();
+            response.images.forEach(image => {
+              const appendToBeginning = true;
+              injectImageIntoLlamaBotImageContainer(image, appendToBeginning);
+            });
+
+            //clear out upload-preview div
+            $("#upload-preview").hide()
+            $("#upload-preview").html('');
+
           },
           error: function(jqXHR, textStatus, errorThrown) {
           console.error("Error attaching images to business:", textStatus, errorThrown);
@@ -251,13 +258,13 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     let page = 1;
-    const imageContainer = document.getElementById('image-container');
+    var imageContainer = document.getElementById('image-container');
     const path = window.location.pathname;
     const segments = path.split('/');
     const slug = segments[segments.length - 1];
 
     /**
-     * Fetches images that the user previoulsy uploaded for the user to use in the page
+     * Fetches images that the user previoulsy uploaded for the user to see in the UI and drag/drop them onto the page
      */
     function fetchImagesForSite(page) {
       console.log("fetching images for page: " + page);
@@ -276,12 +283,7 @@
     .then(response => response.json())
     .then(data => {
       data.forEach(image => {
-        const imgElement = document.createElement('img');
-        imgElement.src = image.url;
-        imgElement.className = 'h-24 object-cover rounded-lg m-2';
-        imgElement.setAttribute('data-llama-editable', 'true');
-
-        imageContainer.appendChild(imgElement);
+        injectImageIntoLlamaBotImageContainer(image);
       });
     })
     .catch(error => console.error('Error fetching images:', error));
@@ -300,6 +302,25 @@
         fetchImagesForSite(page);
       }
     }
+
+    /**
+     * Takes an image (that is already uploaded to S3) and injects it into the llama bot image container so the user can select and drag/drop it onto the page.
+     * {param} appendToBeginning is used when we are attaching images that user JUST uploaded, so it shows them first.
+     *    By default, appendToBeginning is false, so images are shown in the order they were uploaded.
+     */
+    function injectImageIntoLlamaBotImageContainer(image, appendToBeginning = false) {
+      const imgElement = document.createElement('img');
+      imgElement.src = image.url;
+      imgElement.className = 'h-24 object-cover rounded-lg m-2';
+      imgElement.setAttribute('data-llama-editable', 'true');
+      
+      if (appendToBeginning) {
+        imageContainer.insertBefore(imgElement, imageContainer.firstChild);
+      } else {
+        imageContainer.appendChild(imgElement);
+      }
+    }
+    window.injectImageIntoLlamaBotImageContainer = injectImageIntoLlamaBotImageContainer; //make global
 
     /**
      * Closes the image upload window in the chat toolbar
