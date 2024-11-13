@@ -9,6 +9,7 @@ class ChatChannelTest < ActionCable::Channel::TestCase
     @page = pages(:one)
     # Mock the current_user method to return nil in test environment
     ChatChannel.any_instance.stubs(:current_user).returns(nil)
+    @chat_conversation = chat_conversations(:one)
   end
 
   def teardown
@@ -80,13 +81,60 @@ class ChatChannelTest < ActionCable::Channel::TestCase
     @channel.send(:send_to_external_application, message)
   end
 
-  test "receive_from_external_application" do
-    #TODO: create this test before implementing in ChatChannel (test driven development)
+  test "adds message to ChatMessage when sending to external application" do
+    # Subscribe to the channel
+    subscribe session_id: "test_session"
 
+    # Initial message count
+    initial_count = ChatMessage.count
+
+    # Simulate sending a message
+    message_data = {
+      "message" => "Hello AI",
+      "context" => "pages/show",
+      "webPageId" => @page.id.to_s
+    }
+
+    # Assert that a new ChatMessage is created when sending
+    assert_difference -> { ChatMessage.count }, 1 do
+      perform :receive, message_data
+    end
+
+    # Verify the created message
+    new_message = ChatMessage.last
+    assert_equal "Hello AI", new_message.content
+    assert_equal @user, new_message.user
+    assert_equal false, new_message.ai_chat_message
+    assert_not_nil new_message.chat_conversation
   end
 
-  test "adds message to ChatMessage on both sent and received" do
-    #TODO: create this test before implementing in ChatChannel (test driven development)
+  test "adds message to ChatMessage when receiving from external application" do
+    subscribe session_id: "test_session"
+    
+    # Initial message count
+    initial_count = ChatMessage.count
 
+    # Simulate receiving a message from external websocket
+    external_message = {
+      "type" => "chat_response",
+      "content" => "AI response message"
+    }.to_json
+
+    # Create a stubbed connection with Mocha
+    connection = stub('websocket_connection')
+    connection.expects(:read).returns(external_message)
+
+    # Assert that a new ChatMessage is created when receiving
+    assert_difference -> { ChatMessage.count }, 1 do
+      # Call the listen method directly with our stubbed connection
+      @channel.send(:listen_to_external_websocket, connection)
+    end
+
+    # Verify the created message
+    new_message = ChatMessage.last
+    assert_equal "AI response message", new_message.content
+    assert_equal @user, new_message.user
+    assert_equal true, new_message.ai_chat_message
+    assert_equal @chat_conversation, new_message.chat_conversation
   end
 end
