@@ -10,6 +10,7 @@ class SitesController < ApplicationController
 
   # GET /sites/1 or /sites/1.json
   def show
+    @posts = @site.pages.flat_map(&:posts)
   end
 
   # GET /sites/new
