@@ -4,10 +4,10 @@ one:
   title: MyString
   user: one
   site: one
-  uuid: MyString
+  uuid: 123e4567-e89b-12d3-a456-426614174000
 
 two:
   title: MyString
   user: two
   site: two
-  uuid: MyString
+  uuid: 123e4567-e89b-12d3-a456-426614174001

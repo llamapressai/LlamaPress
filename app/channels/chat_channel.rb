@@ -205,6 +205,8 @@ class ChatChannel < ApplicationCable::Channel
 
       # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
       formatted_message = { message: message_content }.to_json
+      
+    #   ChatMessage.create(content: message_content, user: current_user, chat_conversation: ChatConversation.last, ai_chat_message: true, created_at: Time.now)
       ActionCable.server.broadcast "chat_channel_#{params[:session_id]}", formatted_message
     end
   end
@@ -228,6 +230,8 @@ class ChatChannel < ApplicationCable::Channel
 
   # Send messages from the user to the LlamaBot Backend Socket
   def send_to_external_application(message)
+    #   ChatMessage.create(content: message_content, user: current_user, chat_conversation: ChatConversation.last, ai_chat_message: true, created_at: Time.now)
+
     payload = message.to_json
     if @external_ws_connection
       begin
