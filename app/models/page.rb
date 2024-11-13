@@ -174,6 +174,11 @@ class Page < ApplicationRecord
     current_history = page_histories.find_by(id: current_version_id)
     return current_history if current_history&.content == self.content
     
+    # If we're saving from a previous version, prune future versions
+    if current_history
+      page_histories.where('created_at > ?', current_history.created_at).destroy_all
+    end
+    
     # Create new history entry if content is different
     history = self.page_histories.create(content: self.content, user_message: user_message)
     self.update_column(:current_version_id, history.id)
