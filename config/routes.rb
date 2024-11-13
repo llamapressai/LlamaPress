@@ -6,6 +6,8 @@ Rails.application.routes.draw do
     member do
       get 'histories'
       post 'restore'
+      post :page_undo
+      post :page_redo
     end
   end
   resources :sites

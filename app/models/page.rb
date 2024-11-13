@@ -166,8 +166,18 @@ class Page < ApplicationRecord
   end
 
   def save_history(user_message = nil)
-    user_message ||= "Restore to previous version"
-    page_history = self.page_histories.create(content: self.content, user_message: user_message)
+    return unless persisted?  # Make sure the page is saved first
+    
+    user_message ||= "Save version"
+    
+    # Check if there's a previous history entry with the same content
+    current_history = page_histories.find_by(id: current_version_id)
+    return current_history if current_history&.content == self.content
+    
+    # Create new history entry if content is different
+    history = self.page_histories.create(content: self.content, user_message: user_message)
+    self.update_column(:current_version_id, history.id)
+    history
   end
 
   # Set the default html content for the web page
@@ -177,7 +187,49 @@ class Page < ApplicationRecord
     end
   end
 
+  def undo
+    return false unless current_version_id
+
+    current_history = page_histories.find(current_version_id)
+    previous_history = page_histories.where('created_at < ?', current_history.created_at)
+                                   .order(created_at: :desc)
+                                   .first
+    
+    if previous_history
+      restore_with_history(previous_history, "Undo to previous version")
+      true
+    else
+      false
+    end
+  end
+
+  def redo
+    return false unless current_version_id
+
+    current_history = page_histories.find(current_version_id)
+    next_history = page_histories.where('created_at > ?', current_history.created_at)
+                                .order(created_at: :asc)
+                                .first
+    
+    if next_history
+      restore_with_history(next_history, "Redo to next version")
+      true
+    else
+      false
+    end
+  end
+
   private
+
+  def restore_with_history(page_history, message)
+    self.content = page_history.content
+    self.current_version_id = page_history.id
+    # Use update_columns to skip callbacks and avoid creating another history entry
+    self.update_columns(
+      content: page_history.content,
+      current_version_id: page_history.id
+    )
+  end
 
   # Create a new web site for the organization
   def create_new_site
