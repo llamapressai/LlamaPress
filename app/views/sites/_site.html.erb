@@ -73,9 +73,9 @@
       <% @posts.each do |post| %>
         <%= link_to post_path(post), class: "p-6 border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800 block" do %>
           <h3 class="font-bold text-xl text-white mb-2"><%= post.title %></h3>
-          <pre class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
-            <code class="text-sm text-gray-300"><%= truncate(post.content, length: 150) %></code>
-          </pre>
+          <div class="bg-gray-700 p-4 rounded-lg">
+            <p class="text-sm text-gray-300"><%= truncate(post.summarized_content, length: 150) %></p>
+          </div>
           <p class="text-sm text-gray-400 mt-4">
             Last updated: <%= time_ago_in_words(post.updated_at) %> ago
           </p>
