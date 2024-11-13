@@ -587,6 +587,105 @@
         saveChanges();
       }
     });
+
+    // Add keyboard shortcuts for undo/redo
+    // document.addEventListener('keydown', function(e) {
+    //   if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+    //     e.preventDefault();
+    //     undoPageChange();
+    //   } else if ((e.ctrlKey && e.shiftKey && e.key === 'Z') || (e.ctrlKey && e.key === 'y')) {
+    //     e.preventDefault();
+    //     redoPageChange();
+    //   }
+    // });
+
+    function undoPageChange() {
+      let webPageId = "<%=@page&.id%>";
+      if (webPageId) {
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(`/pages/${webPageId}/page_undo`, {
+          method: 'POST',
+          headers: {
+            'X-CSRF-Token': token
+          },
+          credentials: 'same-origin'
+        })
+        .then(response => {
+          console.log('Response: ')
+          console.log(response)
+          if (!response.ok) {
+            console.log("Response Not Okay")
+            if (response.status === 404) {
+              throw new Error('Page not found');
+            }
+            
+            return response.json().then(data => {
+              console.log("ERROR throw")
+              throw new Error(data.error || 'Failed to undo change');
+            });
+          }
+          console.log("Returning response as response")
+          return response;
+        })
+        .then(data => {
+          console.log("Then ")
+          if (data.error) {
+            console.log("Showing Error notification")
+            showNotification(data.error, 'error');
+          } else {
+            location.reload();
+          }
+        })
+        .catch(error => {
+          console.log("Here --")
+          console.error('Error:', error);
+          showNotification(error.message || 'Failed to undo change', 'error');
+        });
+      } else {
+        showNotification('No page ID found', 'error');
+      }
+    }
+
+    window.undoPageChange = undoPageChange;
+
+    function redoPageChange() {
+      let webPageId = "<%=@page&.id%>";
+      if (webPageId) {
+        fetch(`/pages/${webPageId}/page_redo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error('Page not found');
+            }
+            return response.then(data => {
+              throw new Error(data.error || 'Failed to redo change');
+            });
+          }
+          return response;
+        })
+        .then(data => {
+          if (data.error) {
+            showNotification(data.error, 'error');
+          } else {
+            location.reload();
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showNotification(error.message || 'Failed to redo change', 'error');
+        });
+      } else {
+        showNotification('No page ID found', 'error');
+      }
+    }
+
+    window.redoPageChange = redoPageChange
   });
 
   document.addEventListener("DOMContentLoaded", () => {
