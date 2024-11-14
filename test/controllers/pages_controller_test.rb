@@ -187,4 +187,10 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     # assert_includes @response.body, "llamabot css"
     assert_includes @response.body, @page.content
   end
+
+  test "should get page history interlaced with chat messages" do
+    get page_histories_url(@page, format: :json)
+    assert_response :success
+    assert_equal "application/json", @response.media_type
+  end
 end

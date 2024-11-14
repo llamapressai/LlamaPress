@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  content: MyText
+  sender: 1
+  user: one
+  chat_conversation: one
+  uuid: 123e4567-e89b-12d3-a456-426614174000
+
+two:
+  content: MyText
+  sender: 1
+  user: two
+  chat_conversation: two
+  uuid: 123e4567-e89b-12d3-a456-426614174001

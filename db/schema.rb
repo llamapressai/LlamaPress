@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_12_231427) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +41,33 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_12_231427) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "chat_conversations", force: :cascade do |t|
+    t.string "title"
+    t.bigint "user_id", null: false
+    t.bigint "site_id"
+    t.bigint "page_id"
+    t.string "uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_id"], name: "index_chat_conversations_on_page_id"
+    t.index ["site_id"], name: "index_chat_conversations_on_site_id"
+    t.index ["user_id"], name: "index_chat_conversations_on_user_id"
+    t.index ["uuid"], name: "index_chat_conversations_on_uuid", unique: true
+  end
+
+  create_table "chat_messages", force: :cascade do |t|
+    t.text "content"
+    t.integer "sender"
+    t.bigint "user_id", null: false
+    t.bigint "chat_conversation_id", null: false
+    t.string "uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_conversation_id"], name: "index_chat_messages_on_chat_conversation_id"
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
+    t.index ["uuid"], name: "index_chat_messages_on_uuid", unique: true
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -106,6 +134,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_12_231427) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "wordpress_api_encoded_token"
     t.bigint "home_page_id"
     t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
@@ -148,7 +177,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_12_231427) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.string "api_token"
+    t.datetime "mixpanel_profile_last_set_at"
     t.integer "tutorial_step", default: 0
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
@@ -159,6 +191,11 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_12_231427) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "chat_conversations", "pages"
+  add_foreign_key "chat_conversations", "sites"
+  add_foreign_key "chat_conversations", "users"
+  add_foreign_key "chat_messages", "chat_conversations"
+  add_foreign_key "chat_messages", "users"
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"

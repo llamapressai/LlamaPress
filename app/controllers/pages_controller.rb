@@ -79,6 +79,8 @@ class PagesController < ApplicationController
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
+    @chat_messages = @page.chat_messages
+
     if current_user.present? && @page.organization_id == current_user.organization_id
       # Inject the chat partial
       content += inject_chat_partial(content)
@@ -154,25 +156,44 @@ class PagesController < ApplicationController
     @page_number = params[:page] || 1
     @per_page = 10
     
+    # Get both page histories and chat messages
     @page_histories = @page.page_histories
-      .order(created_at: :desc)
-      .page(@page_number)
-      .per(@per_page)
+    @chat_messages = @page.chat_messages
+    
+    # Combine and sort both types of records
+    @combined_history = (@page_histories + @chat_messages).sort_by(&:created_at).reverse
+    
+    # Manual pagination
+    start_index = (@page_number.to_i - 1) * @per_page
+    @paginated_items = @combined_history[start_index, @per_page]
+    total_items = @combined_history.length
     
     respond_to do |format|
       format.html
       format.json do
-        encoded_histories = @page_histories.map do |history|
-          history_data = history.as_json
-          history_data['content'] = Base64.strict_encode64(history.content)
-          history_data
+        encoded_items = @paginated_items.map do |item|
+          if item.is_a?(PageHistory)
+            item.as_json.merge({
+              type: 'page_history',
+              content: Base64.strict_encode64(item.content),
+            })
+          else # ChatMessage
+            {
+              type: 'chat_message',
+              id: item.id,
+              created_at: item.created_at,
+              content: item.content,
+              role: item.ai_message? ? "bot" : "user" #bot and user magic strings are used in the javascript client to determine which color & style to use for the message.
+            }
+          end
         end
+        
         render json: {
-          web_page_histories: encoded_histories,
+          history_items: encoded_items,
           meta: {
-            current_page: @page_histories.current_page,
-            total_pages: @page_histories.total_pages,
-            total_count: @page_histories.total_count,
+            current_page: @page_number.to_i,
+            total_pages: (total_items.to_f / @per_page).ceil,
+            total_count: total_items,
             per_page: @per_page
           }
         }

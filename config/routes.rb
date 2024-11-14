@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :chat_messages
+  resources :chat_conversations
   resources :posts
   resources :snippets
   resources :submissions

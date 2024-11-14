@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  user: one
+  site: one
+  uuid: 123e4567-e89b-12d3-a456-426614174000
+
+two:
+  title: MyString
+  user: two
+  site: two
+  uuid: 123e4567-e89b-12d3-a456-426614174001
