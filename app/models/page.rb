@@ -8,6 +8,8 @@ class Page < ApplicationRecord
   
   has_many :page_histories, dependent: :destroy
   has_many :posts, dependent: :nullify
+  has_many :chat_conversations, dependent: :destroy
+  has_many :chat_messages, through: :chat_conversations 
 
   friendly_id :slug, use: :slugged
 

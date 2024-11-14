@@ -7,6 +7,9 @@ class User < ApplicationRecord
 
   belongs_to :organization
   has_many :sites, through: :organization
+  
+  has_many :chat_conversations, dependent: :destroy
+  has_many :chat_messages, dependent: :destroy
 
   accepts_nested_attributes_for :organization
   after_create :notify_registration

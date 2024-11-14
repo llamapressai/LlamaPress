@@ -79,6 +79,8 @@ class PagesController < ApplicationController
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
+    @chat_messages = @page.chat_messages
+
     if current_user.present? && @page.organization_id == current_user.organization_id
       # Inject the chat partial
       content += inject_chat_partial(content)

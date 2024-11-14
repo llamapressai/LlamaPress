@@ -3,7 +3,8 @@ class CreateChatConversations < ActiveRecord::Migration[7.2]
     create_table :chat_conversations do |t|
       t.string :title
       t.references :user, null: false, foreign_key: true
-      t.references :site, null: false, foreign_key: true
+      t.references :site, null: true, foreign_key: true 
+      t.references :page, null: true, foreign_key: true 
       t.string :uuid
 
       t.timestamps

@@ -45,10 +45,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
   create_table "chat_conversations", force: :cascade do |t|
     t.string "title"
     t.bigint "user_id", null: false
-    t.bigint "site_id", null: false
+    t.bigint "site_id"
+    t.bigint "page_id"
     t.string "uuid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["page_id"], name: "index_chat_conversations_on_page_id"
     t.index ["site_id"], name: "index_chat_conversations_on_site_id"
     t.index ["user_id"], name: "index_chat_conversations_on_user_id"
     t.index ["uuid"], name: "index_chat_conversations_on_uuid", unique: true
@@ -59,12 +61,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
     t.integer "sender"
     t.bigint "user_id", null: false
     t.bigint "chat_conversation_id", null: false
-    t.bigint "site_id", null: false
     t.string "uuid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["chat_conversation_id"], name: "index_chat_messages_on_chat_conversation_id"
-    t.index ["site_id"], name: "index_chat_messages_on_site_id"
     t.index ["user_id"], name: "index_chat_messages_on_user_id"
     t.index ["uuid"], name: "index_chat_messages_on_uuid", unique: true
   end
@@ -110,6 +110,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "organization_id"
+    t.integer "current_version_id"
+    t.index ["current_version_id"], name: "index_pages_on_current_version_id"
     t.index ["site_id"], name: "index_pages_on_site_id"
   end
 
@@ -174,8 +176,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.datetime "mixpanel_profile_last_set_at"
     t.string "api_token"
+    t.datetime "mixpanel_profile_last_set_at"
     t.integer "tutorial_step", default: 0
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
@@ -188,10 +190,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "chat_conversations", "pages"
   add_foreign_key "chat_conversations", "sites"
   add_foreign_key "chat_conversations", "users"
   add_foreign_key "chat_messages", "chat_conversations"
-  add_foreign_key "chat_messages", "sites"
   add_foreign_key "chat_messages", "users"
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify

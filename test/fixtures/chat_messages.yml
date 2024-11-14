@@ -5,7 +5,6 @@ one:
   sender: 1
   user: one
   chat_conversation: one
-  site: one
   uuid: 123e4567-e89b-12d3-a456-426614174000
 
 two:
@@ -13,5 +12,4 @@ two:
   sender: 1
   user: two
   chat_conversation: two
-  site: two
   uuid: 123e4567-e89b-12d3-a456-426614174001

@@ -3,7 +3,7 @@ class ChatMessagesController < ApplicationController
 
   # GET /chat_messages or /chat_messages.json
   def index
-    @chat_messages = ChatMessage.all
+    @chat_messages = current_user.chat_messages.all
   end
 
   # GET /chat_messages/1 or /chat_messages/1.json
@@ -65,6 +65,6 @@ class ChatMessagesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def chat_message_params
-      params.require(:chat_message).permit(:content, :sender, :user_id, :chat_conversation_id, :site_id, :uuid)
+      params.require(:chat_message).permit(:content, :sender, :user_id, :chat_conversation_id, :uuid)
     end
 end

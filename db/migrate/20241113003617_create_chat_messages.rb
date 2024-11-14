@@ -5,7 +5,6 @@ class CreateChatMessages < ActiveRecord::Migration[7.2]
       t.integer :sender
       t.references :user, null: false, foreign_key: true
       t.references :chat_conversation, null: false, foreign_key: true
-      t.references :site, null: false, foreign_key: true
       t.string :uuid
 
       t.timestamps

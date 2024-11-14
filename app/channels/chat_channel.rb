@@ -116,6 +116,16 @@ class ChatChannel < ApplicationCable::Channel
     
     # Fetch the contents of the file or webpage that user is currently editing
     data["file_contents"] = fetch_file_contents(data["context"], data["webPageId"])
+
+    message = data["message"]
+
+    #In this case, conversation short-term memory belongs to a page
+    chat_conversation = ChatConversation.find_by(page_id: data["webPageId"])
+    if chat_conversation.nil?
+        chat_conversation = ChatConversation.create(page_id: data["webPageId"], user: current_user)
+    end
+
+    chat_message = ChatMessage.create(content: message, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:human_message], created_at: Time.now)
     
     # Forward the processed data to the LlamaBot Backend Socket
     send_to_external_application(data)
@@ -128,17 +138,23 @@ class ChatChannel < ApplicationCable::Channel
     Rails.logger.info "Setting up external websocket for connection: #{connection_id}"
     # endpoint = Async::HTTP::Endpoint.parse(ENV['LLAMABOT_WEBSOCKET_URL']) 
     uri = URI(ENV['LLAMABOT_WEBSOCKET_URL'])
+    
     uri.scheme = 'wss'
+    uri.scheme = 'ws' if ENV['DEVELOPMENT_ENVIRONMENT'] == 'true'
+
     endpoint = Async::HTTP::Endpoint.new(
         uri,
         ssl_context: OpenSSL::SSL::SSLContext.new.tap do |ctx|
             ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
-            if ENV['DEVELOPMENT_ENVIRONMENT'] == 'true'
+            if ENV["STAGING_ENVIRONMENT"] == 'true'
               ctx.ca_file = '/usr/local/etc/ca-certificates/cert.pem'
-                # M2 Air : ctx.ca_file = '/etc//ssl/cert.pem'
+              # M2 Air : ctx.ca_file = '/etc//ssl/cert.pem'
               ctx.cert = OpenSSL::X509::Certificate.new(File.read(File.expand_path('~/.ssl/llamapress/cert.pem')))
               ctx.key = OpenSSL::PKey::RSA.new(File.read(File.expand_path('~/.ssl/llamapress/key.pem')))
-            else
+            elsif ENV['DEVELOPMENT_ENVIRONMENT'] == 'true'
+              # do no ctx stuff
+              ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE   
+            else  # production
               ctx.ca_file ='/etc/ssl/certs/ca-certificates.crt'
             end
         end
@@ -188,6 +204,23 @@ class ChatChannel < ApplicationCable::Channel
       begin
         parsed_message = JSON.parse(message_content)
         case parsed_message["type"]
+        when "system_message"
+          Rails.logger.info "---------Received system_message message!----------"
+          response = parsed_message['content']
+          Rails.logger.info "---------------------> Response: #{response}"
+
+          # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
+          formatted_message = { message: message_content }.to_json
+          
+
+          #Get the last chat conversation for this page and save this message to it
+          chat_conversation = ChatConversation.find_by(page_id: parsed_message["page_id"])
+          if chat_conversation.nil?
+            chat_conversation = ChatConversation.create(page_id: parsed_message["page_id"], user: current_user)
+          end
+          chat_message = ChatMessage.create(content: response, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:ai_message], created_at: Time.now)
+
+          Rails.logger.info "--------Completed system_message message!----------"
         when "write_code"
           Rails.logger.info "---------Received write_code message!----------"
           response = parsed_message['content']
@@ -202,11 +235,6 @@ class ChatChannel < ApplicationCable::Channel
       rescue JSON::ParserError => e
         Rails.logger.error "Failed to parse message as JSON: #{e.message}"
       end
-
-      # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
-      formatted_message = { message: message_content }.to_json
-      
-    #   ChatMessage.create(content: message_content, user: current_user, chat_conversation: ChatConversation.last, ai_chat_message: true, created_at: Time.now)
       ActionCable.server.broadcast "chat_channel_#{params[:session_id]}", formatted_message
     end
   end

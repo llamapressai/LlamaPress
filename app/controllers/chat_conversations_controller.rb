@@ -3,7 +3,7 @@ class ChatConversationsController < ApplicationController
 
   # GET /chat_conversations or /chat_conversations.json
   def index
-    @chat_conversations = ChatConversation.all
+    @chat_conversations = current_user.chat_conversations.all
   end
 
   # GET /chat_conversations/1 or /chat_conversations/1.json
@@ -65,6 +65,6 @@ class ChatConversationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def chat_conversation_params
-      params.require(:chat_conversation).permit(:title, :user_id, :site_id, :uuid)
+      params.require(:chat_conversation).permit(:title, :user_id, :site_id, :page_id, :uuid)
     end
 end

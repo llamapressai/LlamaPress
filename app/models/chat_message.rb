@@ -1,11 +1,10 @@
 class ChatMessage < ApplicationRecord
-  before_create :assign_uuid
+  before_validation :assign_uuid, on: :create
   
   enum sender: { human_message: 0, ai_message: 1 }
   
   belongs_to :user
   belongs_to :chat_conversation
-  belongs_to :site
   
   validates :content, presence: true
   validates :sender, presence: true
