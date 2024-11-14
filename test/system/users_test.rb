@@ -21,6 +21,6 @@ class UsersTest < ApplicationSystemTestCase
     fill_in "Email", with: @user.email
     fill_in "Password", with: "1234567890"
     click_on "Log in"
-    assert_text "What do you want to change?"
+    assert_text "Signed in successfully"
   end
 end

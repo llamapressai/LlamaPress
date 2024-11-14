@@ -50,16 +50,25 @@ class SitesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get current_site from application controller" do
-    # Create a web site with a known slug. (Rails defaults to example.com in it's test setup for requests)
+    # Clear any existing OVERRIDE_DOMAIN setting
+    ENV.delete("OVERRIDE_DOMAIN")
+    
+    # Create a web site with a known slug
     site = Site.create!(name: "Test Site", slug: "example.com", organization: organizations(:one))
 
-    users(:one).default_site = site # set this new site as the default site for this user
+    users(:one).default_site = site
     users(:one).save
+    
+    # Set the host explicitly for this request
+    host! "example.com"
         
-    # Make a request to any action in the controller to see if current_site is set correctly
+    # Make a request to any action in the controller
     get sites_url
-
+    
     # Assert that the current_site is set correctly
     assert_equal site, @controller.current_site
+  ensure
+    # Clean up environment
+    ENV.delete("OVERRIDE_DOMAIN")
   end
 end
