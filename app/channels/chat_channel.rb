@@ -125,6 +125,13 @@ class ChatChannel < ApplicationCable::Channel
         chat_conversation = ChatConversation.create(page_id: data["webPageId"], user: current_user)
     end
 
+    data["previous_messages"] = chat_conversation.chat_messages.map do |msg|
+      {
+        "role" => msg.ai_message? ? "assistant" : "user",
+        "content" => msg.content
+      }
+    end
+
     chat_message = ChatMessage.create(content: message, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:human_message], created_at: Time.now)
     
     # Forward the processed data to the LlamaBot Backend Socket
