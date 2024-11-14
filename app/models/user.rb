@@ -28,7 +28,8 @@ class User < ApplicationRecord
 
   # Determines if the user needs to still go through the tutorial.
   def needs_tutorial?
-    return self.tutorial_step >= 0 && self.tutorial_step <= 10 #if tutorial step < 0, then user opted out. If tutorial step > 10, then user has completed the tutorial.
+    return false #disable the tutorial for now.
+    #return self.tutorial_step >= 0 && self.tutorial_step <= 10 #if tutorial step < 0, then user opted out. If tutorial step > 10, then user has completed the tutorial.
   end
 
   # This is the path that the user will be redirected to based on the tutorial step they're on.
