@@ -2,9 +2,9 @@ require 'diffy'
 require 'builder'
 
 class PagesController < ApplicationController
-  before_action :set_page, only: %i[ show edit update destroy restore preview]
+  before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt]
-  skip_before_action :verify_authenticity_token, only: [:restore, :update]
+  skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
   # GET /
   # Find and render the root page depending on the domain.
@@ -263,11 +263,43 @@ class PagesController < ApplicationController
     render plain: "User-agent: *\nAllow: /"
   end
 
+  def page_undo
+    success = @page.undo
+    
+    respond_to do |format|
+      if success
+        format.html { redirect_to @page, notice: 'Successfully undid last change.' }
+        format.json { render json: { message: 'Successfully undid last change', page: @page }, status: :ok }
+      else
+        format.html { redirect_to @page, alert: 'No more changes to undo.' }
+        format.json { render json: { error: 'No more changes to undo' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def page_redo
+    success = @page.redo
+    
+    respond_to do |format|
+      if success
+        format.html { redirect_to @page, notice: 'Successfully redid last change.' }
+        format.json { render json: { message: 'Successfully redid last change', page: @page }, status: :ok }
+      else
+        format.html { redirect_to @page, alert: 'No more changes to redo.' }
+        format.json { render json: { error: 'No more changes to redo' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page
-      @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
-      # @page = current_user.organization.pages.friendly.find(params[:id]) || Page.find(params[:id])
+      @page = current_user.organization.pages.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      respond_to do |format|
+        format.html { redirect_to pages_path, alert: 'Page not found.' }
+        format.json { render json: { error: 'Page not found' }, status: :not_found }
+      end
     end
 
     def set_site

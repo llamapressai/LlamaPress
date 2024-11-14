@@ -13,4 +13,9 @@ class Post < ApplicationRecord
     content_with_post = content.present? ? content.gsub("{{post}}", post_content) : post_content
     return content_with_post
   end
+
+  def summarized_content
+    content = self.content
+    return content.present? ? content.gsub(/<[^>]*>/, '').squish : content
+  end
 end

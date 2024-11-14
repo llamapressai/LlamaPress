@@ -4,7 +4,9 @@
   <div class="absolute right-0 top-6 -mr-16 flex flex-col items-end">
     <!-- Main hover trigger button -->
     <button id="llama-menu-trigger" class="bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
-      <i class="fas fa-bars text-purple-400 group-hover:text-purple-300"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-purple-400 group-hover:text-purple-300">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
       <span class="text-xs text-purple-400 group-hover:text-purple-300">Menu</span>
     </button>
 
@@ -14,6 +16,18 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-llama="app/views/shared/_chat.html.erb"></path>
       </svg>
       <span class="text-xs mt-1 text-purple-400"> Select </span>
+    </button>
+    <button id="undo" onclick="undoPageChange()" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 group-hover:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6-6m-6 6l6 6"/>
+      </svg>
+      <span class="text-xs mt-1 text-purple-400">Undo</span>
+    </button>
+    <button id="redo" onclick="redoPageChange()" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400 group-hover:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2M21 10l-6-6m6 6l-6 6"/>
+      </svg>
+      <span class="text-xs mt-1 text-purple-400">Redo</span>
     </button>
     <button onclick="window.location.href='<%= edit_page_path(@page.id) %>'" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 relative z-20">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 20px;">
@@ -187,6 +201,9 @@
           });
         });
       });
+
+
+ 
     </script>
 
     <hr class="my-2"/>

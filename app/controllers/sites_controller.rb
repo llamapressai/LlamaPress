@@ -10,6 +10,7 @@ class SitesController < ApplicationController
 
   # GET /sites/1 or /sites/1.json
   def show
+    @posts = @site.pages.flat_map(&:posts)
   end
 
   # GET /sites/new
@@ -98,15 +99,30 @@ class SitesController < ApplicationController
     else
       render json: { error: "No site slug provided" }, status: 400
     end
+    
+    attached_images = []
 
     if params[:image_blob_ids].present?
       params[:image_blob_ids].each do |blob_id|
-        blob = ActiveStorage::Blob.find_signed(blob_id)
-        @site = @site || current_site
-        @site.images.attach(blob.signed_id) if blob
+        if blob = ActiveStorage::Blob.find_signed(blob_id)
+          @site = @site || current_site
+          @site.images.attach(blob.signed_id)
+          # Get the most recently attached image
+          attached_images << @site.images.last
+        end
       end
-  
-      render json: { message: "Images attached to stie successfully" }, status: 200
+      
+      #Send image data back to the client so we can display them in the UI
+      images_json = attached_images.compact.map { |img|
+        {
+          attachment_id: img.id,
+          blob_id: img.blob_id,
+          url: img.service.send(:object_for, img.key).public_url,
+          image: @site.extract_image_data(img)
+        }
+      }
+
+      render json: { message: "Images attached to site successfully", images: images_json }, status: 200
     else
       render json: { error: "No image blob IDs provided" }, status: 400
     end
@@ -132,7 +148,7 @@ class SitesController < ApplicationController
       @page = current_user.organization.pages.find_by(slug: slug) || current_user.organization.pages.find(slug)
       @site = @page.site || current_site
       @images = @site.images.order(created_at: :desc).offset(offset).limit(per_page)
-      render json: @images.map { |img|
+      json_response = @images.map { |img|
           {
             attachment_id: img.id,
             blob_id: img.blob_id,
@@ -140,6 +156,7 @@ class SitesController < ApplicationController
             image: @site.extract_image_data(img)
           }
       }
+      render json: json_response
     else
       render json: { error: "No site slug provided" }, status: 400
     end
