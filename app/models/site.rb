@@ -3,6 +3,7 @@ class Site < ApplicationRecord
   has_many :pages, dependent: :destroy
   has_one :home_page, class_name: "Page", primary_key: "home_page_id", foreign_key: "id"
 
+  has_many :chat_conversations, dependent: :destroy
   has_many :submissions, dependent: :destroy
   has_many :snippets, dependent: :destroy
   has_many_attached :images
