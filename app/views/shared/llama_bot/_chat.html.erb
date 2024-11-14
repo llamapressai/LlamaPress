@@ -120,15 +120,15 @@
       id="chatbotMessages"
       class="flex-grow overflow-y-auto p-4 text-black"
       data-llama="app/views/shared/_chat.html.erb">
-      <% if !@chat_messages.empty? %>
-        <% @chat_messages.each do |chat_message| %>
-            <div class="<%= chat_message.ai_message? ? 'mb-2 p-2 rounded bg-blue-100 self-start' : 'mb-2 p-2 rounded bg-green-100 self-end' %>">
+      <%# if !@chat_messages.empty? %>
+        <%# @chat_messages.each do |chat_message| %>
+            <!--<div class="<%#= chat_message.ai_message? ? 'mb-2 p-2 rounded bg-blue-100 self-start' : 'mb-2 p-2 rounded bg-green-100 self-end' %>">
               <p data-llama="app/views/shared/_chat.html.erb exclude_when_saving_contenteditable_edits">
-                <%= chat_message.content %>
-              </p>
-            </div>
-        <% end %>
-      <% end %>      
+                <%#= chat_message.content %>-->
+<!--              </p>
+            </div>-->
+        <%# end %>
+      <%# end %>      
       <!-- Messages and history will be here -->
     </div>
 
