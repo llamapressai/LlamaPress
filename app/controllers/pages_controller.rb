@@ -294,7 +294,7 @@ class PagesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page
-      @page = current_user.organization.pages.find(params[:id])
+    @page = Page.friendly.find(params[:id]) || Page.find(params[:id])
     rescue ActiveRecord::RecordNotFound
       respond_to do |format|
         format.html { redirect_to pages_path, alert: 'Page not found.' }
