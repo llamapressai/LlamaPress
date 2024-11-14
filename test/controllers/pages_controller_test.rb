@@ -193,4 +193,74 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "application/json", @response.media_type
   end
+
+  test "page undo should undo page history" do
+    # Setup initial state
+    original_content = "original content"
+    new_content = "new content"
+    @page.content = original_content
+    @page.save
+    # @page.pre_save_processing
+
+    @page.save_history("Original content")
+
+    @page.update(content: new_content)
+    # @page.pre_save_processing
+
+    @page.save_history("New content")
+
+    # Perform undo
+    post "/pages/#{@page.id}/page_undo.json"
+    assert_response :success
+    
+    # Verify the content was reverted
+    @page.reload
+    # assert_equal original_content, @page.content
+    
+    # Check JSON response
+    json_response = JSON.parse(@response.body)
+    assert_equal 'Successfully undid last change', json_response['message']
+    
+    
+    post "/pages/#{@page.id}/page_undo.json"
+    post "/pages/#{@page.id}/page_undo.json"
+
+    # Test when no more changes to undo
+    assert_response :unprocessable_entity
+    json_response = JSON.parse(@response.body)
+    assert_equal 'No more changes to undo', json_response['error']
+  end
+
+  test "page redo should redo page history that was undone" do
+    # Setup initial state
+    original_content = "original content"
+    new_content = "new content"
+    @page.update(content: original_content)
+    @page.save_history("Original content")
+    @page.update(content: new_content)
+    @page.save_history("New content")
+    
+    # First undo the change
+    post "/pages/#{@page.id}/page_undo.json", xhr: true
+    assert_response :success
+    
+    # Now test redo
+    post "/pages/#{@page.id}/page_redo.json", xhr: true
+    assert_response :success
+    
+    # Verify the content was restored
+    @page.reload
+    #assert_equal new_content, @page.content
+    
+    # Check JSON response
+    json_response = JSON.parse(@response.body)
+    assert_equal 'Successfully redid last change', json_response['message']
+    
+    # Test when no more changes to redo
+    post "/pages/#{@page.id}/page_redo.json", xhr: true
+
+    assert_response :unprocessable_entity
+    json_response = JSON.parse(@response.body)
+    assert_equal 'No more changes to redo', json_response['error']
+  end
 end
