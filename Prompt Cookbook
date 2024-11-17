@@ -165,3 +165,22 @@ how to cover water stains on ceiling,  wet spot on ceiling, how to remove water 
 roof layers diagram, 
 
 anatomy of a roof
+
+
+
+
+___ Fill in Navbar, Footer, and CTA Actions with Sitemap.xml Prompt ___
+
+** This works when you're looking at a page with the navbar, footer, and CTA and all the a href link tags are not set properly. **
+
+Please update every <a href> </a> tag in this page, to use the following Sitemap.xml and match it to the correct URL. 
+
+Here is the sitemap.xml: 
+```page-sitemap.xml
+https://bhexteriordesign.com/	0
+https://bhexteriordesign.com/about/
+https://bhexteriordesign.com/contact/
+https://bhexteriordesign.com/exterior-rendering/
+https://bhexteriordesign.com/exterior-renovation-services/
+https://bhexteriordesign.com/faq/
+```
