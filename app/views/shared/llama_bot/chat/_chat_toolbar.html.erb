@@ -36,20 +36,24 @@
     </div>
 
     <div id="promptsContainer" class="llama-chat-toolbar-window py-4 bg-gray-50">
-        <div class="text-sm font-medium text-gray-600 mb-3 ml-4">
-            Prompt Ideas:
-        </div>
         <div class="overflow-x-auto">
-            <div id="promptsList" class="inline-flex space-x-3 px-4">  <!-- TODO: Eventually we'll allow the user to have their own prompt library for prompts they commonly use -->
-                <div data-llama-prompt="Improve this design 10x. Make it beautiful, modern, and use font awesome icons and aos animations." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-                    💡 Improve design 10X
+            <div id="promptsList" class="flex justify-between items-center px-2">
+                <div class="inline-flex space-x-2">
+                    <div data-llama-prompt="Fill this out and improve design 10x. Make more content and fill it out so it feels like a real website, including things that modern websites have. Make it modern, include icons, pictures, CTA buttons, and anything else to make the design better for the user." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-2 py-1 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 truncate" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))" style="max-width: 150px;">
+                        💡 Improve 10X
+                    </div>
+                    <!--<div data-llama-prompt="Please add a cool fall animation overlay to this page with falling leaf and pumpkin emojis using css keyframe animations" class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-2 py-1 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200 truncate" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))" style="max-width: 150px;">
+                        🎃 Add Halloween animation
+                    </div>-->
+                    <div data-llama-prompt="Optimize this for a mobile device, as well as desktop, with tailwind css. Ensure responsive design" class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-2 py-1 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200 truncate" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))" style="max-width: 150px;">
+                        📱 Optimize for Mobile
+                    </div>
                 </div>
-                <div data-llama-prompt="Please add a cool fall animation overlay to this page with falling leaf and pumpkin emojis using css keyframe animations" class="prompt-bubble bg-orange-100 text-orange-800 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-orange-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-                    🎃 Add Halloween animation
-                </div>
-                <div data-llama-prompt="Optimize this page for mobile devices with tailwind css. Ensure responsive design, improve load times, and enhance touch interactions." class="prompt-bubble bg-white text-gray-700 text-xs rounded-full px-4 py-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200" onclick="insertPrompt(this.getAttribute('data-llama-prompt'))">
-                    Optimize for mobile
-                </div>
+                <button id="closePromptsContainer" class="text-red-500 hover:text-red-700" onclick="togglePromptsContainer()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
