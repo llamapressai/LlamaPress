@@ -1,5 +1,6 @@
+
 <div id="llama-chat-toolbar">
-    <div id="imagesForUserToSelect" class="llama-chat-toolbar-window flex-grow overflow-y-auto p-6 border border-gray-200 rounded-xl shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2 relative">
+    <div id="imagesForUserToSelect" class="llama-chat-toolbar-window flex-grow overflow-y-auto p-6 md:p-4 sm:p-2 border border-gray-200 rounded-xl md:rounded-lg sm:rounded-md shadow-lg bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 mt-2 relative">
         <!-- Add close button -->
         <button onclick="closeImageUploadWindow()" class="absolute top-2 right-2 text-red-500 hover:text-red-700 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -14,7 +15,7 @@
         </p>
 
         <div class="upload flex flex-col items-center space-y-4">
-            <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
+            <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 md:py-2 md:px-4 sm:py-2 sm:px-4 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
                 <span id="file_name_show" class="text-xl">Upload your images</span>
             </label>
             <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="image/*, application/pdf" multiple onchange="get_file_name(this)">
@@ -216,3 +217,4 @@
             <% end %>
         </div>
     </div> <!-- TODO: does this div line up right? We need to make sure our divs are lined up properly across all our chat partials. -->
+</div>
