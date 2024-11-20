@@ -139,9 +139,23 @@ class ElementInspector {
       this.tooltip.style.display = 'block';
       this.tooltip.style.left = `${e.clientX + 15}px`;
       this.tooltip.style.top = `${e.clientY + 15}px`;
+      
+      const classesHtml = target.classList.length 
+        ? Array.from(target.classList)
+            .map(className => `
+              <label style="display: inline-block; margin-right: 8px;">
+                <input type="checkbox" 
+                       checked 
+                       onchange="toggleClass('${className}', this.checked, '${target.dataset.elementId || ''}')" 
+                       class="class-toggle"
+                > ${className}
+              </label>
+            `).join('')
+        : 'none';
+
       this.tooltip.innerHTML = `
         <div>Element: ${target.tagName.toLowerCase()}</div>
-        <div>Classes: ${target.classList.length ? Array.from(target.classList).join(' ') : 'none'}</div>
+        <div>Classes: ${classesHtml}</div>
         <div>Size: ${Math.round(rect.width)}px × ${Math.round(rect.height)}px</div>
         <div>Margin: ${margin.top} ${margin.right} ${margin.bottom} ${margin.left}</div>
         <div>Padding: ${padding.top} ${padding.right} ${padding.bottom} ${padding.left}</div>
@@ -228,6 +242,17 @@ class ElementInspector {
     this.marginOverlays.forEach(overlay => overlay.style.display = 'none');
     this.paddingOverlays.forEach(overlay => overlay.style.display = 'none');
   }
+
+  toggleClass(className, isChecked, elementId) {
+    const target = document.querySelector(`[data-element-id="${elementId}"]`);
+    if (target) {
+        if (isChecked) {
+            target.classList.add(className);
+        } else {
+            target.classList.remove(className);
+        }
+    }
+  }  
 
   updateOverlays(rect, computedStyle) {
     // Update main element overlay (blue)
