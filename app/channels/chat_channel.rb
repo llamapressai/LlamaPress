@@ -232,7 +232,8 @@ class ChatChannel < ApplicationCable::Channel
           Rails.logger.info "---------Received write_code message!----------"
           response = parsed_message['content']
           Rails.logger.info "---------------------> Response: #{response}"
-          handle_write_code(response)
+          result = handle_write_code(response)
+          formatted_message = { message: message_content }.to_json
           Rails.logger.info "--------Completed write_code message!----------"
           # Add any additional handling for write_code messages here
         when "pong"
