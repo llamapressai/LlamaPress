@@ -148,28 +148,59 @@ class ElementInspector {
 
       // Update lines
       const linePositions = [
-        { // Top
+        // Top Left Corner
+        { // Vertical line up
           left: rect.left,
           top: 0,
           width: '1px',
           height: `${rect.top}px`
         },
-        { // Right
+        { // Horizontal line left
+          left: 0,
+          top: rect.top,
+          width: `${rect.left}px`,
+          height: '1px'
+        },
+        
+        // Top Right Corner
+        { // Vertical line up
+          left: rect.right,
+          top: 0,
+          width: '1px',
+          height: `${rect.top}px`
+        },
+        { // Horizontal line right
           left: rect.right,
           top: rect.top,
           width: `${window.innerWidth - rect.right}px`,
           height: '1px'
         },
-        { // Bottom
+
+        // Bottom Left Corner
+        { // Vertical line down
           left: rect.left,
           top: rect.bottom,
           width: '1px',
           height: `${window.innerHeight - rect.bottom}px`
         },
-        { // Left
+        { // Horizontal line left
           left: 0,
-          top: rect.top,
+          top: rect.bottom,
           width: `${rect.left}px`,
+          height: '1px'
+        },
+
+        // Bottom Right Corner
+        { // Vertical line down
+          left: rect.right,
+          top: rect.bottom,
+          width: '1px',
+          height: `${window.innerHeight - rect.bottom}px`
+        },
+        { // Horizontal line right
+          left: rect.right,
+          top: rect.bottom,
+          width: `${window.innerWidth - rect.right}px`,
           height: '1px'
         }
       ];
@@ -181,7 +212,6 @@ class ElementInspector {
         line.style.top = `${pos.top}px`;
         line.style.width = pos.width;
         line.style.height = pos.height;
-        //debugger;
       });
     });
 
