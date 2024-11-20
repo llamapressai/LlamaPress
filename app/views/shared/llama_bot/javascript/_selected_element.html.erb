@@ -12,15 +12,17 @@
     }
 
     .inspector-overlay-margin {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
         background-color: rgba(255, 215, 0, 0.4); /* Gold color with opacity */
-        box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); /* Bright gold shadow */
-        outline: 3px dashed #FFD700; /* Gold dashed outline */
     }
 
     .inspector-overlay-padding {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
         background-color: rgba(0, 128, 0, 0.4); /* Dark green color with opacity */
-        box-shadow: 0 0 12px rgba(0, 128, 0, 0.8); /* Bright green shadow */
-        outline: 3px dashed #008000; /* Dark green dashed outline */
     }
 
     .inspector-line {
@@ -50,6 +52,8 @@ class ElementInspector {
   constructor() {
     this.isActive = false;
     this.overlay = this.createOverlay();
+    this.marginOverlay = this.createMarginOverlay();
+    this.paddingOverlay = this.createPaddingOverlay();
     this.tooltip = this.createTooltip();
     this.lines = this.createLines();
     this.init();
@@ -58,6 +62,20 @@ class ElementInspector {
   createOverlay() {
     const overlay = document.createElement('div');
     overlay.className = 'inspector-overlay';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  createMarginOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'inspector-overlay-margin';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  createPaddingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'inspector-overlay-padding';
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -105,6 +123,20 @@ class ElementInspector {
       this.overlay.style.top = `${rect.top}px`;
       this.overlay.style.width = `${rect.width}px`;
       this.overlay.style.height = `${rect.height}px`;
+
+      // Update margin overlay
+      this.marginOverlay.style.display = 'block';
+      this.marginOverlay.style.left = `${rect.left - parseFloat(computedStyle.marginLeft)}px`;
+      this.marginOverlay.style.top = `${rect.top - parseFloat(computedStyle.marginTop)}px`;
+      this.marginOverlay.style.width = `${rect.width + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight)}px`;
+      this.marginOverlay.style.height = `${rect.height + parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom)}px`;
+
+      // Update padding overlay
+      this.paddingOverlay.style.display = 'block';
+      this.paddingOverlay.style.left = `${rect.left + parseFloat(computedStyle.paddingLeft)}px`;
+      this.paddingOverlay.style.top = `${rect.top + parseFloat(computedStyle.paddingTop)}px`;
+      this.paddingOverlay.style.width = `${rect.width - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight)}px`;
+      this.paddingOverlay.style.height = `${rect.height - parseFloat(computedStyle.paddingTop) - parseFloat(computedStyle.paddingBottom)}px`;
 
       // Update tooltip
       const margin = {
