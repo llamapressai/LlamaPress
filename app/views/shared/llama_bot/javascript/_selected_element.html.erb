@@ -31,14 +31,15 @@
 
     .llama-inspector-tooltip {
     position: fixed;
-    pointer-events: none;
     z-index: 10000;
     background-color: #1a202c;
     color: white;
-    padding: 8px;
-    border-radius: 4px;
+    padding: 12px;
+    border-radius: 6px;
     font-size: 12px;
-    display: none;
+    min-width: 200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    pointer-events: auto; /* Allow interactions */
     }
 
     .llama-inspector-dimensions {
@@ -214,19 +215,50 @@ class ElementInspector {
       const classesHtml = target.classList.length 
         ? Array.from(target.classList)
             .map(className => `
-              <label style="display: inline-block; margin-right: 8px;">
-                <input type="checkbox" 
-                       checked 
-                       onchange="toggleClass('${className}', this.checked, '${target.dataset.elementId || ''}')" 
-                       class="class-toggle"
-                > ${className}
-              </label>
+              <div class="class-item" style="margin-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" 
+                         checked 
+                         onchange="toggleClass('${className}', this.checked, '${target.dataset.elementId || ''}')" 
+                         class="class-toggle"
+                         style="margin: 0;"
+                  >
+                  <span>${className}</span>
+                </label>
+              </div>
             `).join('')
-        : 'none';
+        : '<div style="font-style: italic; color: #666;">No classes</div>';
 
       this.tooltip.innerHTML = `
-        <div>${target.tagName.toLowerCase()}</div>
-        <div>Classes: ${classesHtml}</div>
+        <div style="border-bottom: 1px solid #374151; padding-bottom: 8px; margin-bottom: 8px;">
+          <strong>${target.tagName.toLowerCase()}</strong>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <div style="margin-bottom: 8px; color: #9CA3AF;">Classes:</div>
+          <div style="max-height: 150px; overflow-y: auto;">
+            ${classesHtml}
+          </div>
+        </div>
+        <div style="border-top: 1px solid #374151; padding-top: 8px;">
+          <input type="text" 
+                 placeholder="Add new class..." 
+                 class="llama-class-input"
+                 style="width: 100%; 
+                        padding: 6px;
+                        border-radius: 4px;
+                        border: 1px solid #4B5563;
+                        background: #2D3748;
+                        color: white;
+                        font-size: 12px;"
+                 onkeydown="if(event.key === 'Enter') { 
+                   const target = document.querySelector('[data-element-id=\\'${target.dataset.elementId || ''}\\']');
+                   if(target) { 
+                     target.classList.add(this.value);
+                     this.value = '';
+                   }
+                 }"
+          >
+        </div>
       `;
 
       // Update lines
@@ -497,5 +529,4 @@ class ElementInspector {
 // Initialize the inspector
 const llamaElementInspector = new ElementInspector();
 window.llamaElementInspector = llamaElementInspector;
-
 </script>
