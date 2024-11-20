@@ -30,16 +30,18 @@
     }
 
     .llama-inspector-tooltip {
-    position: fixed;
-    z-index: 10000;
-    background-color: #1a202c;
-    color: white;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    min-width: 200px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    pointer-events: auto; /* Allow interactions */
+        position: fixed;
+        z-index: 10000;
+        background-color: white;
+        color: #1a1a1a;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 14px;
+        min-width: 300px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        pointer-events: auto;
+        transition: all 0.3s ease-in-out;
     }
 
     .llama-inspector-dimensions {
@@ -80,6 +82,18 @@
 </style>
 <script data-llama="exclude_when_saving_contenteditable_edits">
   console.log("selected_element.html.erb");
+
+// Add this before the ElementInspector class definition
+window.llamaInspectorToggleClass = function(className, isChecked, llamaId) {
+  const target = document.querySelector(`[data-llama-id="${llamaId}"]`);
+  if (target) {
+    if (isChecked) {
+      target.classList.add(className);
+    } else {
+      target.classList.remove(className);
+    }
+  }
+};
 
 // script.js
 class ElementInspector {
@@ -126,6 +140,34 @@ class ElementInspector {
   createTooltip() {
     const tooltip = document.createElement('div');
     tooltip.className = 'llama-inspector-tooltip';
+    
+    // Create header banner
+    const header = document.createElement('div');
+    header.className = 'bg-gradient-to-r from-blue-600 to-blue-500 text-white p-2 flex justify-between items-center shadow-md rounded-t-md -mt-3 -mx-3 mb-2';
+    
+    // Add title
+    const title = document.createElement('span');
+    title.className = 'font-semibold text-lg';
+    title.textContent = 'LlamaBot';
+    
+    // Add close button
+    const closeButton = document.createElement('button');
+    closeButton.className = 'text-2xl hover:text-blue-200 transition-colors duration-200';
+    closeButton.innerHTML = '×';
+    closeButton.onclick = () => {
+      tooltip.style.display = 'none';
+      this.hideAll();
+    };
+    
+    this.toggleInspector(false);
+    
+    // Assemble header
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    
+    // Add header to tooltip
+    tooltip.appendChild(header);
+    
     document.body.appendChild(tooltip);
     return tooltip;
   }
@@ -176,7 +218,7 @@ class ElementInspector {
       document.body.style.cursor = 'default';
       console.log("setting cursor to default");
       // remove the overlays
-      this.hideAll();
+      //this.hideAll();
     }
   }
 
@@ -212,14 +254,14 @@ class ElementInspector {
       this.tooltip.style.left = `${e.clientX + 15}px`;
       this.tooltip.style.top = `${e.clientY + 15}px`;
       
-      const classesHtml = target.classList.length 
+      const classesHtml = target.classList.length
         ? Array.from(target.classList)
             .map(className => `
               <div class="class-item" style="margin-bottom: 8px;">
                 <label style="display: flex; align-items: center; gap: 8px;">
                   <input type="checkbox" 
                          checked 
-                         onchange="toggleClass('${className}', this.checked, '${target.dataset.elementId || ''}')" 
+                         onchange="llamaInspectorToggleClass('${className}', this.checked, '${target.dataset.llamaId || ''}')" 
                          class="class-toggle"
                          style="margin: 0;"
                   >
@@ -229,7 +271,7 @@ class ElementInspector {
             `).join('')
         : '<div style="font-style: italic; color: #666;">No classes</div>';
 
-      this.tooltip.innerHTML = `
+      const contentHtml = `
         <div style="border-bottom: 1px solid #374151; padding-bottom: 8px; margin-bottom: 8px;">
           <strong>${target.tagName.toLowerCase()}</strong>
         </div>
@@ -260,6 +302,15 @@ class ElementInspector {
           >
         </div>
       `;
+
+      // Find or create a content container
+      let contentContainer = this.tooltip.querySelector('.tooltip-content');
+      if (!contentContainer) {
+        contentContainer = document.createElement('div');
+        contentContainer.className = 'tooltip-content';
+        this.tooltip.appendChild(contentContainer);
+      }
+      contentContainer.innerHTML = contentHtml;
 
       // Update lines
       const linePositions = [
@@ -336,26 +387,17 @@ class ElementInspector {
   }
 
   hideAll() {
-    this.overlay.style.display = 'none';
-    this.tooltip.style.display = 'none';
-    this.lines.forEach(line => line.style.display = 'none');
-    this.marginOverlays.forEach(overlay => overlay.style.display = 'none');
-    this.paddingOverlays.forEach(overlay => overlay.style.display = 'none');
-    this.dimensionsLabel.style.display = 'none';
-    this.marginLabels.forEach(label => label.style.display = 'none');
-    this.paddingLabels.forEach(label => label.style.display = 'none');
-  }
 
-  toggleClass(className, isChecked, elementId) {
-    const target = document.querySelector(`[data-element-id="${elementId}"]`);
-    if (target) {
-        if (isChecked) {
-            target.classList.add(className);
-        } else {
-            target.classList.remove(className);
-        }
-    }
-  }  
+    //these conditional checks protect against nulls & undefineds
+    if (this?.overlay) this.overlay.style.display = 'none';
+    if (this?.tooltip) this.tooltip.style.display = 'none';
+    this?.lines?.forEach(line => line && (line.style.display = 'none'));
+    this?.marginOverlays?.forEach(overlay => overlay && (overlay.style.display = 'none'));
+    this?.paddingOverlays?.forEach(overlay => overlay && (overlay.style.display = 'none'));
+    if (this?.dimensionsLabel) this.dimensionsLabel.style.display = 'none';
+    this?.marginLabels?.forEach(label => label && (label.style.display = 'none'));
+    this?.paddingLabels?.forEach(label => label && (label.style.display = 'none'));
+  }
 
   updateOverlays(rect, computedStyle) {
     // Update main element overlay (blue)
@@ -523,7 +565,7 @@ class ElementInspector {
           break;
       }
     });
-  }
+  }  
 }
 
 // Initialize the inspector

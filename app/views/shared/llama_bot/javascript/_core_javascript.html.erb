@@ -745,7 +745,6 @@
     });
   });
 
-
   var inSelectionMode = false;
   let selectedElementHTML = null;
 
@@ -760,14 +759,16 @@
   function toggleSelectionMode() {
     inSelectionMode = !inSelectionMode;
     window.llamaElementInspector.toggleInspector(inSelectionMode);
+    
+    //This is toggling selectionMode.
     const chatbotContainer = document.getElementById("chatbotContainer");
     if (inSelectionMode) {
       document.body.classList.add("selection-mode");
-      chatbotContainer.classList.add("hidden");
+     // chatbotContainer.classList.add("hidden"); 
     }
     if (!inSelectionMode) {
       document.body.classList.remove("selection-mode");
-      chatbotContainer.classList.remove("hidden");
+      //chatbotContainer.classList.remove("hidden"); 
     }
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
@@ -783,7 +784,7 @@
     console.log("inSelectionMode", inSelectionMode);
     if (!inSelectionMode) return; //prevent from running if selection mode is off
 
-    window.llamaElementInspector.toggleInspector(false);
+    //window.llamaElementInspector.toggleInspector(false);
 
     event.preventDefault();
     event.stopPropagation();
