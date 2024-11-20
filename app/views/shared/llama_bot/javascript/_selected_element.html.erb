@@ -4,25 +4,21 @@
     pointer-events: none;
     z-index: 9999;
     border: 2px solid #4299e1;
-    /*background-color: rgba(66, 153, 225, 0.1);*/
-    /*display: none;*/
-    background-color: rgba(255, 105, 180, 0.4); /* Bright pink with higher opacity */
-    box-shadow: 0 0 8px rgba(255, 105, 180, 0.8); /* Brighter, larger shadow */
-    outline: 2px solid #FF1493; /* Hot pink outline */    
+    background-color: rgba(66, 153, 225, 0.2);
     }
 
     .inspector-overlay-margin {
         position: fixed;
         pointer-events: none;
         z-index: 9999;
-        background-color: rgba(255, 215, 0, 0.4); /* Gold color with opacity */
+        background-color: rgba(255, 215, 0, 0.4); /* Gold color */
     }
 
     .inspector-overlay-padding {
         position: fixed;
         pointer-events: none;
         z-index: 9999;
-        background-color: rgba(0, 128, 0, 0.4); /* Dark green color with opacity */
+        background-color: rgba(0, 255, 0, 0.4); /* Green color */
     }
 
     .inspector-line {
@@ -52,8 +48,8 @@ class ElementInspector {
   constructor() {
     this.isActive = false;
     this.overlay = this.createOverlay();
-    this.marginOverlay = this.createMarginOverlay();
-    this.paddingOverlay = this.createPaddingOverlay();
+    this.marginOverlays = this.createMarginOverlays();
+    this.paddingOverlays = this.createPaddingOverlays();
     this.tooltip = this.createTooltip();
     this.lines = this.createLines();
     this.init();
@@ -66,18 +62,24 @@ class ElementInspector {
     return overlay;
   }
 
-  createMarginOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'inspector-overlay-margin';
-    document.body.appendChild(overlay);
-    return overlay;
+  createMarginOverlays() {
+    const overlays = ['top', 'right', 'bottom', 'left'].map(() => {
+      const overlay = document.createElement('div');
+      overlay.className = 'inspector-overlay-margin';
+      document.body.appendChild(overlay);
+      return overlay;
+    });
+    return overlays;
   }
 
-  createPaddingOverlay() {
-    const overlay = document.createElement('div');
-    overlay.className = 'inspector-overlay-padding';
-    document.body.appendChild(overlay);
-    return overlay;
+  createPaddingOverlays() {
+    const overlays = ['top', 'right', 'bottom', 'left'].map(() => {
+      const overlay = document.createElement('div');
+      overlay.className = 'inspector-overlay-padding';
+      document.body.appendChild(overlay);
+      return overlay;
+    });
+    return overlays;
   }
 
   createTooltip() {
@@ -117,26 +119,7 @@ class ElementInspector {
       const rect = target.getBoundingClientRect();
       const computedStyle = window.getComputedStyle(target);
       
-      // Update overlay
-      this.overlay.style.display = 'block';
-      this.overlay.style.left = `${rect.left}px`;
-      this.overlay.style.top = `${rect.top}px`;
-      this.overlay.style.width = `${rect.width}px`;
-      this.overlay.style.height = `${rect.height}px`;
-
-      // Update margin overlay
-      this.marginOverlay.style.display = 'block';
-      this.marginOverlay.style.left = `${rect.left - parseFloat(computedStyle.marginLeft)}px`;
-      this.marginOverlay.style.top = `${rect.top - parseFloat(computedStyle.marginTop)}px`;
-      this.marginOverlay.style.width = `${rect.width + parseFloat(computedStyle.marginLeft) + parseFloat(computedStyle.marginRight)}px`;
-      this.marginOverlay.style.height = `${rect.height + parseFloat(computedStyle.marginTop) + parseFloat(computedStyle.marginBottom)}px`;
-
-      // Update padding overlay
-      this.paddingOverlay.style.display = 'block';
-      this.paddingOverlay.style.left = `${rect.left + parseFloat(computedStyle.paddingLeft)}px`;
-      this.paddingOverlay.style.top = `${rect.top + parseFloat(computedStyle.paddingTop)}px`;
-      this.paddingOverlay.style.width = `${rect.width - parseFloat(computedStyle.paddingLeft) - parseFloat(computedStyle.paddingRight)}px`;
-      this.paddingOverlay.style.height = `${rect.height - parseFloat(computedStyle.paddingTop) - parseFloat(computedStyle.paddingBottom)}px`;
+      this.updateOverlays(rect, computedStyle);
 
       // Update tooltip
       const margin = {
@@ -211,6 +194,91 @@ class ElementInspector {
     this.overlay.style.display = 'none';
     this.tooltip.style.display = 'none';
     this.lines.forEach(line => line.style.display = 'none');
+    this.marginOverlays.forEach(overlay => overlay.style.display = 'none');
+    this.paddingOverlays.forEach(overlay => overlay.style.display = 'none');
+  }
+
+  updateOverlays(rect, computedStyle) {
+    // Update main element overlay (blue)
+    this.overlay.style.display = 'block';
+    this.overlay.style.left = `${rect.left}px`;
+    this.overlay.style.top = `${rect.top}px`;
+    this.overlay.style.width = `${rect.width}px`;
+    this.overlay.style.height = `${rect.height}px`;
+    this.overlay.style.backgroundColor = 'rgba(66, 153, 225, 0.2)';
+
+    // Get computed margins and padding
+    const margin = {
+      top: parseFloat(computedStyle.marginTop),
+      right: parseFloat(computedStyle.marginRight),
+      bottom: parseFloat(computedStyle.marginBottom),
+      left: parseFloat(computedStyle.marginLeft)
+    };
+
+    const padding = {
+      top: parseFloat(computedStyle.paddingTop),
+      right: parseFloat(computedStyle.paddingRight),
+      bottom: parseFloat(computedStyle.paddingBottom),
+      left: parseFloat(computedStyle.paddingLeft)
+    };
+
+    // Update margin overlays (gold)
+    // Top margin
+    this.marginOverlays[0].style.display = 'block';
+    this.marginOverlays[0].style.left = `${rect.left - margin.left}px`;
+    this.marginOverlays[0].style.top = `${rect.top - margin.top}px`;
+    this.marginOverlays[0].style.width = `${rect.width + margin.left + margin.right}px`;
+    this.marginOverlays[0].style.height = `${margin.top}px`;
+
+    // Right margin
+    this.marginOverlays[1].style.display = 'block';
+    this.marginOverlays[1].style.left = `${rect.right}px`;
+    this.marginOverlays[1].style.top = `${rect.top - margin.top}px`;
+    this.marginOverlays[1].style.width = `${margin.right}px`;
+    this.marginOverlays[1].style.height = `${rect.height + margin.top + margin.bottom}px`;
+
+    // Bottom margin
+    this.marginOverlays[2].style.display = 'block';
+    this.marginOverlays[2].style.left = `${rect.left - margin.left}px`;
+    this.marginOverlays[2].style.top = `${rect.bottom}px`;
+    this.marginOverlays[2].style.width = `${rect.width + margin.left + margin.right}px`;
+    this.marginOverlays[2].style.height = `${margin.bottom}px`;
+
+    // Left margin
+    this.marginOverlays[3].style.display = 'block';
+    this.marginOverlays[3].style.left = `${rect.left - margin.left}px`;
+    this.marginOverlays[3].style.top = `${rect.top - margin.top}px`;
+    this.marginOverlays[3].style.width = `${margin.left}px`;
+    this.marginOverlays[3].style.height = `${rect.height + margin.top + margin.bottom}px`;
+
+    // Update padding overlays (green)
+    // Top padding
+    this.paddingOverlays[0].style.display = 'block';
+    this.paddingOverlays[0].style.left = `${rect.left}px`;
+    this.paddingOverlays[0].style.top = `${rect.top}px`;
+    this.paddingOverlays[0].style.width = `${rect.width}px`;
+    this.paddingOverlays[0].style.height = `${padding.top}px`;
+
+    // Right padding
+    this.paddingOverlays[1].style.display = 'block';
+    this.paddingOverlays[1].style.left = `${rect.right - padding.right}px`;
+    this.paddingOverlays[1].style.top = `${rect.top}px`;
+    this.paddingOverlays[1].style.width = `${padding.right}px`;
+    this.paddingOverlays[1].style.height = `${rect.height}px`;
+
+    // Bottom padding
+    this.paddingOverlays[2].style.display = 'block';
+    this.paddingOverlays[2].style.left = `${rect.left}px`;
+    this.paddingOverlays[2].style.top = `${rect.bottom - padding.bottom}px`;
+    this.paddingOverlays[2].style.width = `${rect.width}px`;
+    this.paddingOverlays[2].style.height = `${padding.bottom}px`;
+
+    // Left padding
+    this.paddingOverlays[3].style.display = 'block';
+    this.paddingOverlays[3].style.left = `${rect.left}px`;
+    this.paddingOverlays[3].style.top = `${rect.top}px`;
+    this.paddingOverlays[3].style.width = `${padding.left}px`;
+    this.paddingOverlays[3].style.height = `${rect.height}px`;
   }
 }
 
