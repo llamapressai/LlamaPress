@@ -21,7 +21,7 @@
         background-color: rgba(0, 255, 0, 0.4); /* Green color */
     }
 
-    .inspector-line {
+    .llama-inspector-line {
     position: fixed;
     pointer-events: none;
     z-index: 9999;
@@ -29,7 +29,7 @@
     display: none;
     }
 
-    .inspector-tooltip {
+    .llama-inspector-tooltip {
     position: fixed;
     pointer-events: none;
     z-index: 10000;
@@ -39,6 +39,18 @@
     border-radius: 4px;
     font-size: 12px;
     display: none;
+    }
+
+    .llama-inspector-dimensions {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10000;
+      background-color: #1a202c;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
     }
 </style>
 <script>
@@ -52,6 +64,7 @@ class ElementInspector {
     this.paddingOverlays = this.createPaddingOverlays();
     this.tooltip = this.createTooltip();
     this.lines = this.createLines();
+    this.dimensionsLabel = this.createDimensionsLabel();
     this.init();
   }
 
@@ -84,7 +97,7 @@ class ElementInspector {
 
   createTooltip() {
     const tooltip = document.createElement('div');
-    tooltip.className = 'inspector-tooltip';
+    tooltip.className = 'llama-inspector-tooltip';
     document.body.appendChild(tooltip);
     return tooltip;
   }
@@ -93,11 +106,18 @@ class ElementInspector {
     const lines = [];
     for (let i = 0; i < 8; i++) {
       const line = document.createElement('div');
-      line.className = 'inspector-line';
+      line.className = 'llama-inspector-line';
       document.body.appendChild(line);
       lines.push(line);
     }
     return lines;
+  }
+
+  createDimensionsLabel() {
+    const label = document.createElement('div');
+    label.className = 'llama-inspector-dimensions';
+    document.body.appendChild(label);
+    return label;
   }
 
   init() {
@@ -241,6 +261,7 @@ class ElementInspector {
     this.lines.forEach(line => line.style.display = 'none');
     this.marginOverlays.forEach(overlay => overlay.style.display = 'none');
     this.paddingOverlays.forEach(overlay => overlay.style.display = 'none');
+    this.dimensionsLabel.style.display = 'none';
   }
 
   toggleClass(className, isChecked, elementId) {
@@ -335,6 +356,15 @@ class ElementInspector {
     this.paddingOverlays[3].style.top = `${rect.top}px`;
     this.paddingOverlays[3].style.width = `${padding.left}px`;
     this.paddingOverlays[3].style.height = `${rect.height}px`;
+
+    // Update dimensions label
+    this.dimensionsLabel.style.display = 'block';
+    this.dimensionsLabel.style.left = `${rect.right - 5}px`;  // 5px offset from right
+    this.dimensionsLabel.style.top = `${rect.top - 25}px`;    // 25px above the element
+    this.dimensionsLabel.textContent = `${Math.round(rect.width)} × ${Math.round(rect.height)}`;
+    
+    // Add transform to shift the label left by its own width
+    this.dimensionsLabel.style.transform = 'translateX(-100%)';
   }
 }
 
