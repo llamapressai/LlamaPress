@@ -290,8 +290,9 @@ class ElementInspector {
         </div>
         <div style="border-top: 1px solid #374151; padding-top: 8px;">
           <input type="text" 
-                 placeholder="Add new class..." 
+                 placeholder="What do you want to change?" 
                  class="llama-class-input"
+                 onclick="toggleChat(); window.llamaElementInspector.toggleInspector(false); window.llamaElementInspector.hideAll();"
                  style="width: 100%; 
                         padding: 6px;
                         border-radius: 4px;
