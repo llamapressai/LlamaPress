@@ -52,6 +52,18 @@
       font-size: 12px;
       font-family: monospace;
     }
+
+    .llama-inspector-margin-dimensions {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10000;
+      background-color: rgba(255, 215, 0, 0.9);
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-family: monospace;
+    }
 </style>
 <script>
   console.log("selected_element.html.erb");
@@ -65,6 +77,7 @@ class ElementInspector {
     this.tooltip = this.createTooltip();
     this.lines = this.createLines();
     this.dimensionsLabel = this.createDimensionsLabel();
+    this.marginLabels = this.createMarginLabels();
     this.init();
   }
 
@@ -118,6 +131,15 @@ class ElementInspector {
     label.className = 'llama-inspector-dimensions';
     document.body.appendChild(label);
     return label;
+  }
+
+  createMarginLabels() {
+    return ['top', 'right', 'bottom', 'left'].map(() => {
+      const label = document.createElement('div');
+      label.className = 'llama-inspector-margin-dimensions';
+      document.body.appendChild(label);
+      return label;
+    });
   }
 
   init() {
@@ -262,6 +284,7 @@ class ElementInspector {
     this.marginOverlays.forEach(overlay => overlay.style.display = 'none');
     this.paddingOverlays.forEach(overlay => overlay.style.display = 'none');
     this.dimensionsLabel.style.display = 'none';
+    this.marginLabels.forEach(label => label.style.display = 'none');
   }
 
   toggleClass(className, isChecked, elementId) {
@@ -365,6 +388,44 @@ class ElementInspector {
     
     // Add transform to shift the label left by its own width
     this.dimensionsLabel.style.transform = 'translateX(-100%)';
+
+    // Update margin labels
+    const marginValues = {
+      top: margin.top,
+      right: margin.right,
+      bottom: margin.bottom,
+      left: margin.left
+    };
+
+    // Position labels inside margin overlays
+    this.marginLabels.forEach((label, index) => {
+      const side = ['top', 'right', 'bottom', 'left'][index];
+      label.style.display = marginValues[side] > 0 ? 'block' : 'none';
+      label.textContent = `${Math.round(marginValues[side])}px`;
+
+      switch(side) {
+        case 'top':
+          label.style.left = `${rect.left + rect.width / 2}px`;
+          label.style.top = `${rect.top - margin.top / 2}px`;
+          label.style.transform = 'translate(-50%, -50%)';
+          break;
+        case 'right':
+          label.style.left = `${rect.right + margin.right / 2}px`;
+          label.style.top = `${rect.top + rect.height / 2}px`;
+          label.style.transform = 'translate(-50%, -50%)';
+          break;
+        case 'bottom':
+          label.style.left = `${rect.left + rect.width / 2}px`;
+          label.style.top = `${rect.bottom + margin.bottom / 2}px`;
+          label.style.transform = 'translate(-50%, -50%)';
+          break;
+        case 'left':
+          label.style.left = `${rect.left - margin.left / 2}px`;
+          label.style.top = `${rect.top + rect.height / 2}px`;
+          label.style.transform = 'translate(-50%, -50%)';
+          break;
+      }
+    });
   }
 }
 
