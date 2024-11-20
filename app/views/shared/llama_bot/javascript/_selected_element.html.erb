@@ -141,6 +141,7 @@ class ElementInspector {
       this.tooltip.style.top = `${e.clientY + 15}px`;
       this.tooltip.innerHTML = `
         <div>Element: ${target.tagName.toLowerCase()}</div>
+        <div>Classes: ${target.classList.length ? Array.from(target.classList).join(' ') : 'none'}</div>
         <div>Size: ${Math.round(rect.width)}px × ${Math.round(rect.height)}px</div>
         <div>Margin: ${margin.top} ${margin.right} ${margin.bottom} ${margin.left}</div>
         <div>Padding: ${padding.top} ${padding.right} ${padding.bottom} ${padding.left}</div>
