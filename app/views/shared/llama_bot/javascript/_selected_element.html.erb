@@ -1,0 +1,188 @@
+<style>
+    .inspector-overlay {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    border: 2px solid #4299e1;
+    /*background-color: rgba(66, 153, 225, 0.1);*/
+    /*display: none;*/
+    background-color: rgba(255, 105, 180, 0.4); /* Bright pink with higher opacity */
+    box-shadow: 0 0 8px rgba(255, 105, 180, 0.8); /* Brighter, larger shadow */
+    outline: 2px solid #FF1493; /* Hot pink outline */    
+    }
+
+    .inspector-overlay-margin {
+        background-color: rgba(255, 215, 0, 0.4); /* Gold color with opacity */
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); /* Bright gold shadow */
+        outline: 3px dashed #FFD700; /* Gold dashed outline */
+    }
+
+    .inspector-overlay-padding {
+        background-color: rgba(0, 128, 0, 0.4); /* Dark green color with opacity */
+        box-shadow: 0 0 12px rgba(0, 128, 0, 0.8); /* Bright green shadow */
+        outline: 3px dashed #008000; /* Dark green dashed outline */
+    }
+
+    .inspector-line {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    background-color: #4299e1;
+    display: none;
+    }
+
+    .inspector-tooltip {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    background-color: #1a202c;
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+    }
+</style>
+<script>
+  console.log("selected_element.html.erb");
+// script.js
+class ElementInspector {
+  constructor() {
+    this.isActive = false;
+    this.overlay = this.createOverlay();
+    this.tooltip = this.createTooltip();
+    this.lines = this.createLines();
+    this.init();
+  }
+
+  createOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'inspector-overlay';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  createTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'inspector-tooltip';
+    document.body.appendChild(tooltip);
+    return tooltip;
+  }
+
+  createLines() {
+    const lines = [];
+    for (let i = 0; i < 8; i++) {
+      const line = document.createElement('div');
+      line.className = 'inspector-line';
+      document.body.appendChild(line);
+      lines.push(line);
+    }
+    return lines;
+  }
+
+  init() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'i') {
+        console.log("i key pressed");
+        this.isActive = !this.isActive;
+        console.log("selected element inspector is active: ", this.isActive);
+        document.body.style.cursor = this.isActive ? 'crosshair' : 'default';
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!this.isActive) return;
+
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(target);
+      
+      // Update overlay
+      this.overlay.style.display = 'block';
+      this.overlay.style.left = `${rect.left}px`;
+      this.overlay.style.top = `${rect.top}px`;
+      this.overlay.style.width = `${rect.width}px`;
+      this.overlay.style.height = `${rect.height}px`;
+
+      // Update tooltip
+      const margin = {
+        top: computedStyle.marginTop,
+        right: computedStyle.marginRight,
+        bottom: computedStyle.marginBottom,
+        left: computedStyle.marginLeft
+      };
+
+      const padding = {
+        top: computedStyle.paddingTop,
+        right: computedStyle.paddingRight,
+        bottom: computedStyle.paddingBottom,
+        left: computedStyle.paddingLeft
+      };
+
+      this.tooltip.style.display = 'block';
+      this.tooltip.style.left = `${e.clientX + 15}px`;
+      this.tooltip.style.top = `${e.clientY + 15}px`;
+      this.tooltip.innerHTML = `
+        <div>Element: ${target.tagName.toLowerCase()}</div>
+        <div>Size: ${Math.round(rect.width)}px × ${Math.round(rect.height)}px</div>
+        <div>Margin: ${margin.top} ${margin.right} ${margin.bottom} ${margin.left}</div>
+        <div>Padding: ${padding.top} ${padding.right} ${padding.bottom} ${padding.left}</div>
+      `;
+
+      // Update lines
+      const linePositions = [
+        { // Top
+          left: rect.left,
+          top: 0,
+          width: '1px',
+          height: `${rect.top}px`
+        },
+        { // Right
+          left: rect.right,
+          top: rect.top,
+          width: `${window.innerWidth - rect.right}px`,
+          height: '1px'
+        },
+        { // Bottom
+          left: rect.left,
+          top: rect.bottom,
+          width: '1px',
+          height: `${window.innerHeight - rect.bottom}px`
+        },
+        { // Left
+          left: 0,
+          top: rect.top,
+          width: `${rect.left}px`,
+          height: '1px'
+        }
+      ];
+
+      this.lines.forEach((line, index) => {
+        const pos = linePositions[index];
+        line.style.display = 'block';
+        line.style.left = `${pos.left}px`;
+        line.style.top = `${pos.top}px`;
+        line.style.width = pos.width;
+        line.style.height = pos.height;
+        //debugger;
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      this.hideAll();
+    });
+  }
+
+  hideAll() {
+    this.overlay.style.display = 'none';
+    this.tooltip.style.display = 'none';
+    this.lines.forEach(line => line.style.display = 'none');
+  }
+}
+
+// Initialize the inspector
+const inspector = new ElementInspector();
+
+</script>
