@@ -845,6 +845,10 @@
       document.getElementById("selectedElementContainer").style.display =
         "none";
       document.getElementById("selectedElementContent").innerHTML = "";
+      // remove selected-element class any other elements
+      document.querySelectorAll(".selected-element").forEach(element => {
+        element.classList.remove("selected-element");
+      }); 
     });
 
   let isExpanded = false;
