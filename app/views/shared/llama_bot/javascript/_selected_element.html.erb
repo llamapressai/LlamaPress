@@ -1,4 +1,4 @@
-<style>
+<style data-llama="exclude_when_saving_contenteditable_edits">
     .llama-inspector-overlay {
     position: fixed;
     pointer-events: none;
@@ -77,8 +77,9 @@
       font-family: monospace;
     }
 </style>
-<script>
+<script data-llama="exclude_when_saving_contenteditable_edits">
   console.log("selected_element.html.erb");
+
 // script.js
 class ElementInspector {
   constructor() {
@@ -164,15 +165,21 @@ class ElementInspector {
     });
   }
 
+  toggleInspector(isActive) {
+    this.isActive = isActive;
+    console.log("selected element inspector is active: ", this.isActive);
+    if (this.isActive) {
+      document.body.style.cursor = 'crosshair';
+      console.log("setting cursor to crosshair");
+    } else {
+      document.body.style.cursor = 'default';
+      console.log("setting cursor to default");
+      // remove the overlays
+      this.hideAll();
+    }
+  }
+
   init() {
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'i') {
-        console.log("i key pressed");
-        this.isActive = !this.isActive;
-        console.log("selected element inspector is active: ", this.isActive);
-        document.body.style.cursor = this.isActive ? 'crosshair' : 'default';
-      }
-    });
 
     document.addEventListener('mousemove', (e) => {
       if (!this.isActive) return;
@@ -488,6 +495,7 @@ class ElementInspector {
 }
 
 // Initialize the inspector
-const inspector = new ElementInspector();
+const llamaElementInspector = new ElementInspector();
+window.llamaElementInspector = llamaElementInspector;
 
 </script>
