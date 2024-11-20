@@ -218,11 +218,8 @@ class ElementInspector {
         : 'none';
 
       this.tooltip.innerHTML = `
-        <div>Element: ${target.tagName.toLowerCase()}</div>
+        <div>${target.tagName.toLowerCase()}</div>
         <div>Classes: ${classesHtml}</div>
-        <div>Size: ${Math.round(rect.width)}px × ${Math.round(rect.height)}px</div>
-        <div>Margin: ${margin.top} ${margin.right} ${margin.bottom} ${margin.left}</div>
-        <div>Padding: ${padding.top} ${padding.right} ${padding.bottom} ${padding.left}</div>
       `;
 
       // Update lines
