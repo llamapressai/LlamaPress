@@ -1,5 +1,5 @@
 <style>
-    .inspector-overlay {
+    .llama-inspector-overlay {
     position: fixed;
     pointer-events: none;
     z-index: 9999;
@@ -7,14 +7,14 @@
     background-color: rgba(66, 153, 225, 0.2);
     }
 
-    .inspector-overlay-margin {
+    .llama-inspector-overlay-margin {
         position: fixed;
         pointer-events: none;
         z-index: 9999;
         background-color: rgba(255, 215, 0, 0.4); /* Gold color */
     }
 
-    .inspector-overlay-padding {
+    .llama-inspector-overlay-padding {
         position: fixed;
         pointer-events: none;
         z-index: 9999;
@@ -57,7 +57,7 @@ class ElementInspector {
 
   createOverlay() {
     const overlay = document.createElement('div');
-    overlay.className = 'inspector-overlay';
+    overlay.className = 'llama-inspector-overlay';
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -65,7 +65,7 @@ class ElementInspector {
   createMarginOverlays() {
     const overlays = ['top', 'right', 'bottom', 'left'].map(() => {
       const overlay = document.createElement('div');
-      overlay.className = 'inspector-overlay-margin';
+      overlay.className = 'llama-inspector-overlay-margin';
       document.body.appendChild(overlay);
       return overlay;
     });
@@ -75,7 +75,7 @@ class ElementInspector {
   createPaddingOverlays() {
     const overlays = ['top', 'right', 'bottom', 'left'].map(() => {
       const overlay = document.createElement('div');
-      overlay.className = 'inspector-overlay-padding';
+      overlay.className = 'llama-inspector-overlay-padding';
       document.body.appendChild(overlay);
       return overlay;
     });
