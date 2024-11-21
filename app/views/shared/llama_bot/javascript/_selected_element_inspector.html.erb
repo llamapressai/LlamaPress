@@ -339,11 +339,13 @@ class ElementInspector {
         left: computedStyle.paddingLeft
       };
 
-      this.tooltip.style.display = 'block';
-      this.tooltip.style.left = `${e.clientX + 15}px`;
-      this.tooltip.style.top = `${e.clientY + 15}px`;
-
-      this.setTailwindClassEditor(target);
+      const toolTipEnabled = false;
+      if (toolTipEnabled) {  //disable the tailwind inspector window tooltip for now.
+        this.tooltip.style.display = 'block';
+        this.tooltip.style.left = `${e.clientX + 15}px`;
+        this.tooltip.style.top = `${e.clientY + 15}px`;
+        this.setTailwindClassEditor(target);
+      }
 
       // Update lines
       const linePositions = [
