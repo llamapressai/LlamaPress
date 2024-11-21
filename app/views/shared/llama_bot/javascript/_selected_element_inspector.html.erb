@@ -218,43 +218,26 @@ class ElementInspector {
       document.body.style.cursor = 'default';
       console.log("setting cursor to default");
       // remove the overlays
-      this.hideAll();  //selected_element_inspector_container.hideAll()
+      //this.hideAll();  //selected_element_inspector_container.hideAll()
     }
   }
 
-  init() {
+  setTailwindClassEditor(target){
+    let classesHtml = this.getTailwindClassesFromTargetHtml(target);
+    let contentHtml = this.getTailwindContentFromTargetHtml(target, classesHtml);
 
-    document.addEventListener('mousemove', (e) => {
-      if (!this.isActive) return;
+        // Find or create a content container
+    let contentContainer = this.tooltip.querySelector('.tooltip-content');
+    if (!contentContainer) {
+      contentContainer = document.createElement('div');
+      contentContainer.className = 'tooltip-content';
+      this.tooltip.appendChild(contentContainer);
+    }
+    contentContainer.innerHTML = contentHtml;
+  }
 
-      const target = document.elementFromPoint(e.clientX, e.clientY);
-      if (!target) return;
-
-      const rect = target.getBoundingClientRect();
-      const computedStyle = window.getComputedStyle(target);
-      
-      this.updateOverlays(rect, computedStyle);
-
-      // Update tooltip
-      const margin = {
-        top: computedStyle.marginTop,
-        right: computedStyle.marginRight,
-        bottom: computedStyle.marginBottom,
-        left: computedStyle.marginLeft
-      };
-
-      const padding = {
-        top: computedStyle.paddingTop,
-        right: computedStyle.paddingRight,
-        bottom: computedStyle.paddingBottom,
-        left: computedStyle.paddingLeft
-      };
-
-      this.tooltip.style.display = 'block';
-      this.tooltip.style.left = `${e.clientX + 15}px`;
-      this.tooltip.style.top = `${e.clientY + 15}px`;
-      
-      const classesHtml = `
+  getTailwindClassesFromTargetHtml(target){
+      let classesHtml = `
         <div id="llama-inspector-class-items-container">
           ${target.classList.length
             ? Array.from(target.classList)
@@ -280,8 +263,11 @@ class ElementInspector {
                 `).join('')
             : '<div style="font-style: italic; color: #666;">No classes</div>'}
         </div>`;
+      return classesHtml;
+  }
 
-      const contentHtml = `
+  getTailwindContentFromTargetHtml(target, classesHtml){
+      let contentHtml = `
         <div style="border-bottom: 1px solid #374151; padding-bottom: 8px; margin-bottom: 8px;">
           <strong>${target.tagName.toLowerCase()}</strong>
         </div>
@@ -322,15 +308,42 @@ class ElementInspector {
             >
         </div>
       `;
+      return contentHtml;
+  }
 
-      // Find or create a content container
-      let contentContainer = this.tooltip.querySelector('.tooltip-content');
-      if (!contentContainer) {
-        contentContainer = document.createElement('div');
-        contentContainer.className = 'tooltip-content';
-        this.tooltip.appendChild(contentContainer);
-      }
-      contentContainer.innerHTML = contentHtml;
+
+  init() {
+    document.addEventListener('mousemove', (e) => {
+      if (!this.isActive) return;
+
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(target);
+      
+      this.updateOverlays(rect, computedStyle);
+
+      // Update tooltip
+      const margin = {
+        top: computedStyle.marginTop,
+        right: computedStyle.marginRight,
+        bottom: computedStyle.marginBottom,
+        left: computedStyle.marginLeft
+      };
+
+      const padding = {
+        top: computedStyle.paddingTop,
+        right: computedStyle.paddingRight,
+        bottom: computedStyle.paddingBottom,
+        left: computedStyle.paddingLeft
+      };
+
+      this.tooltip.style.display = 'block';
+      this.tooltip.style.left = `${e.clientX + 15}px`;
+      this.tooltip.style.top = `${e.clientY + 15}px`;
+
+      this.setTailwindClassEditor(target);
 
       // Update lines
       const linePositions = [
