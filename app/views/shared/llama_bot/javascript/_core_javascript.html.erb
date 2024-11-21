@@ -764,11 +764,11 @@
     const chatbotContainer = document.getElementById("chatbotContainer");
     if (inSelectionMode) {
       document.body.classList.add("selection-mode");
-     // chatbotContainer.classList.add("hidden"); 
+     chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
     }
     if (!inSelectionMode) {
       document.body.classList.remove("selection-mode");
-      //chatbotContainer.classList.remove("hidden"); 
+      chatbotContainer.classList.remove("hidden"); //selected_element_inspector_container.hideAll()
     }
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
