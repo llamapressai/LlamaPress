@@ -764,11 +764,16 @@
     const chatbotContainer = document.getElementById("chatbotContainer");
     if (inSelectionMode) {
       document.body.classList.add("selection-mode");
-     //chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
+     chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
     }
     if (!inSelectionMode) {
       document.body.classList.remove("selection-mode");
-      //chatbotContainer.classList.remove("hidden"); //selected_element_inspector_container.hideAll()
+      //const selectedElementInspectorContainer = document.querySelector("#selectedElementInspectorContainer");
+      //let classesHtml = window.llamaElementInspector.getTailwindClassesFromTargetHtml(window.lastSelectedElement);
+      //let contentHtml = window.llamaElementInspector.getTailwindContentFromTargetHtml(window.lastSelectedElement, classesHtml);
+      //selectedElementInspectorContainer.innerHTML = contentHtml;
+      //selectedElementInspectorContainer.classList.remove("hidden");
+      chatbotContainer.classList.remove("hidden"); //selected_element_inspector_container.hideAll()
     }
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
