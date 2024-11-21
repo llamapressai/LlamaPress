@@ -92,6 +92,17 @@ rails db:seed
 rails s
 ```
 
+### Run tests 
+```
+# Install playwright, () 
+# https://justin.searls.co/posts/running-rails-system-tests-with-playwright-instead-of-selenium/
+export PLAYWRIGHT_CLI_VERSION=$(bundle exec ruby -e 'require "playwright"; puts Playwright::COMPATIBLE_PLAYWRIGHT_VERSION.strip')
+yarn add -D "playwright@$PLAYWRIGHT_CLI_VERSION"
+yarn run playwright install
+
+bash test/run_tests.sh
+```
+
 ### Create `config/local_env.yml` and set up your llama-bot api keys
 [local_env.yml](config/local_env.yml)
 ```

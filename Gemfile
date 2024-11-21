@@ -56,7 +56,7 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
-  gem "selenium-webdriver"
+  gem "capybara-playwright-driver" #https://justin.searls.co/posts/running-rails-system-tests-with-playwright-instead-of-selenium/
   gem "rails-controller-testing"
   gem "mocha"
   gem 'byebug', platforms: %i[ mri mingw x64_mingw ]
