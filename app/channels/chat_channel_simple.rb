@@ -153,7 +153,7 @@ class ChatChannelSimple < ApplicationCable::Channel
 
   def handle_external_message(message)
     Rails.logger.info "Received from external WebSocket: #{message}"
-    
+
     # Extract the message content
     message_content = message.data
 
@@ -185,7 +185,7 @@ class ChatChannelSimple < ApplicationCable::Channel
       next if connection.closed?
       
       ping_message = {
-        type: 'ping',
+        message_type: 'ping',
         connection_id: @connection_id,
         connection_state: 'connected',
         connection_class: connection.class.name
