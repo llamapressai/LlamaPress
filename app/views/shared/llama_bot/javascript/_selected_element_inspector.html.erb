@@ -98,6 +98,7 @@ window.llamaInspectorToggleClass = function(className, isChecked, llamaId) {
 // script.js
 class ElementInspector {
   constructor() {
+    this.toolTipEnabled = false;
     this.isActive = false;
     this.overlay = this.createOverlay();
     this.marginOverlays = this.createMarginOverlays();
@@ -138,38 +139,40 @@ class ElementInspector {
   }
 
   createTooltip() {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'llama-inspector-tooltip';
-    
-    // Create header banner
-    const header = document.createElement('div');
-    header.className = 'bg-gradient-to-r from-blue-600 to-blue-500 text-white p-2 flex justify-between items-center shadow-md rounded-t-md -mt-3 -mx-3 mb-2';
-    
-    // Add title
-    const title = document.createElement('span');
-    title.className = 'font-semibold text-lg';
-    title.textContent = 'LlamaBot';
-    
-    // Add close button
-    const closeButton = document.createElement('button');
-    closeButton.className = 'text-2xl hover:text-blue-200 transition-colors duration-200';
-    closeButton.innerHTML = '×';
-    closeButton.onclick = () => {
-      tooltip.style.display = 'none';
-      this.hideAll();
-    };
-    
-    this.toggleInspector(false);
-    
-    // Assemble header
-    header.appendChild(title);
-    header.appendChild(closeButton);
-    
-    // Add header to tooltip
-    tooltip.appendChild(header);
-    
-    document.body.appendChild(tooltip);
-    return tooltip;
+    if (this.toolTipEnabled){
+      const tooltip = document.createElement('div');
+      tooltip.className = 'llama-inspector-tooltip';
+      
+      // Create header banner
+      const header = document.createElement('div');
+      header.className = 'bg-gradient-to-r from-blue-600 to-blue-500 text-white p-2 flex justify-between items-center shadow-md rounded-t-md -mt-3 -mx-3 mb-2';
+      
+      // Add title
+      const title = document.createElement('span');
+      title.className = 'font-semibold text-lg';
+      title.textContent = 'LlamaBot';
+      
+      // Add close button
+      const closeButton = document.createElement('button');
+      closeButton.className = 'text-2xl hover:text-blue-200 transition-colors duration-200';
+      closeButton.innerHTML = '×';
+      closeButton.onclick = () => {
+        tooltip.style.display = 'none';
+        this.hideAll();
+      };
+      
+      this.toggleInspector(false);
+      
+      // Assemble header
+      header.appendChild(title);
+      header.appendChild(closeButton);
+      
+      // Add header to tooltip
+      tooltip.appendChild(header);
+      
+      document.body.appendChild(tooltip);
+      return tooltip;
+    }
   }
 
   createLines() {
@@ -222,11 +225,14 @@ class ElementInspector {
     }
   }
 
-  setTailwindClassEditor(target){
+  setTailwindClassEditor(target){    
+    //we don't show the tailwind class editor if the tooltip is not being enabled (tooltip and tailwind class editor are the same thing.)
+    if (!this.toolTipEnabled) return; 
+
     let classesHtml = this.getTailwindClassesFromTargetHtml(target);
     let contentHtml = this.getTailwindContentFromTargetHtml(target, classesHtml);
 
-        // Find or create a content container
+    // Find or create a content container
     let contentContainer = this.tooltip.querySelector('.tooltip-content');
     if (!contentContainer) {
       contentContainer = document.createElement('div');
@@ -339,8 +345,7 @@ class ElementInspector {
         left: computedStyle.paddingLeft
       };
 
-      const toolTipEnabled = false;
-      if (toolTipEnabled) {  //disable the tailwind inspector window tooltip for now.
+      if (this.toolTipEnabled) {  //disable the tailwind inspector window tooltip for now.
         this.tooltip.style.display = 'block';
         this.tooltip.style.left = `${e.clientX + 15}px`;
         this.tooltip.style.top = `${e.clientY + 15}px`;

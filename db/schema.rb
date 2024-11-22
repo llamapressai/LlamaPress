@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
-
+ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -136,6 +135,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
     t.datetime "updated_at", null: false
     t.string "wordpress_api_encoded_token"
     t.bigint "home_page_id"
+    t.bigint "after_submission_page_id"
+    t.index ["after_submission_page_id"], name: "index_sites_on_after_submission_page_id"
     t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
     t.index ["slug"], name: "index_sites_on_slug", unique: true
@@ -177,8 +178,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.string "api_token"
     t.datetime "mixpanel_profile_last_set_at"
+    t.string "api_token"
     t.integer "tutorial_step", default: 0
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
@@ -202,6 +203,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_13_003617) do
   add_foreign_key "posts", "pages"
   add_foreign_key "posts", "users"
   add_foreign_key "sites", "organizations"
+  add_foreign_key "sites", "pages", column: "after_submission_page_id"
   add_foreign_key "sites", "pages", column: "home_page_id"
   add_foreign_key "snippets", "sites"
   add_foreign_key "submissions", "sites"

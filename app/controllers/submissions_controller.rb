@@ -35,9 +35,31 @@ class SubmissionsController < ApplicationController
     # - What if we don't have page_id set in the form? Do we still record the form submissions?
     # - Is there a way to see where we came from?
 
+    #Below is how to access params in javascript for a customized thank you page:
+    #new URLSearchParams(window.location.search).get('name');
+    # EXAMPLE:
+    #<h1
+    # class="text-4xl font-bold mb-2 aos-init aos-animate"
+    #   data-aos="fade-down"
+    #   data-aos-delay="200"
+    #   data-llama-id="14"
+    #   data-llama-editable="true">
+    #   Thank You
+    #   <script data-llama-id="15">
+    #     if (new URLSearchParams(window.location.search).get('name')){ 
+    #       document.write(`, ${new URLSearchParams(window.location.search).get('name')}`);
+    #     }
+    #   </script>
+    #   !
+    # </h1>
+
     respond_to do |format|
       if @submission.save
-        format.html { redirect_to @submission, notice: "Submission was successfully created." }
+        format.html { 
+          redirect_to_record = @site.after_submission_page.present? ? @site.after_submission_page : @submission
+          redirect_to "#{url_for(redirect_to_record)}?#{data.to_query}",
+                     notice: "Submission was successfully created.", allow_other_host: true
+        }
         format.json { render :show, status: :created, location: @submission }
       else
         format.html { render :new, status: :unprocessable_entity }
