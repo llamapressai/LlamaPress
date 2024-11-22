@@ -24,64 +24,48 @@
         /**
          * Receives message responses from LlamaBot Backend.
          */
-        received(data) { // LlamaBot Backend is sending us a message -- let's handle it and format it so the user can see it
+        received(data) {
           console.log("Received response from LlamaBot Backend:", data);
           hideLoadingIndicator();
           
+          // Reset send button state
+          const sendButton = document.getElementById('sendButton');
+          sendButton.textContent = 'Send';
+          sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+          sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+          
           try {
-            
-            // Parse the incoming data
-            const parsedData2 = typeof data === "string" ? JSON.parse(data) : data;
-            const parsed = JSON.parse(data)
-            const parsedData = JSON.parse(parsed.message)
+            // Parse the incoming data - simplify the parsing chain
+            const parsed = JSON.parse(data);
+            const parsedData = JSON.parse(parsed.message);
 
-            //TODO: Magic string, bad. We should have a better way to detect when the workflow is complete.
-            if (parsedData.content == 'Workflow completed') {
-              //reload page..
-              window.location.reload();
-            }
+            // if (parsedData.content === 'Workflow completed') {
+            //   window.location.reload();
+            //   return;
+            // }
             
-            // Handle the message based on its type
             switch (parsedData.type) {
               case 'ai_message':
-                // Display AI-generated messages
                 addMessage(parsedData.content, "bot");
                 break;
-
               case 'system_message':
-                // Reflect system messages back to the user
                 addMessage(parsedData.content, "system");
                 break;
-
               case 'user_input_required':
-                // Ask for user input if necessary
-                const userInputMessage = parsedData.content;
-                addMessage(userInputMessage, "bot");
-                // Optionally, you can trigger some action to collect input from the user here
+                addMessage(parsedData.content, "bot");
                 break;
-
               case 'write_code':
-                // Handle a command to finalize changes, maybe by calling an endpoint or initiating some process
-                addMessage("Recieved changes. Writing to the file system...", "system")
-                //reload page..
+                addMessage("Received changes. Writing to the file system...", "system");
+                window.location.reload();
                 break;
-
               default:
                 console.warn("Unknown message type:", parsedData.type);
-                addMessage("Unknown: " + data, "system");
+                addMessage(`Unknown message type: ${parsedData.type}`, "system");
             }
           } catch (error) {
             console.error("Error parsing or processing received data:", error);
-            addMessage("Error: " + error, "bot");
+            addMessage(`Error: ${error.message}`, "bot");
           }
-
-          // Optionally handle the 'message_complete' field if it exists
-          //   if (parsedData.message_complete) {
-          //     const streamContainer = document.getElementById("botStreamContainer");
-          //     if (streamContainer) {
-          //       streamContainer.id = "";
-          //     }
-          //   }
         },
 
         connected() {
@@ -270,11 +254,47 @@ document.addEventListener("visibilitychange", function() {
 async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, errorCallback) {
   try {
     if (chatChannel && chatChannel.send) {
+      // Change button state and add click handler for cancel
+      const sendButton = document.getElementById('sendButton');
+      sendButton.textContent = 'Cancel';
+      sendButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+      sendButton.classList.add('bg-red-500', 'hover:bg-red-600');
+      
+      // Add cancel click handler
+      const cancelHandler = () => {
+        console.log("Cancel Sent");
+        
+        // Update the thinking text to "Cancelling..."
+        const thinkingElement = document.querySelector('.thinking-pulse');
+        if (thinkingElement) {
+          thinkingElement.textContent = 'Cancelling...';
+        }
+        
+        // Update button text and disable it
+        const sendButton = document.getElementById('sendButton');
+        sendButton.textContent = 'Cancelling...';
+        sendButton.disabled = true;
+        
+        chatChannel.send({
+          user_message: "cancel",
+          type: "cancel",
+          message_type: "cancel",
+          context: "<%=@view_path%>",
+          webPageId: "<%=@page&.id%>",
+        });
+        
+        // Remove the cancel handler after it's used
+        sendButton.removeEventListener('click', cancelHandler);
+      };
+      
+      sendButton.addEventListener('click', cancelHandler);
+      
       chatChannel.send({
         message: userMessage,
         context: "<%=@view_path%>",
         selectedElement: selectedElementInnerHtml,
         webPageId: "<%=@page&.id%>",
+        message_type: "message"
       });
     } else {
       console.error("Chat channel not initialized yet");
@@ -282,7 +302,6 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
   } catch (error) {
     console.error("Error sending message:", error);
     errorCallback(error);
-  } finally {
   }
 }
 window.sendUserMessageOverSocket = sendUserMessageOverSocket;
