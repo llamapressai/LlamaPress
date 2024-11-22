@@ -314,6 +314,12 @@
       imgElement.className = 'h-24 object-cover rounded-lg m-2';
       imgElement.setAttribute('data-llama-editable', 'true');
       
+      // Add click handler to append image URL to userInput
+      imgElement.onclick = function() {
+        const userInput = document.getElementById('userInput');
+        userInput.value = userInput.value + ' ' + image.url;
+      };
+      
       if (appendToBeginning) {
         imageContainer.insertBefore(imgElement, imageContainer.firstChild);
       } else {
