@@ -764,9 +764,16 @@
     const chatbotContainer = document.getElementById("chatbotContainer");
     if (inSelectionMode) {
       document.body.classList.add("selection-mode");
-     chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
+      
+      document.getElementById("llama-bot-message-to-user").textContent = "Select an element you want to edit!";
+      //animate the message to user
+      document.getElementById("llama-bot-message-to-user").classList.add("animate-pulse");
+
+      chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
     }
     if (!inSelectionMode) {
+      document.getElementById("llama-bot-message-to-user").classList.remove("animate-pulse");
+      document.getElementById("llama-bot-message-to-user").textContent = "What do you want to change?";
       document.body.classList.remove("selection-mode");
       //const selectedElementInspectorContainer = document.querySelector("#selectedElementInspectorContainer");
       //let classesHtml = window.llamaElementInspector.getTailwindClassesFromTargetHtml(window.lastSelectedElement);
