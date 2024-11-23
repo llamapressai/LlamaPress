@@ -63,7 +63,6 @@
 
             if(parsed.message.type == "external_ws_pong") {
               lastPongTime = Date.now(); // Update last pong time, which will keep the status icon green
-              console.log("Received pong response from LlamaBot Backend");
               return;
             }
 
