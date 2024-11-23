@@ -102,31 +102,53 @@
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
                 
+                // Get the actual element
+                const container = range.commonAncestorContainer;
+                console.log("User highlighted/selected container: ", container);
+                const element = container.nodeType === 1 ? container : container.parentElement;
+                console.log("User highlighted/selected element: ", element);
+                
                 // Create a span for the selected content
-                const span = document.createElement('span');
-                span.appendChild(range.extractContents());
+                //const span = document.createElement('span');
+                //span.appendChild(range.extractContents());
                 
                 // Apply the formatting classes to the span
                 switch (command) {
                     case 'bold':
-                        span.classList.add('font-bold');
+                        if (!element.classList.contains('font-bold')) {
+                            element.classList.add('font-bold');
+                        } else {
+                            element.classList.remove('font-bold');
+                        }
                         break;
                     case 'italic':
-                        span.classList.add('italic');
+                        if (!element.classList.contains('italic')) {
+                            element.classList.add('italic');
+                        } else {
+                            element.classList.remove('italic');
+                        }
                         break;
                     case 'underline':
-                        span.classList.add('underline');
+                        if (!element.classList.contains('underline')) {
+                            element.classList.add('underline');
+                        } else {
+                            element.classList.remove('underline');
+                        }
                         break;
                     case 'strikethrough':
-                        span.classList.add('line-through');
+                        if (!element.classList.contains('line-through')) {
+                            element.classList.add('line-through');
+                        } else {
+                            element.classList.remove('line-through');
+                        }
                         break;
                     case 'h1':
                     case 'h2':
                     case 'h3':
                     case 'p':
                         // For headings and paragraphs, we still want to transform the entire block
-                        const container = range.commonAncestorContainer;
-                        const element = container.nodeType === 1 ? container : container.parentElement;
+                        //const container = range.commonAncestorContainer;
+                        //const element = container.nodeType === 1 ? container : container.parentElement;
                         applyHeadingOrParagraph(element, command);
                         return; // Exit early as we don't need to insert the span
                 }
