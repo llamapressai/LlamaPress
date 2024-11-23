@@ -49,14 +49,7 @@
          */
         received(data) {
           console.log("Received response from LlamaBot Backend:", data);
-          hideLoadingIndicator();
-          
-          // Reset send button state
-          const sendButton = document.getElementById('sendButton');
-          sendButton.textContent = 'Send';
-          sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-          sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-          
+
           try {
             // Parse the incoming data - simplify the parsing chain
             const parsed = JSON.parse(data);
@@ -67,6 +60,16 @@
             }
 
             const parsedData = JSON.parse(parsed.message);
+
+            // This will run regardless of success or failure
+            isLoading = false;
+
+            hideLoadingIndicator();
+            // Reset send button state
+            const sendButton = document.getElementById('sendButton');
+            sendButton.textContent = 'Send';
+            sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
 
             // if (parsedData.content === 'Workflow completed') {
             //   window.location.reload();
@@ -98,6 +101,15 @@
           } catch (error) {
             console.error("Error parsing or processing received data:", error);
             addMessage(`Error: ${error.message}`, "bot");
+                        // This will run regardless of success or failure
+            isLoading = false;
+
+            hideLoadingIndicator();
+            // Reset send button state
+            const sendButton = document.getElementById('sendButton');
+            sendButton.textContent = 'Send';
+            sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
           }
         },
 
@@ -227,12 +239,12 @@ document.addEventListener("visibilitychange", function() {
       chatbotMessages.appendChild(loadingDiv);
     }
 
-    function hideLoadingIndicator() {
-      const loadingDiv = document.getElementById("loadingIndicator");
-      if (loadingDiv) {
-        loadingDiv.remove();
-      }
-    }
+    //function hideLoadingIndicator() {
+    //  const loadingDiv = document.getElementById("loadingIndicator");
+    //  if (loadingDiv) {
+    //    loadingDiv.remove();
+    //  }
+    //}
 
     function autoResizeUserInputArea() {
         textarea.style.height = 'auto';
