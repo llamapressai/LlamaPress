@@ -270,7 +270,7 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
           thinkingElement.textContent = 'Cancelling...';
         }
         
-        // Update button text and disable it
+        // Update button text and disable it temporarily
         const sendButton = document.getElementById('sendButton');
         sendButton.textContent = 'Cancelling...';
         sendButton.disabled = true;
@@ -285,6 +285,14 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
         
         // Remove the cancel handler after it's used
         sendButton.removeEventListener('click', cancelHandler);
+        
+        // Re-enable the button after a short delay
+        setTimeout(() => {
+          sendButton.disabled = false;
+          sendButton.textContent = 'Send';
+          sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+          sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 1000);
       };
       
       sendButton.addEventListener('click', cancelHandler);
