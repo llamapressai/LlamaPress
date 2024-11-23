@@ -174,7 +174,11 @@ class ChatChannel < ApplicationCable::Channel
       begin
         @external_ws_connection = Async::WebSocket::Client.connect(endpoint)
         Rails.logger.info "Connected to external WebSocket for connection: #{connection_id}"
-
+        
+        #Tell llamabot frontend that we've connected to the backend
+        formatted_message = { message: {type: "external_ws_pong"} }.to_json
+        ActionCable.server.broadcast "chat_channel_#{params[:session_id]}", formatted_message
+        
         # Store tasks in instance variables so we can clean them up later
         @listener_task = task.async do
           listen_to_external_websocket(@external_ws_connection)
@@ -239,7 +243,8 @@ class ChatChannel < ApplicationCable::Channel
           # Add any additional handling for write_code messages here
         when "pong"
           Rails.logger.debug "Received pong response"
-          next  #skip broadcast on pong
+          # Tell llamabot frontend that we've received a pong response, and we're still connected
+          formatted_message = { message: {type: "external_ws_pong"} }.to_json
         end
       rescue JSON::ParserError => e
         Rails.logger.error "Failed to parse message as JSON: #{e.message}"
@@ -251,7 +256,6 @@ class ChatChannel < ApplicationCable::Channel
   # TODO: Send keep-alive pings to the LlamaBot Backend
   def send_keep_alive_pings(connection)
     loop do
-      sleep 30
       ping_message = {
         type: 'ping',
         connection_id: @connection_id,
@@ -260,6 +264,7 @@ class ChatChannel < ApplicationCable::Channel
       }.to_json
       connection.write(ping_message)
       Rails.logger.debug "Sent keep-alive ping: #{ping_message}"
+      sleep 30
     end
   rescue => e
     Rails.logger.error "Error in keep-alive ping: #{e.message} | Connection type: #{connection.class.name}"

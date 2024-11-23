@@ -3,6 +3,28 @@
   console.log("Loaded...");
 
   let isLoading = false;
+  let lastPongTime = Date.now() - 30000;
+  let connectionCheckInterval;
+
+  // Add this function to update the status indicator
+  function updateConnectionStatus() {
+    const timeSinceLastPong = Date.now() - lastPongTime;
+    
+    if (timeSinceLastPong < 30000) { // Less than 30 seconds
+      updateStatusIcon('bg-green-500');
+    } else if (timeSinceLastPong < 50000) { // Between 30-50 seconds
+      updateStatusIcon('bg-yellow-400');
+    } else { // More than 50 seconds
+      updateStatusIcon('bg-red-500');
+    }
+  }
+
+  // Update the status icon with the given color
+  function updateStatusIcon(color) {
+    const statusIndicator = document.getElementById('statusIcon');
+    statusIndicator.classList.remove('bg-yellow-400', 'bg-red-500', 'bg-green-500');  // Remove all existing classes
+    statusIndicator.classList.add(color);
+  }
 
   /**
    * Initialize the chat channel (ActionCable). This allows us to send and receive messages to LlamaBot Backend.
@@ -16,6 +38,7 @@
     console.log("Initializing Chat...");
     
     const consumer = ActionCable.createConsumer();
+    connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
     chatChannel = consumer.subscriptions.create(
@@ -37,6 +60,13 @@
           try {
             // Parse the incoming data - simplify the parsing chain
             const parsed = JSON.parse(data);
+
+            if(parsed.message.type == "external_ws_pong") {
+              lastPongTime = Date.now(); // Update last pong time, which will keep the status icon green
+              console.log("Received pong response from LlamaBot Backend");
+              return;
+            }
+
             const parsedData = JSON.parse(parsed.message);
 
             // if (parsedData.content === 'Workflow completed') {
@@ -58,6 +88,10 @@
                 addMessage("Received changes. Writing to the file system...", "system");
                 window.location.reload();
                 break;
+              case 'external_ws_pong':
+                lastPongTime = Date.now();
+                console.log("Received pong response from LlamaBot Backend, which means we're connected");
+                break;
               default:
                 console.warn("Unknown message type:", parsedData.type);
                 addMessage(`Unknown message type: ${parsedData.type}`, "system");
@@ -75,7 +109,7 @@
 
     disconnected() {
       console.log("Disconnected from ChatChannel. Attempting to reconnect...");
-    // You can also implement exponential backoff for reconnection here
+      clearInterval(connectionCheckInterval);
       setTimeout(() => consumer.connection.reopen(), 5000);
     },
 
