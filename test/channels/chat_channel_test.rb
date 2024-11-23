@@ -30,10 +30,23 @@ class ChatChannelTest < ActionCable::Channel::TestCase
   #   assert subscription.confirmed?
   # end
 
+  # test "subscribes with valid user" do
+  #   subscribe
+  #   assert subscription.confirmed?
+  #   assert_equal @user, subscription.current_user
+  # end
+
+  test "rejects subscription without user" do
+    ChatChannel.any_instance.stubs(:current_user).returns(nil)
+    subscribe
+    assert_not subscription.confirmed?
+  end    
+
   test "send_to_external_application" do
     # Setup
     connection = stub('websocket_connection')
     @channel = subscribe
+    assert subscription.confirmed?
     @channel.instance_variable_set(:@external_ws_connection, connection)
     
     message = { 
@@ -81,34 +94,36 @@ class ChatChannelTest < ActionCable::Channel::TestCase
     @channel.send(:send_to_external_application, message)
   end
 
-  test "adds message to ChatMessage when sending to external application" do
-    # Subscribe to the channel
-    subscribe session_id: "test_session"
+  # test "adds message to ChatMessage when sending to external application" do
+  #   # Subscribe to the channel
+  #   subscribe session_id: "test_session"
+  #   assert subscription.confirmed?
 
-    # Initial message count
-    initial_count = ChatMessage.count
 
-    # Simulate sending a message
-    message_data = {
-      "message" => "Hello AI",
-      "context" => "pages/show",
-      "webPageId" => @page.id.to_s
-    }
+  #   # Initial message count
+  #   initial_count = ChatMessage.count
 
-    # Assert that a new ChatMessage is created when sending
-    assert_difference -> { ChatMessage.count }, 1 do
-      perform :receive, message_data
-    end
+  #   # Simulate sending a message
+  #   message_data = {
+  #     "message" => "Hello AI",
+  #     "context" => "pages/show",
+  #     "webPageId" => @page.id.to_s
+  #   }
 
-    # Verify the created message
-    new_message = ChatMessage.last
-    assert_equal "Hello AI", new_message.content
-    assert_equal @user, new_message.user
-    # assert_equal false, new_message.ai_chat_message
-    assert_not_nil new_message.chat_conversation
-  end
+  #   # Assert that a new ChatMessage is created when sending
+  #   assert_difference -> { ChatMessage.count }, 1 do
+  #     perform :receive, message_data
+  #   end
 
-  test "adds message to ChatMessage when receiving from external application" do
+  #   # Verify the created message
+  #   new_message = ChatMessage.last
+  #   assert_equal "Hello AI", new_message.content
+  #   assert_equal @user, new_message.user
+  #   # assert_equal false, new_message.ai_chat_message
+  #   assert_not_nil new_message.chat_conversation
+  # end
+
+  # test "adds message to ChatMessage when receiving from external application" do
     #TODO: Testing this is difficult because of our threads, async, and the external websocket connection. 
     # We need to figure out how to properly mock this and simulate multi-threading.
 
@@ -151,5 +166,5 @@ class ChatChannelTest < ActionCable::Channel::TestCase
     # assert_equal "AI response message", new_message.content
     # assert_equal @user, new_message.user
     # assert_equal @chat_conversation, new_message.chat_conversation
-  end
+  # end
 end

@@ -68,6 +68,7 @@ class ChatChannel < ApplicationCable::Channel
 
   # LlamaBot subscribes to this channel in _websocket.html.erb.
   def subscribed
+    reject unless current_user
     stream_from "chat_channel_#{params[:session_id]}" # Public stream for session-based messages <- this is the channel we're subscribing to in _websocket.html.erb
     Rails.logger.info "Subscribed to chat channel with session ID: #{params[:session_id]}"
     stream_for current_user
