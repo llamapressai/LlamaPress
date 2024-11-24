@@ -107,9 +107,6 @@ class ChatChannel < ApplicationCable::Channel
 
   # Receive messages from the llamabot/_chat.html.erb chatbot.
   def receive(data)
-    # Log the incoming WebSocket data
-    Rails.logger.info "Received data: #{data.inspect}"
-    
     # Standardize field names so LlamaBot Backend can understand
     data["web_page_id"] = data["webPageId"]
     data["user_message"] = data["message"] 
@@ -137,6 +134,8 @@ class ChatChannel < ApplicationCable::Channel
     
     # Forward the processed data to the LlamaBot Backend Socket
     send_to_external_application(data)
+    # Log the incoming WebSocket data
+    Rails.logger.info "Received data: #{data.inspect}"
   end
 
   private
@@ -167,7 +166,6 @@ class ChatChannel < ApplicationCable::Channel
             end
         end
     )
-
 
     # Initialize the connection and store it in an instance variable
     @external_ws_task = Async do |task|
@@ -223,7 +221,6 @@ class ChatChannel < ApplicationCable::Channel
 
           # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
           formatted_message = { message: message_content }.to_json
-          
 
           #Get the last chat conversation for this page and save this message to it
           chat_conversation = ChatConversation.find_by(page_id: parsed_message["page_id"])
@@ -263,8 +260,9 @@ class ChatChannel < ApplicationCable::Channel
         connection_class: connection.class.name
       }.to_json
       connection.write(ping_message)
+      connection.flush
       Rails.logger.debug "Sent keep-alive ping: #{ping_message}"
-      sleep 30
+      Async::Task.current.sleep(30)
     end
   rescue => e
     Rails.logger.error "Error in keep-alive ping: #{e.message} | Connection type: #{connection.class.name}"
@@ -278,6 +276,7 @@ class ChatChannel < ApplicationCable::Channel
     if @external_ws_connection
       begin
         @external_ws_connection.write(payload)
+        @external_ws_connection.flush
         Rails.logger.info "Sent message to external WebSocket: #{payload}"
       rescue => e
         Rails.logger.error "Error sending message to external WebSocket: #{e.message}"
