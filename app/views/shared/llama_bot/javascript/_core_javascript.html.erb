@@ -650,6 +650,7 @@
     function undoPageChange() {
       let webPageId = "<%=@page&.id%>";
       if (webPageId) {
+        sessionStorage.setItem('showTimelineAfterReload', 'true');
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         fetch(`/pages/${webPageId}/page_undo`, {
           method: 'POST',
@@ -699,6 +700,7 @@
     function redoPageChange() {
       let webPageId = "<%=@page&.id%>";
       if (webPageId) {
+        sessionStorage.setItem('showTimelineAfterReload', 'true');
         fetch(`/pages/${webPageId}/page_redo`, {
           method: 'POST',
           headers: {

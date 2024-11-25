@@ -211,6 +211,21 @@ class PagesController < ApplicationController
     end
   end
 
+  def restore_with_history
+    @page = Page.friendly.find(params[:id])
+    @page_history = PageHistory.find(params[:page_history_id])
+    
+    if @page.restore_with_history(@page_history, "Restored by user")
+      respond_to do |format|
+        format.json { render json: { success: true, message: 'Page restored successfully' } }
+      end
+    else
+      respond_to do |format|
+        format.json { render json: { success: false, error: 'Failed to restore page' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   def sitemap_xml
     @pages = current_site.pages
     

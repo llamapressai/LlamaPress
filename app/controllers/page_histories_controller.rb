@@ -62,6 +62,17 @@ class PageHistoriesController < ApplicationController
     end
   end
 
+  def list
+    @page = Page.find(params[:id])
+    @histories = @page.page_histories.order(created_at: :desc)
+    
+    render json: @histories.map { |history| 
+      history.as_json.merge(
+        is_current_version: (history.id == @page.current_version_id)
+      )
+    }
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page_history
