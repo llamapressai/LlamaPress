@@ -144,7 +144,7 @@ function restoreVersion(historyId) {
 
 // Add keyboard shortcut handler
 document.addEventListener('keydown', function(event) {
-  if (event.shiftKey && event.key.toLowerCase() === 'h') {
+  if ((event.altKey) && event.key.toLowerCase() === 'h') {
     event.preventDefault();
     toggleTimelineOverlay();
   }
