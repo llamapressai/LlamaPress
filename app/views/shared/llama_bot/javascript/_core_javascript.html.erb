@@ -771,10 +771,11 @@
       
       // Add banner
       const banner = document.createElement('div');
-      banner.className = 'selection-mode-banner';
+      banner.className = 'selection-mode-banner llama-inspector-ignore';
+      banner.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits');
       banner.innerHTML = `
-        <div class="selection-mode-exit" onclick="toggleSelectionMode()">✕</div>
-        <div>Press Esc to exit selection mode</div>
+        <div class="selection-mode-exit llama-inspector-ignore" onclick="toggleSelectionMode()" data-llama="exclude_when_saving_contenteditable_edits">✕</div>
+        <div class="llama-inspector-ignore" data-llama="exclude_when_saving_contenteditable_edits">Press Esc to exit selection mode</div>
         <div style="width: 20px"></div>
       `;
       document.body.appendChild(banner);
@@ -822,11 +823,15 @@
    * @param {Event} event - The event object.
    */
   function handleElementSelection(event) {
-    console.log("Handle Elemenet Selection called");
+    console.log("Handle Element Selection called");
     console.log("inSelectionMode", inSelectionMode);
     if (!inSelectionMode) return; //prevent from running if selection mode is off
 
-    //window.llamaElementInspector.toggleInspector(false);
+    // Check if clicked element or its parent has the ignore class
+    if (event.target.closest('.llama-inspector-ignore')) {
+        // Don't prevent default or stop propagation for ignored elements
+        return; // Exit early without selecting the element
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -837,7 +842,7 @@
     // Remove the selection class from any previously selected element
     const previouslySelected = document.querySelector(".selected-element");
     if (previouslySelected) {
-      previouslySelected.classList.remove("selected-element");
+        previouslySelected.classList.remove("selected-element");
     }
 
     // Add selection class to the newly selected element
@@ -848,7 +853,7 @@
 
     // Trigger a custom event
     const customEvent = new CustomEvent("elementSelected", {
-      detail: selectedElement,
+        detail: selectedElement,
     });
     document.dispatchEvent(customEvent);
 

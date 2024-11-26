@@ -36,6 +36,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        pointer-events: none; /* Make banner non-interactive by default */
     }
 
     .selection-mode-exit {
@@ -44,10 +45,15 @@
         padding: 4px 8px;
         font-size: 20px;
         font-weight: bold;
+        pointer-events: auto; /* Make exit button interactive */
     }
 
     .selection-mode-exit:hover {
         color: #ff6666;
+    }
+
+    .llama-inspector-ignore {
+        pointer-events: auto !important;
     }
     </style>
 
