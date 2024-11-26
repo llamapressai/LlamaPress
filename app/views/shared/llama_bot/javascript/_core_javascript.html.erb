@@ -760,32 +760,62 @@
     inSelectionMode = !inSelectionMode;
     window.llamaElementInspector.toggleInspector(inSelectionMode);
     
-    //This is toggling selectionMode.
     const chatbotContainer = document.getElementById("chatbotContainer");
+    const sidePanelButtons = document.querySelectorAll('#llama-side-panel button');
+    
     if (inSelectionMode) {
-      document.body.classList.add("selection-mode");
+      // Hide side panel buttons
+      sidePanelButtons.forEach(button => {
+        button.style.display = 'none';
+      });
       
+      // Add banner
+      const banner = document.createElement('div');
+      banner.className = 'selection-mode-banner';
+      banner.innerHTML = `
+        <div class="selection-mode-exit" onclick="toggleSelectionMode()">✕</div>
+        <div>Press Esc to exit selection mode</div>
+        <div style="width: 20px"></div>
+      `;
+      document.body.appendChild(banner);
+      
+      document.body.classList.add("selection-mode");
       document.getElementById("llama-bot-message-to-user").textContent = "Select an element you want to edit!";
-      //animate the message to user
       document.getElementById("llama-bot-message-to-user").classList.add("animate-pulse");
-
-      chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
-    }
-    if (!inSelectionMode) {
+      chatbotContainer.classList.add("hidden");
+      
+      // Add escape key listener
+      document.addEventListener('keydown', handleSelectionModeEscape);
+    } else {
+      // Show side panel buttons
+      sidePanelButtons.forEach(button => {
+        button.style.display = '';
+      });
+      
+      // Remove banner
+      const banner = document.querySelector('.selection-mode-banner');
+      if (banner) {
+        banner.remove();
+      }
+      
       document.getElementById("llama-bot-message-to-user").classList.remove("animate-pulse");
       document.getElementById("llama-bot-message-to-user").textContent = "What do you want to change?";
       document.body.classList.remove("selection-mode");
-      //const selectedElementInspectorContainer = document.querySelector("#selectedElementInspectorContainer");
-      //let classesHtml = window.llamaElementInspector.getTailwindClassesFromTargetHtml(window.lastSelectedElement);
-      //let contentHtml = window.llamaElementInspector.getTailwindContentFromTargetHtml(window.lastSelectedElement, classesHtml);
-      //selectedElementInspectorContainer.innerHTML = contentHtml;
-      //selectedElementInspectorContainer.classList.remove("hidden");
-      chatbotContainer.classList.remove("hidden"); //selected_element_inspector_container.hideAll()
+      chatbotContainer.classList.remove("hidden");
+      
+      // Remove escape key listener
+      document.removeEventListener('keydown', handleSelectionModeEscape);
     }
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
   }
-  window.toggleSelectionMode = toggleSelectionMode;
+
+  // Add this new function to handle escape key
+  function handleSelectionModeEscape(e) {
+    if (e.key === "Escape" && inSelectionMode) {
+      toggleSelectionMode();
+    }
+  }
 
   /**
    * Handle element selection. This fires when the user to selects an element on the page that they want the LLM to edit.
