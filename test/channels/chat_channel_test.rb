@@ -57,6 +57,7 @@ class ChatChannelTest < ActionCable::Channel::TestCase
 
     # Expectations
     connection.expects(:write).with(expected_payload)
+    connection.expects(:flush)  # Add expectation for flush
     Rails.logger.expects(:info).with("Sent message to external WebSocket: #{expected_payload}")
 
     # Action
@@ -88,6 +89,7 @@ class ChatChannelTest < ActionCable::Channel::TestCase
 
     # Expectations
     connection.expects(:write).with(expected_payload).raises(StandardError.new("Connection failed"))
+
     Rails.logger.expects(:error).with("Error sending message to external WebSocket: Connection failed")
 
     # Action
