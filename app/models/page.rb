@@ -169,21 +169,38 @@ class Page < ApplicationRecord
   end
 
   def save_history(user_message = nil)
+    puts "\n=== Starting save_history ==="
+    puts "Initial user_message: #{user_message.inspect}"
+    
     return unless persisted?  # Make sure the page is saved first
+    puts "Page is persisted, continuing..."
     
     user_message ||= "Save version"
+    puts "Final user_message: #{user_message}"
     
     # Check if there's a previous history entry with the same content
     current_history = page_histories.find_by(id: current_version_id)
-    return current_history if current_history&.content == self.content
+    puts "Current history found: #{current_history.inspect}"
     
-    # If we're saving from a previous version, prune future versions
-    if current_history
-      page_histories.where('created_at > ?', current_history.created_at).destroy_all
+    same = current_history&.content == self.content
+    puts "Content is same as current history? #{same}"
+
+    if same
+      puts "=== Returning existing history (no changes) ==="
+      return current_history
     end
     
+    # If we're saving from a previous version, prune future versions
+    # if current_history
+    #   page_histories.where('created_at > ?', current_history.created_at).destroy_all
+    # end
+
     # Create new history entry if content is different
+    puts "Creating new history entry..."
     history = self.page_histories.create(content: self.content, user_message: user_message)
+    puts "New history created: #{history.inspect}"
+    
+    puts "Updating current_version_id to: #{history.id}"
     self.update_column(:current_version_id, history.id)
     history
   end

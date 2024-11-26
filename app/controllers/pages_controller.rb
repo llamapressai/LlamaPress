@@ -129,12 +129,18 @@ class PagesController < ApplicationController
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
     message = params[:message].present? ? params[:message] : "User Edit"
-    @page.save_history(message)
+    Rails.logger.info "Attempting to update page #{@page.id} with message: #{message}"
+    
     respond_to do |format|
       if @page.update(page_params)
+        Rails.logger.info "Successfully updated page #{@page.id}"
+        @page.save_history(message)
+        Rails.logger.info "Saved page history with message: #{message}"
+        
         format.html { redirect_to page_url(@page.id), notice: "web page was successfully updated." }
         format.json { render :show, status: :ok, location: @page }
       else
+        Rails.logger.error "Failed to update page #{@page.id}. Errors: #{@page.errors.full_messages}"
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @page.errors, status: :unprocessable_entity }
       end
