@@ -63,7 +63,16 @@
     window.toggleChat = toggleChat;
 
     // Add event listeners to the chat icon and close button
-    chatIcon.addEventListener("click", toggleChat);
+    chatIcon.addEventListener("click", () => {
+      // If we're in selection mode, exit it
+      if (inSelectionMode) {
+        toggleSelectionMode();
+        return; // Don't toggle chat if we were in selection mode
+      }
+      
+      // Normal chat toggle behavior
+      toggleChat();
+    });
     closeButton.addEventListener("click", toggleChat);
 
     /**
