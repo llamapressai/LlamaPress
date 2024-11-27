@@ -771,49 +771,51 @@
     
     const chatbotContainer = document.getElementById("chatbotContainer");
     const sidePanelButtons = document.querySelectorAll('#llama-side-panel button');
+    const menuTrigger = document.getElementById('llama-menu-trigger');
+    const selectionExit = document.getElementById('llama-selection-exit');
+    const panel = document.getElementById('llama-side-panel');
     
     if (inSelectionMode) {
-      // Hide side panel buttons
+      // Hide side panel buttons except selection exit
       sidePanelButtons.forEach(button => {
-        button.style.display = 'none';
+        if (button.id !== 'llama-selection-exit') {
+          button.style.display = 'none';
+        }
       });
       
-      // Add banner
-      const banner = document.createElement('div');
-      banner.className = 'selection-mode-banner llama-inspector-ignore';
-      banner.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits');
-      banner.innerHTML = `
-        <div class="selection-mode-exit llama-inspector-ignore" onclick="toggleSelectionMode()" data-llama="exclude_when_saving_contenteditable_edits">✕</div>
-        <div class="llama-inspector-ignore" data-llama="exclude_when_saving_contenteditable_edits">Press Esc to exit selection mode</div>
-        <div style="width: 20px"></div>
-      `;
-      document.body.appendChild(banner);
+      // Hide menu trigger, show selection exit
+      menuTrigger.classList.add('hidden');
+      selectionExit.classList.remove('hidden');
+      
+      // Add click handler for selection exit
+      selectionExit.onclick = () => toggleSelectionMode();
+      
+      // Make sure panel is closed in selection mode
+      panel.classList.add('-translate-x-full');
       
       document.body.classList.add("selection-mode");
       document.getElementById("llama-bot-message-to-user").textContent = "Select an element you want to edit!";
       document.getElementById("llama-bot-message-to-user").classList.add("animate-pulse");
       chatbotContainer.classList.add("hidden");
       
-      // Add escape key listener
       document.addEventListener('keydown', handleSelectionModeEscape);
     } else {
-      // Show side panel buttons
+      // Show all side panel buttons except selection exit
       sidePanelButtons.forEach(button => {
-        button.style.display = '';
+        if (button.id !== 'llama-selection-exit') {
+          button.style.display = '';
+        }
       });
       
-      // Remove banner
-      const banner = document.querySelector('.selection-mode-banner');
-      if (banner) {
-        banner.remove();
-      }
+      // Show menu trigger, hide selection exit
+      menuTrigger.classList.remove('hidden');
+      selectionExit.classList.add('hidden');
       
       document.getElementById("llama-bot-message-to-user").classList.remove("animate-pulse");
       document.getElementById("llama-bot-message-to-user").textContent = "What do you want to change?";
       document.body.classList.remove("selection-mode");
       chatbotContainer.classList.remove("hidden");
       
-      // Remove escape key listener
       document.removeEventListener('keydown', handleSelectionModeEscape);
     }
 
