@@ -325,6 +325,9 @@ class ElementInspector {
       const target = document.elementFromPoint(e.clientX, e.clientY);
       if (!target) return;
 
+      // Ignore elements with the llama-inspector-ignore class
+      if (target.closest('.llama-inspector-ignore')) return;
+
       const rect = target.getBoundingClientRect();
       const computedStyle = window.getComputedStyle(target);
       

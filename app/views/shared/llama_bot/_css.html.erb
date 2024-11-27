@@ -22,6 +22,39 @@
         box-shadow: 0 0 12px rgba(255, 215, 0, 0.8); /* Bright gold shadow */
         outline: 3px dashed #FFD700; /* Gold dashed outline */
     }
+
+    .selection-mode-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(147, 51, 234, 0.8); /* This is a purple-600 with opacity */
+        color: white;
+        text-align: center;
+        padding: 8px;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none; /* Make banner non-interactive by default */
+    }
+
+    .selection-mode-exit {
+        color: #ff4444;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 20px;
+        font-weight: bold;
+        pointer-events: auto; /* Make exit button interactive */
+    }
+
+    .selection-mode-exit:hover {
+        color: #ff6666;
+    }
+
+    .llama-inspector-ignore {
+        pointer-events: auto !important;
+    }
     </style>
 
     <script>

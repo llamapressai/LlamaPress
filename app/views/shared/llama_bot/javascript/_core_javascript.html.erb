@@ -63,7 +63,16 @@
     window.toggleChat = toggleChat;
 
     // Add event listeners to the chat icon and close button
-    chatIcon.addEventListener("click", toggleChat);
+    chatIcon.addEventListener("click", () => {
+      // If we're in selection mode, exit it
+      if (inSelectionMode) {
+        toggleSelectionMode();
+        return; // Don't toggle chat if we were in selection mode
+      }
+      
+      // Normal chat toggle behavior
+      toggleChat();
+    });
     closeButton.addEventListener("click", toggleChat);
 
     /**
@@ -760,43 +769,80 @@
     inSelectionMode = !inSelectionMode;
     window.llamaElementInspector.toggleInspector(inSelectionMode);
     
-    //This is toggling selectionMode.
     const chatbotContainer = document.getElementById("chatbotContainer");
+    const sidePanelButtons = document.querySelectorAll('#llama-side-panel button');
+    const menuTrigger = document.getElementById('llama-menu-trigger');
+    const selectionExit = document.getElementById('llama-selection-exit');
+    const panel = document.getElementById('llama-side-panel');
+    
     if (inSelectionMode) {
-      document.body.classList.add("selection-mode");
+      // Hide side panel buttons except selection exit
+      sidePanelButtons.forEach(button => {
+        if (button.id !== 'llama-selection-exit') {
+          button.style.display = 'none';
+        }
+      });
       
+      // Hide menu trigger, show selection exit
+      menuTrigger.classList.add('hidden');
+      selectionExit.classList.remove('hidden');
+      
+      // Add click handler for selection exit
+      selectionExit.onclick = () => toggleSelectionMode();
+      
+      // Make sure panel is closed in selection mode
+      panel.classList.add('-translate-x-full');
+      
+      document.body.classList.add("selection-mode");
       document.getElementById("llama-bot-message-to-user").textContent = "Select an element you want to edit!";
-      //animate the message to user
       document.getElementById("llama-bot-message-to-user").classList.add("animate-pulse");
-
-      chatbotContainer.classList.add("hidden"); //selected_element_inspector_container.hideAll()
-    }
-    if (!inSelectionMode) {
+      chatbotContainer.classList.add("hidden");
+      
+      document.addEventListener('keydown', handleSelectionModeEscape);
+    } else {
+      // Show all side panel buttons except selection exit
+      sidePanelButtons.forEach(button => {
+        if (button.id !== 'llama-selection-exit') {
+          button.style.display = '';
+        }
+      });
+      
+      // Show menu trigger, hide selection exit
+      menuTrigger.classList.remove('hidden');
+      selectionExit.classList.add('hidden');
+      
       document.getElementById("llama-bot-message-to-user").classList.remove("animate-pulse");
       document.getElementById("llama-bot-message-to-user").textContent = "What do you want to change?";
       document.body.classList.remove("selection-mode");
-      //const selectedElementInspectorContainer = document.querySelector("#selectedElementInspectorContainer");
-      //let classesHtml = window.llamaElementInspector.getTailwindClassesFromTargetHtml(window.lastSelectedElement);
-      //let contentHtml = window.llamaElementInspector.getTailwindContentFromTargetHtml(window.lastSelectedElement, classesHtml);
-      //selectedElementInspectorContainer.innerHTML = contentHtml;
-      //selectedElementInspectorContainer.classList.remove("hidden");
-      chatbotContainer.classList.remove("hidden"); //selected_element_inspector_container.hideAll()
+      chatbotContainer.classList.remove("hidden");
+      
+      document.removeEventListener('keydown', handleSelectionModeEscape);
     }
 
     console.log("Selection mode:", inSelectionMode ? "ON" : "OFF");
   }
-  window.toggleSelectionMode = toggleSelectionMode;
+
+  // Add this new function to handle escape key
+  function handleSelectionModeEscape(e) {
+    if (e.key === "Escape" && inSelectionMode) {
+      toggleSelectionMode();
+    }
+  }
 
   /**
    * Handle element selection. This fires when the user to selects an element on the page that they want the LLM to edit.
    * @param {Event} event - The event object.
    */
   function handleElementSelection(event) {
-    console.log("Handle Elemenet Selection called");
+    console.log("Handle Element Selection called");
     console.log("inSelectionMode", inSelectionMode);
     if (!inSelectionMode) return; //prevent from running if selection mode is off
 
-    //window.llamaElementInspector.toggleInspector(false);
+    // Check if clicked element or its parent has the ignore class
+    if (event.target.closest('.llama-inspector-ignore')) {
+        // Don't prevent default or stop propagation for ignored elements
+        return; // Exit early without selecting the element
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -807,7 +853,7 @@
     // Remove the selection class from any previously selected element
     const previouslySelected = document.querySelector(".selected-element");
     if (previouslySelected) {
-      previouslySelected.classList.remove("selected-element");
+        previouslySelected.classList.remove("selected-element");
     }
 
     // Add selection class to the newly selected element
@@ -818,7 +864,7 @@
 
     // Trigger a custom event
     const customEvent = new CustomEvent("elementSelected", {
-      detail: selectedElement,
+        detail: selectedElement,
     });
     document.dispatchEvent(customEvent);
 
