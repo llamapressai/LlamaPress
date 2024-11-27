@@ -100,8 +100,12 @@ class ChatChannel < ApplicationCable::Channel
     
     # Clean up the connection
     if @external_ws_connection
-      @external_ws_connection.close
-      Rails.logger.info "Closed external WebSocket connection for: #{connection_id}"
+      begin
+        @external_ws_connection.close
+        Rails.logger.info "Closed external WebSocket connection for: #{connection_id}"
+      rescue RuntimeError => e
+        Rails.logger.warn "Could not close WebSocket connection: #{e.message}"
+      end
     end
   end
 

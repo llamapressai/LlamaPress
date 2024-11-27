@@ -5,6 +5,7 @@ class Page < ApplicationRecord
 
   belongs_to :site
   belongs_to :organization
+  belongs_to :current_version, class_name: 'PageHistory', optional: true, foreign_key: 'current_version_id'
   
   has_many :page_histories, dependent: :destroy
   has_many :posts, dependent: :nullify
@@ -168,21 +169,38 @@ class Page < ApplicationRecord
   end
 
   def save_history(user_message = nil)
+    puts "\n=== Starting save_history ==="
+    puts "Initial user_message: #{user_message.inspect}"
+    
     return unless persisted?  # Make sure the page is saved first
+    puts "Page is persisted, continuing..."
     
     user_message ||= "Save version"
+    puts "Final user_message: #{user_message}"
     
     # Check if there's a previous history entry with the same content
     current_history = page_histories.find_by(id: current_version_id)
-    return current_history if current_history&.content == self.content
+    puts "Current history found: #{current_history.inspect}"
     
-    # If we're saving from a previous version, prune future versions
-    if current_history
-      page_histories.where('created_at > ?', current_history.created_at).destroy_all
+    same = current_history&.content == self.content
+    puts "Content is same as current history? #{same}"
+
+    if same
+      puts "=== Returning existing history (no changes) ==="
+      return current_history
     end
     
+    # If we're saving from a previous version, prune future versions
+    # if current_history
+    #   page_histories.where('created_at > ?', current_history.created_at).destroy_all
+    # end
+
     # Create new history entry if content is different
+    puts "Creating new history entry..."
     history = self.page_histories.create(content: self.content, user_message: user_message)
+    puts "New history created: #{history.inspect}"
+    
+    puts "Updating current_version_id to: #{history.id}"
     self.update_column(:current_version_id, history.id)
     history
   end
@@ -194,16 +212,26 @@ class Page < ApplicationRecord
     end
   end
 
-  def undo
-    return false unless current_version_id
+  def next_version
+    return nil unless current_version
+    page_histories.where('created_at > ?', current_version.created_at)
+                  .order(created_at: :asc)
+                  .first
+  end
 
-    current_history = page_histories.find(current_version_id)
-    previous_history = page_histories.where('created_at < ?', current_history.created_at)
-                                   .order(created_at: :desc)
-                                   .first
+  def previous_version
+    return nil unless current_version
+    page_histories.where('created_at < ?', current_version.created_at)
+                  .order(created_at: :desc)
+                  .first
+  end
+
+  def undo
+    return false unless current_version
+    previous = previous_version
     
-    if previous_history
-      restore_with_history(previous_history, "Undo to previous version")
+    if previous
+      restore_with_history(previous, "Undo to previous version")
       true
     else
       false
@@ -211,22 +239,41 @@ class Page < ApplicationRecord
   end
 
   def redo
-    return false unless current_version_id
-
-    current_history = page_histories.find(current_version_id)
-    next_history = page_histories.where('created_at > ?', current_history.created_at)
-                                .order(created_at: :asc)
-                                .first
+    return false unless current_version
+    next_ver = next_version
     
-    if next_history
-      restore_with_history(next_history, "Redo to next version")
+    if next_ver
+      restore_with_history(next_ver, "Redo to next version")
       true
     else
       false
     end
   end
 
-  private
+  def current_version
+    return nil unless current_version_id
+    page_histories.find_by(id: current_version_id)
+  end
+
+  def version_number
+    return 0 unless current_version_id
+    page_histories.where('created_at <= ?', current_version.created_at).count
+  end
+
+  def total_versions
+    page_histories.count
+  end
+
+  def latest_version?
+    return true unless current_version_id
+    !page_histories.where('created_at > ?', current_version.created_at).exists?
+  end
+
+  def first_version?
+    return true unless current_version_id
+    !page_histories.where('created_at < ?', current_version.created_at).exists?
+  end
+
 
   def restore_with_history(page_history, message)
     self.content = page_history.content
@@ -237,6 +284,8 @@ class Page < ApplicationRecord
       current_version_id: page_history.id
     )
   end
+
+  private
 
   # Create a new web site for the organization
   def create_new_site

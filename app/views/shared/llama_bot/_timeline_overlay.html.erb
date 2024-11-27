@@ -1,0 +1,159 @@
+<!-- Timeline Overlay -->
+<div id="timelineOverlay" class="fixed right-0 top-0 h-full w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300 overflow-y-auto z-50" data-llama="exclude_when_saving_contenteditable_edits">
+  <div class="p-4 border-b border-gray-200">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-semibold">Page History</h2>
+      <button onclick="toggleTimelineOverlay()" class="text-gray-500 hover:text-gray-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="relative px-4">
+    <!-- Timeline line -->
+    <div class="absolute left-9 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+
+    <!-- Timeline entries container -->
+    <div id="timelineEntries" class="relative py-4">
+      <!-- Loading spinner will be replaced with entries -->
+      <div class="flex justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTimelineOverlay() {
+  const overlay = document.getElementById('timelineOverlay');
+  overlay.classList.toggle('translate-x-full');
+  
+  if (!overlay.classList.contains('translate-x-full')) {
+    loadTimelineHistory();
+    document.addEventListener('keydown', handleEscKey);
+  } else {
+    document.removeEventListener('keydown', handleEscKey);
+  }
+}
+
+function handleEscKey(event) {
+  if (event.key === 'Escape') {
+    const overlay = document.getElementById('timelineOverlay');
+    overlay.classList.add('translate-x-full');
+    document.removeEventListener('keydown', handleEscKey);
+  }
+}
+
+function createTimelineEntry(history) {
+  const entry = document.createElement('div');
+  entry.className = 'flex gap-4 mb-6 relative';
+  
+  const timestamp = new Date(history.created_at).toLocaleString();
+  let contentLength = history.content.length;
+  const isCurrentVersion = history.is_current_version;
+
+  entry.innerHTML = `
+    <div class="relative z-10">
+      <div class="w-6 h-6 rounded-full ${isCurrentVersion ? 'bg-green-500' : 'bg-blue-500'} flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="${isCurrentVersion ? 'M5 13l4 4L19 7' : 'M12 12h0.01'}" />
+        </svg>
+      </div>
+    </div>
+    <div class="flex-1">
+      <div class="bg-white rounded-lg border p-4 ${isCurrentVersion ? 'ring-2 ring-green-500' : ''}">
+        <div class="space-y-2">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-gray-700">
+                ${isCurrentVersion ? '<span class="font-semibold text-green-600">Current Version</span> - ' : ''}
+                ${timestamp}
+              </p>
+              <p class="text-sm text-gray-500">Content size: ${contentLength} bytes</p>
+            </div>
+            ${!isCurrentVersion ? `
+              <button onclick="restoreVersion('${history.id}')" 
+                      class="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                Restore
+              </button>
+            ` : ''}
+          </div>
+          ${history.user_message ? `
+            <div class="pt-2">
+              <p class="text-sm text-gray-700">Edit: ${history.user_message}</p>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+
+  return entry;
+}
+
+function loadTimelineHistory() {
+  console.log("Loading History...")
+  const container = document.getElementById('timelineEntries');
+  const pageId = '<%= @page&.id %>';
+  
+  fetch(`/page_histories/${pageId}/list.json`)
+    .then(response => {
+      console.log('Raw response:', response);
+      return response.json();
+    })
+    .then(data => {
+      console.log('Parsed JSON data:', data);
+      container.innerHTML = '';
+      data.forEach(item => {
+        container.appendChild(createTimelineEntry(item));
+      });
+    })
+    .catch(error => {
+      console.error('Error loading timeline history:', error);
+      container.innerHTML = '<p class="text-red-500 text-center">Error loading history</p>';
+    });
+}
+
+function restoreVersion(historyId) {
+  const pageId = '<%= @page&.id %>';
+  
+  fetch(`/pages/${pageId}/restore_with_history`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ page_history_id: historyId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.reload();
+    } else {
+      alert(data.error || 'Failed to restore version');
+    }
+  })
+  .catch(error => {
+    console.error('Error restoring version:', error);
+    alert('Failed to restore version');
+  });
+}
+
+// Add keyboard shortcut handler
+document.addEventListener('keydown', function(event) {
+  if ((event.altKey) && event.key.toLowerCase() === 'h') {
+    event.preventDefault();
+    toggleTimelineOverlay();
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionStorage.getItem('showTimelineAfterReload') === 'true') {
+    sessionStorage.removeItem('showTimelineAfterReload');
+    toggleTimelineOverlay();
+  }
+});
+</script>
