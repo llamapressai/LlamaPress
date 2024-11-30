@@ -139,7 +139,7 @@ class ChatChannel < ApplicationCable::Channel
     # Forward the processed data to the LlamaBot Backend Socket
     send_to_external_application(data)
     # Log the incoming WebSocket data
-    Rails.logger.info "Received data: #{data.inspect}"
+    Rails.logger.info "Got message from Javascript LlamaBot Frontend: #{data.inspect}"
   end
 
   private
@@ -206,14 +206,14 @@ class ChatChannel < ApplicationCable::Channel
   # Listen for messages from the LlamaBot Backend
   def listen_to_external_websocket(connection)
     while message = connection.read
-      Rails.logger.info "Received from external WebSocket: #{message}"
-      
       # Extract the actual message content
       if message.buffer
         message_content = message.buffer  # Use .data to get the message content
       else
         message_content = message.content
       end
+
+      Rails.logger.info "Received from external WebSocket: #{message_content}"
 
       begin
         parsed_message = JSON.parse(message_content)
