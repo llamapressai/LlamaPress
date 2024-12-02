@@ -26,7 +26,15 @@ class SubmissionsController < ApplicationController
 
   # POST /submissions or /submissions.json
   def create
-    data = JSON.parse(params.to_json).reject { |key, value| key == "controller" || key == "action" }
+    # Spam check - reject if honeypot field is filled
+    if params[:hp].present?
+      head :ok
+      return
+    end
+
+    data = JSON.parse(params.to_json).reject { |key, value| 
+      ['controller', 'action', 'hp'].include?(key)
+    }
     @page = Page.find_by(id: params[:page_id])
     @site = @page&.site || Site.find_by(id: params[:site_id])
     @submission = @site.submissions.new(data: data)
