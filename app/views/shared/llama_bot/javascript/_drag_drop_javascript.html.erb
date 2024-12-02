@@ -1,0 +1,94 @@
+<script data-llama="exclude_when_saving_contenteditable_edits">
+document.addEventListener('DOMContentLoaded', function() {
+  // Only initialize if the page is content editable
+  if (!document.body.contentEditable) return;
+
+  document.body.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  document.body.addEventListener('dragenter', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Add visual feedback
+    if (e.target.nodeType === 1) { // Element node
+      e.target.classList.add('drag-over');
+    }
+  });
+
+  document.body.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Remove visual feedback
+    if (e.target.nodeType === 1) { // Element node
+      e.target.classList.remove('drag-over');
+    }
+  });
+
+  document.body.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Remove any drag-over classes
+    document.querySelectorAll('.drag-over').forEach(el => {
+      el.classList.remove('drag-over');
+    });
+
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const html = dt.getData('text/html');
+
+    if (files.length > 0) {
+      // Handle image files
+      handleImageDrop(files, e.target);
+    } else if (html) {
+      // Handle HTML content (like dragging from side panel)
+      handleHTMLDrop(html, e.target);
+    }
+  });
+
+  function handleImageDrop(files, dropTarget) {
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.classList.add('max-w-full', 'h-auto', 'my-4');
+        img.setAttribute('data-llama-editable', 'true');
+        
+        // Insert at drop position
+        dropTarget.appendChild(img);
+        
+        // Save changes
+        if (typeof saveChanges === 'function') {
+          saveChanges();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function handleHTMLDrop(html, dropTarget) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Add data-llama-editable attribute to all elements
+    tempDiv.querySelectorAll('*').forEach(el => {
+      el.setAttribute('data-llama-editable', 'true');
+    });
+    
+    // Insert at drop position
+    dropTarget.appendChild(tempDiv.firstElementChild);
+    
+    // Save changes
+    if (typeof saveChanges === 'function') {
+      saveChanges();
+    }
+  }
+});
+</script>

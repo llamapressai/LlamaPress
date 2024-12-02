@@ -314,6 +314,14 @@
       imgElement.className = 'h-24 object-cover rounded-lg m-2';
       imgElement.setAttribute('data-llama-editable', 'true');
       
+      // Make draggable 
+      imgElement.draggable = true;
+      
+      // Add drag start handler
+      imgElement.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/html', imgElement.outerHTML);
+      });
+      
       // Add click handler to append image URL to userInput
       imgElement.onclick = function() {
         const userInput = document.getElementById('userInput');
