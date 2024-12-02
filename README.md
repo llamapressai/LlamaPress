@@ -125,3 +125,23 @@ pg_ctl stop
 pg_ctl start
 pg_ctl restart
 ```
+
+```
+nano .git/hooks/pre-push
+#!/bin/bash
+# Run tests before pushing
+bash test/run_tests
+
+# Check if tests passed
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Aborting push."
+    exit 1
+fi
+
+# Allow push to continue if tests passed
+exit 0
+```
+
+```
+chmod +x .git/hooks/pre-push
+```
