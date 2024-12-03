@@ -320,6 +320,7 @@
       // Add drag start handler
       imgElement.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('text/html', imgElement.outerHTML);
+        e.dataTransfer.setData('image/url', imgElement.src);
       });
       
       // Add click handler to append image URL to userInput

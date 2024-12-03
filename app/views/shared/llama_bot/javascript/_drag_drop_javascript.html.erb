@@ -77,17 +77,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
     
-    // Add data-llama-editable attribute to all elements
-    tempDiv.querySelectorAll('*').forEach(el => {
-      el.setAttribute('data-llama-editable', 'true');
-    });
-    
-    // Insert at drop position
-    dropTarget.appendChild(tempDiv.firstElementChild);
-    
-    // Save changes
-    if (typeof saveChanges === 'function') {
-      saveChanges();
+    const droppedImage = tempDiv.querySelector('img');
+    if (droppedImage) {
+      // Select the target element
+      const customEvent = new CustomEvent("elementSelected", {
+        detail: dropTarget
+      });
+      document.dispatchEvent(customEvent);
+      
+      const prompt = `add this image (${droppedImage.src}) to the selected element and align it with the style`;
+      insertPrompt(prompt);
+      
+    } else {
+      // Handle non-image HTML drops as before
+      tempDiv.querySelectorAll('*').forEach(el => {
+        el.setAttribute('data-llama-editable', 'true');
+      });
+      
+      dropTarget.appendChild(tempDiv.firstElementChild);
+      
+      if (typeof saveChanges === 'function') {
+        saveChanges();
+      }
     }
   }
 });
