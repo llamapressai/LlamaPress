@@ -5,6 +5,8 @@
 
   const imageBlobIdsToAttachToJobRequest = []; // This is an array with the image blob IDs that we need to pass as a parameter into job_requests so it can attach these images to the job_request after it's been created
   
+  window.selectedImages = new Set(); // Using Set to avoid duplicates
+
   function submitPreuploadedS3ImagesToServer(){
       const csrfToken = "<%= form_authenticity_token %>";
       console.log("Made it with these image blob IDs!");
@@ -323,10 +325,18 @@
         e.dataTransfer.setData('image/url', imgElement.src);
       });
       
-      // Add click handler to append image URL to userInput
+      // Updated click handler
       imgElement.onclick = function() {
-        const userInput = document.getElementById('userInput');
-        userInput.value = userInput.value + ' ' + image.url;
+        if (window.selectedImages.has(image.url)) {
+          // If image is already selected, deselect it
+          window.selectedImages.delete(image.url);
+          imgElement.classList.remove('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+        } else {
+          // If image is not selected, select it
+          window.selectedImages.add(image.url);
+          imgElement.classList.add('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+        }
+        console.log('Selected images:', Array.from(selectedImages));
       };
       
       if (appendToBeginning) {
