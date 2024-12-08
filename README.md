@@ -92,15 +92,15 @@ source ~/.zshrc
 ### Setting up psql
 
 ```
-brew install postgresql #we want to be on Postgres 14
-initdb /usr/local/var/postgresql@14
-brew services start postgresql@14
+brew install postgresql@16 #we want to be on Postgres 16
+initdb /usr/local/var/postgresql@16
+brew services start postgresql@16
 ```
 
 
 ### Start postgres, install gems, and create the database
 ```
-brew services start postgresql@14
+brew services start postgresql@16
 
 bundle gem install 
 
@@ -156,6 +156,7 @@ pg_ctl start
 pg_ctl restart
 ```
 
+### Setting up pre-push hook for tests
 ```
 nano .git/hooks/pre-push
 #!/bin/bash
@@ -174,4 +175,13 @@ exit 0
 
 ```
 chmod +x .git/hooks/pre-push
+```
+
+### Setting up AWS CLI for database backups and restoring. NOTE: Databases are saved to AWS S3 after being set up in your production environment. You must have an AWS Key Secret that has access to the S3 bucket to restore the database. 
+
+### You must also have the load_database_from_s3.sh script in this folder to restore the database. Reach out to Kody or Brian if you need help with this. 
+
+```
+brew install awscli
+aws configure
 ```
