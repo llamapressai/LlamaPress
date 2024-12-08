@@ -75,9 +75,34 @@ Once installed just run `mise install` from the root of the project.
 ```
 # Install dependencies (ruby, postgres, node, yarn, redis, etc.)
 mise install
+```
 
-# Start postgres
-pg_ctl start
+### Check you have the right ruby version, should be 3.3.5
+```
+ruby --version
+# output: ruby 3.3.5 (2024-09-03 revision ef084cc8f4)
+```
+
+# If not, you'll need to run `mise install` then `source ~/.zshrc`
+``` 
+mise install
+source ~/.zshrc
+```
+
+### Setting up psql
+
+```
+brew install postgresql #we want to be on Postgres 14
+initdb /usr/local/var/postgresql@14
+brew services start postgresql@14
+```
+
+
+### Start postgres, install gems, and create the database
+```
+brew services start postgresql@14
+
+bundle gem install 
 
 # Create the database
 rails db:create
@@ -87,6 +112,11 @@ rails db:migrate
 
 # Seed the database with organization and web pages
 rails db:seed
+
+# Set up local_env.yml file (see below). 
+touch config/local_env.yml
+
+# open config/local_env.yml in your editor and paste in the relevant API keys (openai, aws, llama-bot, etc.) (reach out to Kody or Brian directly (kody@llamapress.ai, brian@llamapress.ai), if you need help with this step of setting up your config/local_env.yml file)
 
 # Start the server
 rails s
