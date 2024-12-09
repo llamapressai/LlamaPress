@@ -8,7 +8,6 @@
 /.bundle
 
 # Ignore all environment files (except templates).
-/.env*
 !/.env*.erb
 
 # Ignore all logfiles and tempfiles.
@@ -50,3 +49,5 @@ start
 .prettierignore
 
 load_database_from_s3.sh
+config.bat
+node_modules
