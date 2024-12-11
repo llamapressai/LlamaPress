@@ -50,3 +50,6 @@ start
 .prettierignore
 
 load_database_from_s3.sh
+
+node_modules
+dump.rdb
