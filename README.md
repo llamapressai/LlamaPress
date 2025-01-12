@@ -188,3 +188,10 @@ chmod +x .git/hooks/pre-push
 brew install awscli
 aws configure
 ```
+### Setting up Redis
+
+Start Redis locally for development:
+```
+brew services start redis
+```
+
