@@ -2,6 +2,7 @@ require 'async/websocket/client'
 require 'async/http/endpoint'
 require 'async/reactor'
 require 'json'  # Ensure JSON is required if not already
+require 'llama_bot'
 
 class ChatChannel < ApplicationCable::Channel
   def fetch_file_contents(context, web_page_id=nil)
@@ -64,6 +65,15 @@ class ChatChannel < ApplicationCable::Channel
     end
   
     return "Got it! Snippets have been updated and here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
+  end
+
+  # This method is called when the LlamaBot Backend sends a message to the chat channel with the type "extension_run". 
+  # This means the LlamaBot Backend is asking us to run an extension that's defined here in LlamaPress, in the llamabot_extensions folder.
+  def handle_extension_run(response)
+    extension_name = response['payload']['extension_name']
+    extension_context = response['payload']['extension_context']
+    extension = LlamaBotExtension.find_by(name: extension_name)
+    extension.run(extension_context)
   end
 
   # LlamaBot subscribes to this channel in _websocket.html.erb.
@@ -250,6 +260,8 @@ class ChatChannel < ApplicationCable::Channel
       rescue JSON::ParserError => e
         Rails.logger.error "Failed to parse message as JSON: #{e.message}"
       end
+
+      # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
       ActionCable.server.broadcast "chat_channel_#{params[:session_id]}", formatted_message
     end
   end

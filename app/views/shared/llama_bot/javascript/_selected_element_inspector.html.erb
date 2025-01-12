@@ -221,7 +221,9 @@ class ElementInspector {
       document.body.style.cursor = 'default';
       console.log("setting cursor to default");
       // remove the overlays
-      this.hideAll();  //selected_element_inspector_container.hideAll()
+      if (!this.toolTipEnabled) {
+        this.hideAll();  //selected_element_inspector_container.hideAll()
+      }
     }
   }
 

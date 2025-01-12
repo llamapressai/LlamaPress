@@ -6,15 +6,21 @@
   let lastPongTime = Date.now() - 30000;
   let connectionCheckInterval;
 
-  // Add this function to update the status indicator
+  /**
+   * Sets Green, Yellow, Red indicator on the Blue LlamaBot Chat Window status icon, so the user can know if they're connected to LlamaBot Backend or not.
+   */
   function updateConnectionStatus() {
     const timeSinceLastPong = Date.now() - lastPongTime;
-    
-    if (timeSinceLastPong < 30000) { // Less than 30 seconds
+
+    let connectionIsActive = timeSinceLastPong < 30000; // We've heard back from LlamaBot Backend in the last 30 seconds
+    let connectionMightBeStuck = timeSinceLastPong < 50000; // We've heard back from LlamaBot Backend in the last 50 seconds
+    let connectionIsDead = timeSinceLastPong > 50000; // We've not heard back from LlamaBot Backend in the last 50 seconds
+
+    if (connectionIsActive) { //green
       updateStatusIcon('bg-green-500');
-    } else if (timeSinceLastPong < 50000) { // Between 30-50 seconds
+    } else if (connectionMightBeStuck) { //yellow
       updateStatusIcon('bg-yellow-400');
-    } else { // More than 50 seconds
+    } else { //red
       updateStatusIcon('bg-red-500');
     }
   }
