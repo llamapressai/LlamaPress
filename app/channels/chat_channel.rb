@@ -5,6 +5,9 @@ require 'json'  # Ensure JSON is required if not already
 require 'llama_bot'
 
 class ChatChannel < ApplicationCable::Channel
+  
+  # Fetches the file contents from the database or the file system, depending on the context and web_page_id. 
+  # This then gets sent to the LlamaBot Backend for the LLM to understand what the user is editing and read it.
   def fetch_file_contents(context, web_page_id=nil)
     file_path = context || "app/views/llama_bot/home.html.erb"
 
@@ -42,7 +45,7 @@ class ChatChannel < ApplicationCable::Channel
       end
     end
   
-    if should_we_write_page_to_database
+    if should_we_write_page_to_database # This is for updating an existing WebPage that lives in the database, as opposed to overwriting to a file on the filesystem.
       # Write the full page content to the database
       web_page = Page.find_by(id: response['query_params']['web_page_id'])
       if web_page
@@ -228,15 +231,19 @@ class ChatChannel < ApplicationCable::Channel
       begin
         parsed_message = JSON.parse(message_content)
         case parsed_message["type"]
+        
+        
+        ## A system message be sent directly to the user, so they can read it in the Chat Window as if LlamaBot is talking to them. 
+        ## For Example, a system message could be LlamaBot Saying: Got it! Reading Docx now so I can update the Wordpress page..
         when "system_message"
           Rails.logger.info "---------Received system_message message!----------"
           response = parsed_message['content']
           Rails.logger.info "---------------------> Response: #{response}"
 
-          # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
+          # Broadcast the message to the public channel websocket so llamabot/_chat.html.erb can display it
           formatted_message = { message: message_content }.to_json
 
-          #Get the last chat conversation for this page and save this message to it
+          #Get the last chat conversation for this page and save this message to it, so that the user can read it's message history and what LlamaBot has said to them previously.
           chat_conversation = ChatConversation.find_by(page_id: parsed_message["page_id"])
           if chat_conversation.nil?
             chat_conversation = ChatConversation.create(page_id: parsed_message["page_id"], user: current_user)
@@ -244,6 +251,9 @@ class ChatChannel < ApplicationCable::Channel
           chat_message = ChatMessage.create(content: response, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:ai_message], created_at: Time.now)
 
           Rails.logger.info "--------Completed system_message message!----------"
+        
+        # This message is sent when LlamaBot is trying to write new code to a file on the file system, or webpage that's saved in the database.
+        # Perfect for editing existing Ruby on Rails code on the filesystem, or updating an existing WebPage that lives in the database.
         when "write_code"
           Rails.logger.info "---------Received write_code message!----------"
           response = parsed_message['content']
@@ -252,6 +262,8 @@ class ChatChannel < ApplicationCable::Channel
           formatted_message = { message: message_content }.to_json
           Rails.logger.info "--------Completed write_code message!----------"
           # Add any additional handling for write_code messages here
+        
+        #This is for the frontend chatbot to know that we're still connected to the LlamaBot backend, and display the green "Connected" status in the chatbot user interface.
         when "pong"
           Rails.logger.debug "Received pong response"
           # Tell llamabot frontend that we've received a pong response, and we're still connected
@@ -266,7 +278,7 @@ class ChatChannel < ApplicationCable::Channel
     end
   end
 
-  # TODO: Send keep-alive pings to the LlamaBot Backend
+  # Sends keep-live pings to the LlamaBot Backend to keep the websocket connection alive and prevent it from timing out.
   def send_keep_alive_pings(connection)
     loop do
       ping_message = {
@@ -284,7 +296,7 @@ class ChatChannel < ApplicationCable::Channel
     Rails.logger.error "Error in keep-alive ping: #{e.message} | Connection type: #{connection.class.name}"
   end
 
-  # Send messages from the user to the LlamaBot Backend Socket
+  # Sends messages from the user to the LlamaBot Backend Socket
   def send_to_external_application(message)
     #   ChatMessage.create(content: message_content, user: current_user, chat_conversation: ChatConversation.last, ai_chat_message: true, created_at: Time.now)
 
