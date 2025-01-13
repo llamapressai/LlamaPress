@@ -29,7 +29,7 @@ To create a new LlamaBot Extension:
 Example:
 ```ruby
 # llamabot_extensions/my_custom_task.rb
-class MyCustomTask
+class MyCustomTask < LlamaBotExtension
   # Metadata about the extension
   def self.metadata
     {
@@ -48,3 +48,4 @@ class MyCustomTask
     "You asked for '#{input}', here's the result from the custom task!"
   end
 end
+```
