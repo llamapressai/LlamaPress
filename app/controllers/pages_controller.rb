@@ -52,8 +52,15 @@ class PagesController < ApplicationController
 
   def resolve_slug
     #Handle duplicate slugs. Default to current_site's version, but if it can't find current_site's version, try the global version.
+    Rails.logger.info "Resolving slug for path: #{params[:path]}"
+    Rails.logger.info "Current site: #{current_site&.slug}"
+  
+    
+    
     @page = current_site&.pages&.friendly&.find(params[:path]) || Page.find_by(slug: params[:path])
     
+
+
     if @page.nil?
       redirect_to llama_bot_home_path and return
     end
