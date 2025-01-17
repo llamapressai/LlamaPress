@@ -44,7 +44,7 @@
     <script>
         const toolbar = document.getElementById('llama-toolbar');
         const colorPicker = document.getElementById('llama-color-picker');
-        const textDropdownButton = document.getElementById('llama-text-dropdown-button');
+        //const textDropdownButton = document.getElementById('llama-text-dropdown-button');
         const textDropdown = document.getElementById('llama-text-dropdown');
 
         let selectedRange = null;
@@ -55,16 +55,16 @@
             body.addEventListener('click', hideToolbar);
             
             // Add click handler for text dropdown button
-            textDropdownButton.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent immediate hiding
-                textDropdown.classList.toggle('hidden');
-            });
+            //textDropdownButton.addEventListener('click', function(e) {
+            //    e.stopPropagation(); // Prevent immediate hiding
+            //    textDropdown.classList.toggle('hidden');
+            //});
 
             // Hide dropdown when clicking outside
             document.addEventListener('click', function(e) {
-                if (!textDropdownButton.contains(e.target)) {
-                    textDropdown.classList.add('hidden');
-                }
+                //if (!textDropdownButton.contains(e.target)) {
+                //    textDropdown.classList.add('hidden');
+                //}
             });
         });
 

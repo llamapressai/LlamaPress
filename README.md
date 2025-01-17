@@ -75,9 +75,34 @@ Once installed just run `mise install` from the root of the project.
 ```
 # Install dependencies (ruby, postgres, node, yarn, redis, etc.)
 mise install
+```
 
-# Start postgres
-pg_ctl start
+### Check you have the right ruby version, should be 3.3.5
+```
+ruby --version
+# output: ruby 3.3.5 (2024-09-03 revision ef084cc8f4)
+```
+
+# If not, you'll need to run `mise install` then `source ~/.zshrc`
+``` 
+mise install
+source ~/.zshrc
+```
+
+### Setting up psql
+
+```
+brew install postgresql@16 #we want to be on Postgres 16
+initdb /usr/local/var/postgresql@16
+brew services start postgresql@16
+```
+
+
+### Start postgres, install gems, and create the database
+```
+brew services start postgresql@16
+
+bundle gem install 
 
 # Create the database
 rails db:create
@@ -88,6 +113,11 @@ rails db:migrate
 # Seed the database with organization and web pages
 rails db:seed
 
+# Set up local_env.yml file (see below). 
+touch config/local_env.yml
+
+# open config/local_env.yml in your editor and paste in the relevant API keys (openai, aws, llama-bot, etc.) (reach out to Kody or Brian directly (kody@llamapress.ai, brian@llamapress.ai), if you need help with this step of setting up your config/local_env.yml file)
+
 # Start the server
 rails s
 ```
@@ -97,8 +127,11 @@ rails s
 # Install playwright, () 
 # https://justin.searls.co/posts/running-rails-system-tests-with-playwright-instead-of-selenium/
 export PLAYWRIGHT_CLI_VERSION=$(bundle exec ruby -e 'require "playwright"; puts Playwright::COMPATIBLE_PLAYWRIGHT_VERSION.strip')
+
 yarn add -D "playwright@$PLAYWRIGHT_CLI_VERSION"
 yarn run playwright install
+
+yarn install 
 
 bash test/run_tests.sh
 ```
@@ -126,6 +159,7 @@ pg_ctl start
 pg_ctl restart
 ```
 
+### Setting up pre-push hook for tests
 ```
 nano .git/hooks/pre-push
 #!/bin/bash
@@ -145,3 +179,19 @@ exit 0
 ```
 chmod +x .git/hooks/pre-push
 ```
+
+### Setting up AWS CLI for database backups and restoring. NOTE: Databases are saved to AWS S3 after being set up in your production environment. You must have an AWS Key Secret that has access to the S3 bucket to restore the database. 
+
+### You must also have the load_database_from_s3.sh script in this folder to restore the database. Reach out to Kody or Brian if you need help with this. 
+
+```
+brew install awscli
+aws configure
+```
+### Setting up Redis
+
+Start Redis locally for development:
+```
+brew services start redis
+```
+

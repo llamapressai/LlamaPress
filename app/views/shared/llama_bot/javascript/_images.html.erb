@@ -5,6 +5,8 @@
 
   const imageBlobIdsToAttachToJobRequest = []; // This is an array with the image blob IDs that we need to pass as a parameter into job_requests so it can attach these images to the job_request after it's been created
   
+  window.selectedImages = new Set(); // Using Set to avoid duplicates
+
   function submitPreuploadedS3ImagesToServer(){
       const csrfToken = "<%= form_authenticity_token %>";
       console.log("Made it with these image blob IDs!");
@@ -46,7 +48,7 @@
 
   async function get_file_name(input){
     const file_name = document.getElementById('image_holder');
-    const uploadText = file_name.files.length > 1 ? 'Upload your images ('+file_name.files.length+' files)' : 'Upload your images ('+file_name.files[0].name+')';
+    const uploadText = file_name.files.length > 1 ? 'Upload ('+file_name.files.length+' files)' : 'Upload ('+file_name.files[0].name+')';
     const csrfToken = "<%= form_authenticity_token %>";
     //$('#file_name_show').html(uploadText);
     const previewContainer = document.querySelector('#upload-preview');
@@ -309,30 +311,92 @@
      *    By default, appendToBeginning is false, so images are shown in the order they were uploaded.
      */
     function injectImageIntoLlamaBotImageContainer(image, appendToBeginning = false) {
-      const imgElement = document.createElement('img');
-      imgElement.src = image.url;
-      imgElement.className = 'h-24 object-cover rounded-lg m-2';
-      imgElement.setAttribute('data-llama-editable', 'true');
+      let element;
+      const fileExtension = image.url.split('.').pop().toLowerCase();
+      const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension);
       
-      // Make draggable 
-      imgElement.draggable = true;
+      if (isImage) {
+        element = document.createElement('img');
+        element.src = image.url;
+        element.className = 'h-24 object-cover rounded-lg m-2';
+      } else {
+        element = document.createElement('div');
+        element.className = 'h-24 w-24 flex flex-col rounded-lg m-2 bg-gray-100 border border-gray-300 relative group';
+        
+        // Fetch and display file contents
+        fetch(image.url)
+          .then(response => response.text())
+          .then(content => {
+            const truncatedType = fileExtension.length > 4 ? 
+              fileExtension.substring(0, 4) + '...' : 
+              fileExtension;
+
+            element.innerHTML = `
+              <div class="absolute inset-0 p-2">
+                <div class="text-[8px] text-gray-500 overflow-hidden h-full opacity-30">
+                  ${content}
+                </div>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center bg-white/50">
+                <div class="text-center w-full px-2">
+                  <div class="text-gray-500 mb-1">
+                    <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-medium text-gray-600 block truncate uppercase">${truncatedType}</span>
+                </div>
+              </div>
+              <div class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 overflow-auto">
+                <pre class="text-[8px] text-gray-600">${content}</pre>
+              </div>
+            `;
+          })
+          .catch(error => {
+            console.error('Error fetching file contents:', error);
+            // Fallback to normal view if fetch fails
+            const truncatedType = fileExtension.length > 4 ? 
+              fileExtension.substring(0, 4) + '...' : 
+              fileExtension;
+            
+            element.innerHTML = `
+              <div class="text-center w-full px-2">
+                <div class="text-gray-500 mb-1">
+                  <svg class="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
+                  </svg>
+                </div>
+                <span class="text-sm font-medium text-gray-600 block truncate uppercase">${truncatedType}</span>
+              </div>
+            `;
+          });
+      }
+
+      element.setAttribute('data-llama-editable', 'true');
+      element.draggable = true;
       
       // Add drag start handler
-      imgElement.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/html', imgElement.outerHTML);
-        e.dataTransfer.setData('image/url', imgElement.src);
+      element.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/html', element.outerHTML);
+        e.dataTransfer.setData('image/url', image.url);
       });
       
-      // Add click handler to append image URL to userInput
-      imgElement.onclick = function() {
-        const userInput = document.getElementById('userInput');
-        userInput.value = userInput.value + ' ' + image.url;
+      // Updated click handler
+      element.onclick = function() {
+        if (window.selectedImages.has(image.url)) {
+          window.selectedImages.delete(image.url);
+          element.classList.remove('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+        } else {
+          window.selectedImages.add(image.url);
+          element.classList.add('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+        }
+        console.log('Selected images:', Array.from(selectedImages));
       };
       
       if (appendToBeginning) {
-        imageContainer.insertBefore(imgElement, imageContainer.firstChild);
+        imageContainer.insertBefore(element, imageContainer.firstChild);
       } else {
-        imageContainer.appendChild(imgElement);
+        imageContainer.appendChild(element);
       }
     }
     window.injectImageIntoLlamaBotImageContainer = injectImageIntoLlamaBotImageContainer; //make global
@@ -356,6 +420,22 @@
     if (typeof initialFetchDone === 'undefined') {
       window.initialFetchDone = true;
       fetchImagesForSite(page);
+    }
+
+    function validateFileSize(input) {
+        const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+        const files = input.files;
+        
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].size > maxSize) {
+                alert(`File "${files[i].name}" is too large. Maximum file size is 25MB.`);
+                input.value = ''; // Clear the input
+                return;
+            }
+        }
+        
+        // If all files are valid, proceed with the existing get_file_name function
+        get_file_name(input);
     }
   });
 </script>
