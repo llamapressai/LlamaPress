@@ -299,6 +299,20 @@ document.addEventListener("visibilitychange", function() {
 async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, errorCallback) {
   try {
     if (chatChannel && chatChannel.send) {
+      // Add selected images if any exist
+      if (window.selectedImages && window.selectedImages.size > 0) {
+        userMessage += "\n\nThe user selected the following images:\n" + 
+          Array.from(window.selectedImages).join('\n');
+        
+        // Clear selected images after sending
+        window.selectedImages.clear();
+        
+        // Remove visual selection from all images
+        document.querySelectorAll('#image-container img').forEach(img => {
+          img.classList.remove('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+        });
+      }
+
       // Change button state and add click handler for cancel
       const sendButton = document.getElementById('sendButton');
       sendButton.textContent = 'Cancel';
