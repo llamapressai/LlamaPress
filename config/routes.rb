@@ -67,10 +67,14 @@ Rails.application.routes.draw do
   get 'sitemap.xml', to: 'pages#sitemap_xml', defaults: { format: 'xml' }
   get 'robots.txt', to: 'pages#robots_txt', defaults: { format: 'txt' }
 
+
+  get 'source_code', to: 'llama_bot#source_code'
   # Make sure this is the LAST route
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && 
     !request.path.start_with?('/cable') && 
     !request.path.start_with?('/page_histories')
   }
+
+
 end
