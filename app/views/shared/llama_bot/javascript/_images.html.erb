@@ -421,5 +421,21 @@
       window.initialFetchDone = true;
       fetchImagesForSite(page);
     }
+
+    function validateFileSize(input) {
+        const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+        const files = input.files;
+        
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].size > maxSize) {
+                alert(`File "${files[i].name}" is too large. Maximum file size is 25MB.`);
+                input.value = ''; // Clear the input
+                return;
+            }
+        }
+        
+        // If all files are valid, proceed with the existing get_file_name function
+        get_file_name(input);
+    }
   });
 </script>

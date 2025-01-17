@@ -17,7 +17,7 @@
             <label for="image_holder" class="cursor-pointer flex items-center justify-center space-x-2 bg-gradient-to-r from-indigo-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white font-extrabold py-3 px-6 md:py-2 md:px-4 sm:py-2 sm:px-4 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out">
                 <span id="file_name_show" class="text-xl">Upload</span>
             </label>
-            <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="*/*" multiple onchange="validateFileSize(this)">
+            <input type="file" id="image_holder" class="hidden" name="images_bad_param[]" accept="*/*" multiple onchange="get_file_name(this)">
         </div>
         
         <div id="upload-preview" class="hidden grid grid-cols-3 gap-4 mt-6 p-4 bg-white rounded-lg shadow-inner border border-gray-200">
@@ -192,43 +192,27 @@
                 
                 <!-- Code Snippets Javascript Logic -->
                 <script>
-                    function copyToClipboard(text) {
-                        navigator.clipboard.writeText(text).then(function() {
-                        console.log('Copying to clipboard was successful!');
-                        }, function(err) {
-                        console.error('Could not copy text: ', err);
-                        });
-                    }
-
-                    function toggleSnippetContent(snippetId) {
-                        var contentId = 'snippet-content-' + snippetId;
-                        var content = document.getElementById(contentId);
-                        var button = content.previousElementSibling;
-                        
-                        if (content.classList.contains('hidden')) {
-                            content.classList.remove('hidden');
-                            button.textContent = 'Hide';
-                        } else {
-                            content.classList.add('hidden');
-                            button.textContent = 'View';
+                        function copyToClipboard(text) {
+                            navigator.clipboard.writeText(text).then(function() {
+                            console.log('Copying to clipboard was successful!');
+                            }, function(err) {
+                            console.error('Could not copy text: ', err);
+                            });
                         }
-                    }
 
-                    function validateFileSize(input) {
-                        const maxSize = 25 * 1024 * 1024; // 25MB in bytes
-                        const files = input.files;
-                        
-                        for (let i = 0; i < files.length; i++) {
-                            if (files[i].size > maxSize) {
-                                alert(`File "${files[i].name}" is too large. Maximum file size is 25MB.`);
-                                input.value = ''; // Clear the input
-                                return;
+                        function toggleSnippetContent(snippetId) {
+                            var contentId = 'snippet-content-' + snippetId;
+                            var content = document.getElementById(contentId);
+                            var button = content.previousElementSibling;
+                            
+                            if (content.classList.contains('hidden')) {
+                                content.classList.remove('hidden');
+                                button.textContent = 'Hide';
+                            } else {
+                                content.classList.add('hidden');
+                                button.textContent = 'View';
                             }
                         }
-                        
-                        // If all files are valid, proceed with the existing get_file_name function
-                        get_file_name(input);
-                    }
                 </script>
             <% else %>
                 <p class="text-gray-600">No code snippets available.</p>

@@ -109,7 +109,8 @@ class ChatChannel < ApplicationCable::Channel
     end
   end
 
-  # Receive messages from the llamabot/_chat.html.erb chatbot.
+  # Receive messages from frontend and send to llamabot backend, frontend comes from the llamabot/_chat.html.erb chatbot, sent
+  # through external websocket to llama_bot_backend.rb
   def receive(data)
     # Standardize field names so LlamaBot Backend can understand
     data["web_page_id"] = data["webPageId"]
@@ -133,6 +134,13 @@ class ChatChannel < ApplicationCable::Channel
         "content" => msg.content
       }
     end
+
+    # @web_page = Page.find_by(id: data["webPageId"])
+    # if @web_page.site.wordpress_credentials.present?
+    #   data["wordpress_credentials"] = @web_page.site.wordpress_credentials
+    # else
+    #   data["wordpress_credentials"] = nil
+    # end
 
     chat_message = ChatMessage.create(content: message, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:human_message], created_at: Time.now)
     

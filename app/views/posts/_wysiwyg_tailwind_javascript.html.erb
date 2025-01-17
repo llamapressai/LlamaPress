@@ -44,14 +44,14 @@
         const editor = document.getElementById('editor');
         const toolbar = document.getElementById('toolbar');
         const colorPicker = document.getElementById('colorPicker');
-        const textDropdownButton = document.getElementById('textDropdownButton');
+        //const textDropdownButton = document.getElementById('textDropdownButton');
         const textDropdown = document.getElementById('textDropdown');
 
         editor.addEventListener('mouseup', saveSelection);
         editor.addEventListener('keyup', saveSelection);
         editor.addEventListener('mouseup', showToolbar);
         document.addEventListener('mousedown', hideToolbar);
-        textDropdownButton.addEventListener('click', toggleTextDropdown);
+//        textDropdownButton.addEventListener('click', toggleTextDropdown);
 
         let currentColorProperty = '';
         let lastSelection = null;
