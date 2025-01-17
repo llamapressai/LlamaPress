@@ -214,6 +214,15 @@ class ChatChannel < ApplicationCable::Channel
   # Listen for messages from the LlamaBot Backend
   def listen_to_external_websocket(connection)
     while message = connection.read
+
+      #Try to fix the ping/pong issue keepliave
+      # if message.type == :ping
+      
+      #   # respond with :pong
+      #   connection.write(Async::WebSocket::Messages::ControlFrame.new(:pong, frame.data))
+      #   connection.flush
+      #   next
+      # end
       # Extract the actual message content
       if message.buffer
         message_content = message.buffer  # Use .data to get the message content
