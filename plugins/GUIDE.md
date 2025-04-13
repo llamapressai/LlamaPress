@@ -15,21 +15,23 @@ to:
 and then run: 
 `bundle install`
 
-## Step 3: Set up the initial route. 
+## Step 3: Bundle the plugin
 
-Open up plugins/hello_dolly/config/routes.rb, and add a new line.
+`cd plugins/hello_dolly`
 
-Change: 
-```ruby
-HelloDolly::Engine.routes.draw do
-end
+`bundle`
+
+## Step 4: Scaffold the greetings controller
+
+`bundle exec rails g scaffold Greeting title:string content:text --engine=HelloDolly`
+
+## Step 5: Set up the route in config/routes.rb
+
+`mount HelloDolly::Engine, at: "plugins/hello_dolly"`
+
+## Step 6: Run the migrations in the main app
+```bash
+cd ..
+bundle exec rails hello_dolly:install:migrations
+bundle exec rails db:migrate 
 ```
-
-to: 
-```ruby
-HelloDolly::Engine.routes.draw do
-    root to: "greetings#index" #<-- add this line here
-end
-```
-
-## Step 4: Setting up a new controller.
