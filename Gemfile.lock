@@ -1,3 +1,9 @@
+PATH
+  remote: plugins/hello_dolly
+  specs:
+    hello_dolly (0.1.0)
+      rails (>= 7.2.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -460,6 +466,7 @@ DEPENDENCIES
   eventmachine
   faye-websocket
   friendly_id
+  hello_dolly!
   importmap-rails
   jbuilder
   kaminari

@@ -85,3 +85,5 @@ gem 'async-io'
 
 # Use Builder to generate XML sitemaps
 gem 'builder'
+
+gem "hello_dolly", path: "plugins/hello_dolly"
