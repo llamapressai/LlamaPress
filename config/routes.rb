@@ -69,6 +69,9 @@ Rails.application.routes.draw do
 
 
   get 'source_code', to: 'llama_bot#source_code'
+  
+  mount HelloDolly::Engine => "/hello_dolly"
+
   # Make sure this is the LAST route
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|
     !request.path.start_with?('/rails/') && 
