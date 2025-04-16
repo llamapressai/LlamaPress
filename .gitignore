@@ -8,7 +8,6 @@
 /.bundle
 
 # Ignore all environment files (except templates).
-/.env*
 !/.env*.erb
 
 # Ignore all logfiles and tempfiles.
@@ -56,3 +55,4 @@ load_database_from_s3.sh
 node_modules
 dump.rdb
 
+config.bat
