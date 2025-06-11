@@ -1,4 +1,3 @@
-require Rails.root.join('lib', 'llama_bot.rb')
 require 'securerandom'
 
 class LlamaBotController < ApplicationController
@@ -12,52 +11,6 @@ class LlamaBotController < ApplicationController
       @sites = current_organization.sites
       @pages = current_organization.pages
     end
-
-    def message
-      user_message = params[:message]
-      context = params[:context]
-      selectedElement = params[:selectedElement].present? && !params[:selectedElement].empty? ? params[:selectedElement] : nil
-      webPageId = params[:webPageId]
-      
-      if user_message.include?("ave snippet:") && selectedElement.present?
-        # Save snippet logic (unchanged)
-        # Parse the selectedElement HTML
-        doc = Nokogiri::HTML.fragment(selectedElement)
-
-         # Find all elements with 'data-llama-id' and replace the value with a UUID
-        doc.css('[data-llama-id]').each do |node|
-          node['data-llama-id'] = SecureRandom.uuid
-        end
-
-        updated_selectedElement = doc.to_html 
-
-        snippet_name = user_message.split(":")[1] # get snippet name by splitting on :
-        page = Page.find_by(id: webPageId)
-        snippet = Snippet.new(name: snippet_name, content: updated_selectedElement, site_id: page.site_id)
-        snippet.save
-        llama_bot_response = "Snippet saved"
-        render json: { response: llama_bot_response }
-      else 
-        LlamaBot.completion(user_message, context, selectedElement, webPageId, session_id)
-        head :ok
-      end
-
-      # Things needed: 
-      # 1. Stop Button (user can press LlamaBot Javascript button to stop the bot).
-      # 2. Discuss with Danish - contenteditable so that users can edit content they select with llamabot.
-        # 2a. Something to take HTML from llamabot js client and save to the webpage.
-      
-      #TODO: Save llama_bot_response to the database. How do we do this? 
-      
-      # llama_message = LlamaMessage.new(user_message: user_message, bot_message: llama_bot_response, web_page_id: webPageId)
-      # llama_bot_message.save #user_id 
-      # from: llama_bot.rb
-      # llama_message.save
-
-      #TODO: Do we keep this route now that we have websocket connection?
-      # render json: { response: llama_bot_response }
-    end
-
 
     # get /llama_bot/source
     def source
