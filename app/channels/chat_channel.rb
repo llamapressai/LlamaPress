@@ -1,6 +1,3 @@
-require 'async/websocket/client'
-require 'async/http/endpoint'
-require 'async/reactor'
 require 'json'  # Ensure JSON is required if not already
 
 class ChatChannel < ApplicationCable::Channel
