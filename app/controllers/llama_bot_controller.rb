@@ -2,7 +2,6 @@ require 'securerandom'
 
 class LlamaBotController < ApplicationController
     include ActionController::Live
-    skip_before_action :verify_authenticity_token, only: [:message]
     skip_before_action :authenticate_user!, only: [:source_code]
 
     #/home
