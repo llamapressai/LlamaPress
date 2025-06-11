@@ -73,15 +73,9 @@ gem 'diffy'
 gem "aws-sdk-s3"
 
 gem 'twilio-ruby'
-gem 'websocket-client-simple'
-gem 'eventmachine'
-gem 'websocket-eventmachine-client'
-gem 'faye-websocket'
-gem 'async'
 gem 'async-websocket'
 gem 'async-http'
 gem 'kaminari'
-gem 'async-io'
 
 # Use Builder to generate XML sitemaps
 gem 'builder'
