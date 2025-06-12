@@ -5,6 +5,8 @@ one:
   page: one
   prompt: MyText
   user_message: MyText
+  human_chat_message: one
+  ai_chat_message: two
 
 two:
   content: MyText

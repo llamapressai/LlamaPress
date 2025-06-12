@@ -9,6 +9,7 @@ rails test \
   test/models/page_test.rb \
   test/models/site_test.rb \
   test/controllers/sites_controller_test.rb \
-  test/system/users_test.rb
+  test/system/users_test.rb \
+  test/system/chat_frontend_llamabot_test.rb
 
 echo "All tests completed."

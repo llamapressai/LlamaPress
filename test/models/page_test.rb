@@ -82,4 +82,9 @@ class PageTest < ActiveSupport::TestCase
     assert_equal 'unique-slug', unique_page.slug
   end
 
+  test "save_initial_history creates initial page history" do
+    page = Page.create(site: @site, slug: 'test-slug', organization: @organization)
+    assert_equal 1, page.page_histories.count
+    assert_equal "Initial Save", page.page_histories.first.user_message
+  end
 end
