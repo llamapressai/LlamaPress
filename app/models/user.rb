@@ -13,6 +13,7 @@ class User < ApplicationRecord
 
   accepts_nested_attributes_for :organization
   after_create :notify_registration
+  before_save :set_public_id, :set_api_token
 
   belongs_to :default_site, class_name: "Site", optional: true
 
@@ -21,8 +22,8 @@ class User < ApplicationRecord
 
   def notify_registration
     if Rails.env.production?
-      Twilio.send_text("9152845787", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
-      Twilio.send_text("3853001203", "New User Registration: email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+      Rails.logger.info("🎉 New LlamaPress User Registration! email: #{self.email}, organization: #{self.organization.name}, name: #{self.first_name} #{self.last_name}, phone: #{self.phone}")
+
     end
   end
 
@@ -51,13 +52,46 @@ class User < ApplicationRecord
     end
   end
 
+  def set_public_id
+    if self.public_id.nil?
+      self.public_id = SecureRandom.uuid
+      self.save
+    end
+  end
+
+  def set_api_token
+    if self.api_token.nil?
+      self.api_token = SecureRandom.uuid
+      self.save
+    end
+  end
+
+  def should_we_allow_user_to_send_this_message?
+    # return true # temporarily disable the subscription plan check -- remove paywall. 
+    # return false
+    if self.valid_subscription?
+      return true
+    elsif self.today_message_count >= 15
+      return false
+    else
+      return true
+    end
+  end
+
+  #Used to check if the user has a valid subscription plan.
+  def valid_subscription?
+    self.subscription_plan.present?
+  end
+
+  #Used to check the number of messages the user has sent today.
+  def today_message_count
+    self.chat_messages.where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day, sender: :human_message).count
+  end
+
   private
 
   def create_default_organization
     self.build_organization if organization.nil?
   end
 
-  def set_public_id
-    self.public_id ||= self.id
-  end
 end

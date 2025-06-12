@@ -8,6 +8,10 @@ class UsersController < ApplicationController
 
   # GET /users/1 or /users/1.json
   def show
+    respond_to do |format|
+      format.html # This will render the default show.html.erb template
+      format.json { render json: @user.to_json }
+    end
   end
 
   # GET /users/new

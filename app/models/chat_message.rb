@@ -5,11 +5,20 @@ class ChatMessage < ApplicationRecord
   
   belongs_to :user
   belongs_to :chat_conversation
+  has_many :message_reactions, dependent: :destroy
   
   validates :content, presence: true
   validates :sender, presence: true
   validates :uuid, presence: true, uniqueness: true
 
+  def thumbs_up_count
+    message_reactions.where(reaction_type: 'up').count
+  end
+  
+  def thumbs_down_count
+    message_reactions.where(reaction_type: 'down').count
+  end
+  
   private
 
   def assign_uuid

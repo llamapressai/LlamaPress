@@ -1,7 +1,7 @@
 class SubmissionsController < ApplicationController
   before_action :set_submission, only: %i[ show edit update destroy ]
-  skip_before_action :verify_authenticity_token, only: [:create]
-  skip_before_action :authenticate_user!, only: [:create, :show]
+  skip_before_action :verify_authenticity_token, only: [:create, :verify_phone_number_with_twilio, :confirm_verify_code_with_twilio]
+  skip_before_action :authenticate_user!, only: [:create, :show, :verify_phone_number_with_twilio, :confirm_verify_code_with_twilio]
   layout false, only: :show
 
   # GET /submissions or /submissions.json
@@ -23,6 +23,31 @@ class SubmissionsController < ApplicationController
   # GET /submissions/1/edit
   def edit
   end
+
+  # POST /submissions/verify_phone_number_with_twilio
+  def verify_phone_number_with_twilio
+    phone_number = params[:phone_number]
+    verification_status = Twilio.send_verification_token(phone_number)
+    render json: { status: verification_status }
+    # render json: { status: 'success' }
+  end
+
+  # POST /submissions/confirm_verify_code_with_twilio
+  def confirm_verify_code_with_twilio
+    phone_number = params[:phone_number]
+    code = params[:code]
+    verification_status = Twilio.check_verification_token(phone_number, code)
+    render json: { status: verification_status }
+  end
+
+
+  # # POST /submissions/confirm_verify_code_with_twilio
+  # def confirm_verify_code_with_twilio
+  #   phone_number = params[:phone_number]
+  #   code = params[:code]
+  #   verification_status = Twilio.check_verification_token(phone_number, code)
+  #   render json: { status: verification_status }
+  # end
 
   # POST /submissions or /submissions.json
   def create

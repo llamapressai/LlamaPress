@@ -1,4 +1,8 @@
 class Site < ApplicationRecord
+  # First nullify the references
+  before_destroy :nullify_home_page_and_after_submission_page_references
+  
+  # Then set up the relationships
   belongs_to :organization
   has_many :pages, dependent: :destroy
   has_one :home_page, class_name: "Page", primary_key: "home_page_id", foreign_key: "id"
@@ -18,9 +22,12 @@ class Site < ApplicationRecord
       content_type: image.blob.content_type,
       id: image.id, # it's often useful to also send the ID
       filename: image.blob.filename.to_s,
-      content_type: image.blob.content_type,
       url: image.service.send(:object_for, image.key).public_url
     }
+  end
+
+  def wordpress_api_decoded_token
+    Base64.decode64(wordpress_api_encoded_token) if wordpress_api_encoded_token.present?
   end
 
   def make_unique_slug
@@ -30,5 +37,14 @@ class Site < ApplicationRecord
       self.slug = "#{original_slug}-#{counter}"
       counter += 1
     end
+  end
+  private
+
+  def nullify_home_page_and_after_submission_page_references
+    # Use update_columns to bypass callbacks and validations
+    update_columns(
+      home_page_id: nil,
+      after_submission_page_id: nil
+    )
   end
 end

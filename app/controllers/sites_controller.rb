@@ -1,6 +1,7 @@
 class SitesController < ApplicationController
   before_action :set_site, only: %i[ show edit update destroy ]
-  skip_before_action :verify_authenticity_token, only: [:get_signed_s3_url_for_uploading_images]
+  skip_before_action :verify_authenticity_token, only: [:get_signed_s3_url_for_uploading_images, :create_wordpress_site]
+  skip_before_action :authenticate_user!, only: [:create_wordpress_site]
   
   
   # GET /sites or /sites.json
@@ -66,7 +67,7 @@ class SitesController < ApplicationController
     @site.destroy!
 
     respond_to do |format|
-      format.html { redirect_to sites_url, notice: "web site was successfully destroyed." }
+      format.html { redirect_to "/", notice: "web site was successfully destroyed." }
       format.json { head :no_content }
     end
   end
@@ -163,6 +164,88 @@ class SitesController < ApplicationController
 
   end 
 
+  # POST /api/sites/:slug/wordpress_api_token
+  def update_wordpress_token
+    required_params = params.permit(:domain, :username, :password, :template_id, :name, :slug, :organization_id)
+    missing_params = [:domain, :username, :password, :template_id, :name, :organization_id].select do |key|
+      required_params[key].blank?
+    end
+
+    if missing_params.any?
+      render json: { error: "Missing required parameters: #{missing_params.join(', ')}" }, status: :bad_request
+    else
+      token_hash = {
+        'domain' => required_params[:domain],
+        'username' => required_params[:username],
+        'password' => required_params[:password],
+        'template_id' => required_params[:template_id]
+      }
+      token_json = token_hash.to_json
+      encoded_token = Base64.strict_encode64(token_json)
+
+      site = Site.new(
+        name: required_params[:name],
+        slug: (required_params[:slug].present? ? required_params[:slug] : required_params[:name].parameterize),
+        organization_id: required_params[:organization_id],
+        wordpress_api_encoded_token: encoded_token
+      )
+
+      if site.save
+        render json: { message: 'WordPress API token and site created successfully', site: site }, status: :ok
+      else
+        render json: { error: 'Failed to create site', details: site.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+  end
+
+  # POST /api/wordpress_sites
+  def create_wordpress_site
+    required_params = params.permit(:email, :password, :url, :api_key, :name)
+    missing_params = [:email, :password, :url, :api_key, :name].select do |key|
+      required_params[key].blank?
+    end
+
+    if missing_params.any?
+      render json: { error: "Missing required parameters: #{missing_params.join(', ')}" }, status: :bad_request
+    else
+      # First, validate LlamaPress credentials
+      user = User.find_by(email: required_params[:email])
+      
+      if user && user.valid_password?(required_params[:password])
+        begin
+          wordpress_credentials = JSON.parse(Base64.decode64(required_params[:api_key]))
+          
+          # Create a new site with the decoded WordPress credentials
+          site = Site.new(
+            name: required_params[:name],
+            slug: required_params[:name].parameterize,
+            wordpress_api_encoded_token: required_params[:api_key],
+            organization_id: user.organization_id  # Use the authenticated user's organization
+          )
+
+          if site.save
+            render json: { 
+              message: 'WordPress site created successfully', 
+              site: site,
+              credentials: {
+                email: required_params[:email],
+                url: required_params[:url]
+              }
+            }, status: :ok
+          else
+            render json: { error: 'Failed to create site', details: site.errors.full_messages }, status: :unprocessable_entity
+          end
+        rescue JSON::ParserError
+          render json: { error: 'Invalid API key format' }, status: :unprocessable_entity
+        rescue StandardError => e
+          render json: { error: "Unexpected error: #{e.message}" }, status: :internal_server_error
+        end
+      else
+        render json: { error: 'Invalid LlamaPress credentials' }, status: :unauthorized
+      end
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_site
@@ -171,6 +254,7 @@ class SitesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def site_params
-      params.require(:site).permit(:organization_id, :name, :slug, :home_page_id, :after_submission_page_id)
+      params.require(:site).permit(:name, :slug, :organization_id, :wordpress_api_encoded_token, 
+                                   :home_page_id, :after_submission_page_id, :system_prompt, :llamabot_agent_name)
     end
 end

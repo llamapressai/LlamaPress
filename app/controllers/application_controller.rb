@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   before_action :authenticate_user!, :set_context
+  before_action :allow_iframe_requests
+  protect_from_forgery with: :null_session
 
   def current_organization
     current_user.try :organization
@@ -99,4 +101,12 @@ class ApplicationController < ActionController::Base
     domain.slice! "https://"
     domain
   end
+
+  def allow_iframe_requests
+    # Remove X-Frame-Options header
+    response.headers.delete('X-Frame-Options')
+    
+    # Add CSP header
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://* https://*;"
+  end  
 end

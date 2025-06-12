@@ -1,14 +1,25 @@
 require 'securerandom'
+require 'llama_bot'
 
 class LlamaBotController < ApplicationController
     include ActionController::Live
-    skip_before_action :authenticate_user!, only: [:source_code]
+    skip_before_action :authenticate_user!, only: [:home, :source_code]
+
+    def get_message_history_from_llamabot_checkpoint
+      @page_id = params[:page_id]
+      @state_history = LlamaBot.get_message_history_from_llamabot_checkpoint(@page_id)
+      render json: @state_history
+    end
 
     #/home
     def home
-      #llama bot home page
-      @sites = current_organization.sites
-      @pages = current_organization.pages
+      if current_user.present?
+        #llama bot home page
+        @sites = current_organization.sites
+        @pages = current_organization.pages
+      else
+        redirect_to "/users/sign_up"
+      end
     end
 
     # get /llama_bot/source
@@ -41,16 +52,9 @@ class LlamaBotController < ApplicationController
     end
 
     def source_code
-      source_files = Dir.glob(Rails.root.join('app', '**', '*')).select { |file| File.file?(file) }
-      source_code_contents = source_files.map do |file|
-        { path: file.sub(Rails.root.to_s + '/', ''), content: File.read(file) }
-      end
-
-      render json: source_code_contents
+      render json: { message: "Source code" }
     end
-
-    before_action :authenticate_external_system, only: [:source_code]
-
+    
     private
     
     def generate_directory_structure(path)

@@ -23,6 +23,7 @@ class Page < ApplicationRecord
 
   after_initialize :set_default_html_content, if: :new_record?
   before_save :pre_save_processing, if: :content_changed?
+  after_create :save_initial_history # create initial page history
 
   def render_content
     content = self.content
@@ -168,6 +169,23 @@ class Page < ApplicationRecord
     self.save
   end
 
+  def save_initial_history
+    puts "\n=== Starting save_initial_history ==="
+    puts "Initial user_message: Initial Save"
+
+    return unless persisted?
+    puts "Page is persisted, continuing..."
+
+    user_message = "Initial Save"
+    history = self.page_histories.create(content: self.content, user_message: user_message)
+    puts "New history created: #{history.inspect}"
+
+    self.update_column(:current_version_id, history.id)
+    puts "Updated current_version_id to: #{history.id}"
+
+    history
+  end
+
   def save_history(user_message = nil)
     puts "\n=== Starting save_history ==="
     puts "Initial user_message: #{user_message.inspect}"
@@ -178,7 +196,20 @@ class Page < ApplicationRecord
     user_message ||= "Save version"
     puts "Final user_message: #{user_message}"
     
+    # 03/03/2025, There was an error getting thrown here for new pages, because current_version_id was not set on initial creation. I don't know 
+    # the root cause of this, but I know that the error was happening because current_version_id was not set.
+
+    ## I'm not able to reproduce this error, but I know it was happening for a minute, so I'm going to 
+    # keep this code here temporarily in case we notice it happening again.
+
+    # This was an attempted fix at that: 
     # Check if there's a previous history entry with the same content
+    # if (current_version_id.blank?)
+    #   puts "No current version id, creating initial history"
+    #   history = self.page_histories.create(content: self.content, user_message: user_message)
+    #   self.update_column(:current_version_id, history.id)
+    # end
+    
     current_history = page_histories.find_by(id: current_version_id)
     puts "Current history found: #{current_history.inspect}"
     
@@ -212,18 +243,36 @@ class Page < ApplicationRecord
     end
   end
 
+  def set_default_html_content_for_picture_to_html
+      self.content = PagesHelper.starting_html_content_for_picture_to_html()
+  end
+
   def next_version
     return nil unless current_version
-    page_histories.where('created_at > ?', current_version.created_at)
-                  .order(created_at: :asc)
-                  .first
+    
+    # Get all versions, ordered by creation time
+    versions = page_histories.order(created_at: :asc).to_a
+    
+    # Find the index of the current version
+    current_index = versions.index { |v| v.id == current_version_id }
+    return nil if current_index.nil? || current_index >= versions.length - 1
+    
+    # Return the immediately following version
+    versions[current_index + 1]
   end
 
   def previous_version
     return nil unless current_version
-    page_histories.where('created_at < ?', current_version.created_at)
-                  .order(created_at: :desc)
-                  .first
+    
+    # Get all versions up to the current one, ordered by creation time
+    versions = page_histories.order(created_at: :asc).to_a
+    
+    # Find the index of the current version
+    current_index = versions.index { |v| v.id == current_version_id }
+    return nil if current_index.nil? || current_index == 0
+    
+    # Return the immediately preceding version
+    versions[current_index - 1]
   end
 
   def undo
@@ -283,6 +332,24 @@ class Page < ApplicationRecord
       content: page_history.content,
       current_version_id: page_history.id
     )
+  end
+
+  def publish_to_wordpress!
+    Rails.logger.info("Publishing to WordPress for page #{self.id}")
+    if self.published_to_wordpress?
+      Rails.logger.info("Updating WordPress page #{self.wordpress_page_id}")
+      response = Wordpress.update_page!(site.wordpress_api_decoded_token, self)
+    else
+      Rails.logger.info("Creating WordPress page")
+      response = Wordpress.create_page!(site.wordpress_api_decoded_token, self)
+      self.wordpress_page_id = response['id']
+      self.save
+    end
+    return response
+  end
+
+  def published_to_wordpress?
+    self.wordpress_page_id.present?
   end
 
   private

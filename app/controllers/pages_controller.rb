@@ -1,8 +1,9 @@
 require 'diffy'
 require 'builder'
+require 'nokogiri'
 
 class PagesController < ApplicationController
-  before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo]
+  before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo download_html ]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt]
   skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
@@ -87,12 +88,34 @@ class PagesController < ApplicationController
   def show
     content = @page.render_content
     @chat_messages = @page.chat_messages
-
-    if current_user.present? && @page.organization_id == current_user.organization_id
-      # Inject the chat partial
-      content += inject_chat_partial(content)
-      content += inject_analytics_partial() if Rails.env.production?
+    
+    if (current_user&.organization_id == @page.organization_id) || 
+       (params[:user_api_token].present? && User.find_by(api_token: params[:user_api_token])&.tap { |u| sign_in(u) })
+      
+      begin
+        # Try to find </body> tag position
+        body_end_index = content.rindex('</body>')
+        
+        if body_end_index
+          # Insert our content just before </body>
+          injected_content = inject_chat_partial(content)
+          injected_content += inject_analytics_partial if Rails.env.production?
+          
+          content = content.insert(body_end_index, injected_content)
+        else
+          # Fallback: If no </body> tag found, append at the end
+          Rails.logger.warn "No </body> tag found in page content, appending content at the end"
+          content += inject_chat_partial(content)
+          content += inject_analytics_partial if Rails.env.production?
+        end
+      rescue => e
+        Rails.logger.error "Error injecting content: #{e.message}"
+        # Fallback to simple append
+        content += inject_chat_partial(content)
+        content += inject_analytics_partial if Rails.env.production?
+      end
     end
+
     render inline: content.html_safe, layout: 'page'
   end
 
@@ -164,39 +187,82 @@ class PagesController < ApplicationController
     end
   end
 
+  # GET /pages/1/histories
+  # Returns a paginated list of page histories and chat messages for a given page.
+  # The histories are combined and sorted by creation date, with the most recent items first.
+  # The response is paginated, with a default of 10 items per page.
+  # The current page number is optional, and defaults to 1.
+  # The response is formatted as JSON, with the following structure:
+  
   def histories
     @page = Page.find(params[:id])
     @page_number = params[:page] || 1
-    @per_page = 10
+    @per_page = 1000
     
     # Get both page histories and chat messages
     @page_histories = @page.page_histories
-    @chat_messages = @page.chat_messages
+
+    @message_history = nil
+    if !Rails.env.test? #depends on localhost:8000 running with LlamaBot with this route in FastAPI
+      @llamabot_state_history = LlamaBot.get_message_history_from_llamabot_checkpoint(@page.id)
+      @message_history = @llamabot_state_history["messages"]
+    end  
+
+    @chat_messages = @page.chat_messages #Here is where we get chat message history for the page.
     
     # Combine and sort both types of records
-    @combined_history = (@page_histories + @chat_messages).sort_by(&:created_at).reverse
+
+    # TODO: This broke our page_history interweaving. It's only chat messages now.
+    # We need to fix this if we want to let the user view page history within their chat messages. 
+
+    # We didn't add page history back in because these messages (saved by LangGraph in our Checkpoint table) 
+    # don't have time-stamps when we fetch them from LlamaBot via LangGraph Checkpoint SDK (see FastAPI route for chat-history/{thread_id})
+    # so we can't interleave them.
+
+    # @combined_history = (@page_histories + @llamabot_state_history).sort_by(&:created_at).reverse
+    @combined_history = @message_history.nil? ? @page_histories : @message_history
     
     # Manual pagination
-    start_index = (@page_number.to_i - 1) * @per_page
-    @paginated_items = @combined_history[start_index, @per_page]
-    total_items = @combined_history.length
+    # start_index = (@page_number.to_i - 1) * @per_page
+    # @paginated_items = @combined_history[start_index, @per_page]
+  total_items = @combined_history.length
     
     respond_to do |format|
       format.html
       format.json do
-        encoded_items = @paginated_items.map do |item|
+        encoded_items = @combined_history.map do |item|
           if item.is_a?(PageHistory)
             item.as_json.merge({
               type: 'page_history',
               content: Base64.strict_encode64(item.content),
             })
           else # ChatMessage
+            content = item["content"]
+            #bot and user magic strings are used in the javascript client to determine which color & style to use for the message.
+            # role = item["type"] == "ai" ? "bot" : item["type"] == "user" ? "user" : item["type"] == "system" ? "system" : item["type"] == "tool" ? "tool" : "user"
+            if item["type"] == "human"
+              role = "user"
+            elsif item["type"] == "ai"
+              if item["content"].blank? && item["additional_kwargs"].to_s.include?("tool_call")
+                # byebug
+                content = "🧠: " + (item["additional_kwargs"]["tool_calls"][0]["function"]["name"]&.titleize) + " called with arguments: " + item["additional_kwargs"]["tool_calls"][0]["function"]["arguments"]
+                role = "tool"
+              else  
+                role = "bot"
+              end
+            elsif item["type"] == "tool"
+              content = "⚙️: " + item["content"]
+              role = "tool"
+            else
+              role = "user"
+            end
+
             {
               type: 'chat_message',
-              id: item.id,
-              created_at: item.created_at,
-              content: item.content,
-              role: item.ai_message? ? "bot" : "user" #bot and user magic strings are used in the javascript client to determine which color & style to use for the message.
+              id: item["id"],
+              #created_at: item.created_at,
+              content: content,
+              role: role 
             }
           end
         end
@@ -222,6 +288,20 @@ class PagesController < ApplicationController
       format.html { redirect_to page_path(@page), notice: "web page was successfully restored." }
       format.json { render json: { message: "web page restored successfully", page: @page }, status: :ok }
     end
+  end
+  
+  # POST /pages/1/publish_to_wordpress
+  def publish_to_wordpress
+    @page = current_organization.pages.find(params[:id])
+    begin
+      @page.publish_to_wordpress!
+    rescue => e
+      render json: { message: "Error publishing to WordPress: #{e.message}" }, 
+             status: :unprocessable_entity
+      return
+    end
+    render json: { message: "Web page was successfully published to WordPress." }, 
+           status: :ok
   end
 
   def restore_with_history
@@ -319,6 +399,26 @@ class PagesController < ApplicationController
     end
   end
 
+  def twilio_verify_example
+    render layout: false
+  end
+
+  def download_html
+    begin
+      content = @page.render_content
+      
+      send_data content, 
+                filename: "llamapress-ai-#{@page.slug}.html", 
+                type: "text/html",
+                disposition: 'attachment'
+    rescue => e
+      Rails.logger.error "Download failed: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      redirect_to @page, alert: "Download failed: #{e.message}"
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page
@@ -342,10 +442,11 @@ class PagesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def page_params
-      params.require(:page).permit(:site_id, :content, :slug, :organization_id)
+      params.require(:page).permit(:site_id, :content, :slug, :organization_id, :wordpress_page_id)
     end
 
     def inject_chat_partial(content)
+      @chat_channel_session_id = get_session_id_for_websocket_chat_channel()
       render_to_string(partial: 'shared/llama_bot/chat')
     end
 
@@ -355,5 +456,13 @@ class PagesController < ApplicationController
 
     def inject_analytics_partial()
       render_to_string(partial: 'shared/llama_bot/analytics')
+    end
+
+    def get_session_id_for_websocket_chat_channel()
+      if Rails.env.test?
+        return "test_session_123" #for testing purposes, we need to return a predictable session id. See chat_frontend_llamabot_test.rb for more details.
+      else
+        return session.id
+      end
     end
 end
