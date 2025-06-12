@@ -79,3 +79,6 @@ gem 'kaminari'
 
 # Use Builder to generate XML sitemaps
 gem 'builder'
+
+gem 'google-cloud-logging'
+gem 'ostruct'
