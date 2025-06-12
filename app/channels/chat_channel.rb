@@ -4,8 +4,7 @@ require 'async/reactor'
 require 'json'  # Ensure JSON is required if not already
 
 class ChatChannel < ApplicationCable::Channel
-  include ChatHelper  # Add this line to include the helper module
-
+  
   def fetch_file_contents(context, web_page_id=nil)
     file_path = context || "app/views/llama_bot/home.html.erb"
 
