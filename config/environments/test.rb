@@ -6,6 +6,11 @@ require "active_support/core_ext/integer/time"
 # and recreated between test runs. Don't rely on the data there!
 
 Rails.application.configure do
+
+  if ENV["ENABLE_GOOGLE_CLOUD_LOGGING"] != "true"
+    # config.logger = ActiveSupport::Logger.new(STDOUT)
+    # config.log_level = :debug
+  end
   # Settings specified here will take precedence over those in config/application.rb.
 
   # While tests run files are not watched, reloading is not necessary.
@@ -67,4 +72,5 @@ Rails.application.configure do
 
 
   config.active_storage.service = :amazon #change long term 
+  config.active_record.logger = nil #silence logs in tests
 end

@@ -70,7 +70,9 @@ Rails.application.configure do
   # config.i18n.raise_on_missing_translations = true
 
   # Annotate rendered view with file names.
-  config.action_view.annotate_rendered_view_with_filenames = true
+  # config.action_view.annotate_rendered_view_with_filenames = true
+  config.action_view.annotate_rendered_view_with_filenames = false
+
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
@@ -84,7 +86,17 @@ Rails.application.configure do
 
 
   config.active_storage.service = :amazon #change long term
+  
+  #please do not change
   config.action_cable.log_tags = [ :action_cable, -> request { request.uuid } ]
   config.action_cable.logger = ActiveSupport::Logger.new(STDOUT)
-  config.log_level = :debug  # Ensure log level is debug 
+  config.logger = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
+  config.log_level = :debug
+
+  # please do not change
+  if ENV["ENABLE_GOOGLE_CLOUD_LOGGING"] == "true"
+    config.logger = ActiveSupport::TaggedLogging.new(GCPLogger.logger)
+  end
+
+  config.hosts << "host.docker.internal"
 end
