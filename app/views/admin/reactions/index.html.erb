@@ -1,0 +1,53 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Message Reactions</h1>
+  
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="py-3 px-4 text-left">Page</th>
+          <th class="py-3 px-4 text-left">User</th>
+          <th class="py-3 px-4 text-left">Type</th>
+          <th class="py-3 px-4 text-left">Message</th>
+          <th class="py-3 px-4 text-left">Feedback</th>
+          <th class="py-3 px-4 text-left">Trace Info</th>
+          <th class="py-3 px-4 text-left">Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reactions.each do |reaction| %>
+          <tr class="border-t hover:bg-gray-50">
+            <td class="py-3 px-4"><%= link_to reaction.page_history&.page&.slug, page_show_url(reaction.page_history&.page), class: 'text-blue-500 hover:underline' %></td>
+            <td class="py-3 px-4"><%= reaction.user&.email || 'Anonymous' %></td>
+            <td class="py-3 px-4">
+              <span class="<%= reaction.reaction_type == 'up' ? 'text-green-600' : 'text-red-600' %>">
+                <%= reaction.reaction_type == 'up' ? '👍' : '👎' %>
+                <%= reaction.reaction_type.capitalize %>
+              </span>
+            </td>
+            <td class="py-3 px-4 max-w-md truncate">
+              <%= reaction.chat_message&.content&.truncate(100) || 'Message not found' %>
+            </td>
+            <td class="py-3 px-4 max-w-md">
+              <%= reaction.feedback || 'No feedback provided' %>
+            </td>
+            <td class="py-3 px-4">
+              <% if reaction.chat_message&.trace_id.present? %>
+                <a href="<%= reaction.chat_message.trace_url %>" target="_blank" class="text-blue-500 hover:underline">
+                  <%= reaction.chat_message.trace_id.truncate(10) %>
+                </a>
+              <% else %>
+                No trace
+              <% end %>
+            </td>
+            <td class="py-3 px-4"><%= reaction.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="mt-6">
+    <%= paginate @reactions %>
+  </div>
+</div> 

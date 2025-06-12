@@ -1,84 +1,120 @@
-<div class="bg-[#ff6600] text-white py-4 mb-0">
-  <div class="container mx-auto px-4 flex items-center">
-    <p class="text-lg">Welcome to LlamaPress Beta!</p>
-  </div>
-</div>
-<div class="bg-[#fff0e6] text-[#993d00] py-2 mb-6">
-  <div class="container mx-auto px-4 text-center text-sm">
-  </div>
-</div>
-    <p id="notice" class="text-green-600"><%= notice %></p>
-    <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-semibold text-black flex items-center p-4">
-          <i class="fas fa-folder-open text-yellow-400 mr-2"></i>
-          Your Pages
-        </h1>
+<p id="notice" class="text-green-600 text-center"><%= notice %></p>
 
-<div class="container mx-auto px-4">
-  <% sorted_sites = @pages.group_by(&:site).sort_by { |site, _| site.id == current_user.default_site_id ? 0 : 1 } %>
-  <% sorted_sites.each do |site, pages| %>
-    <div class="mb-8">
-      <button onclick="toggleSite('<%= site.id %>')" class="w-full flex items-center justify-between bg-gray-900 p-4 rounded-t-lg text-white mb-2">
-        <div class="flex items-center">
-          <i class="fas fa-globe text-gray-300 mr-2"></i>
-          <a href="<%= site_path(site.id) %>" target="_blank" rel="noopener noreferrer" class="flex items-center mr-2 text-gray-300 hover:text-white">    
-            <h3 class="text-xl font-bold text-blue-400 hover:text-blue-300 underline"><%= site.name %> (<%= site.slug %>)</h3>
-          </a>
-          <% if site.id == current_user.default_site_id %>
-            <svg class="w-6 h-6 ml-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-            </svg>
+<main class="container mx-auto px-6 py-12">
+  <!-- AI Prompt Section -->
+  <div class="mb-20">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-blue-800 text-transparent bg-clip-text">
+        Create Anything with LlamaPress
+      </h1>
+      <p class="text-center text-gray-600 mb-8 text-lg">Transform your ideas into beautiful websites in seconds</p>
+      <div class="bg-white rounded-xl shadow-xl p-8 border-2 border-gray-300">
+        <form action="/public_leads/create_from_prompt" method="POST" class="space-y-6">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <textarea 
+            name="prompt"
+            id="website-prompt"
+            class="w-full h-48 p-6 text-lg border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            placeholder="Describe the website you want to create... (e.g., 'Create a modern restaurant website with an online menu and booking system')"
+            required
+          ></textarea>
+
+          <% unless user_signed_in? %>
+            <div class="space-y-4">
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" name="email" id="email" required 
+                  class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200">
+              </div>
+              
+              <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" name="password" id="password" required 
+                  class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all duration-200">
+              </div>
+            </div>
           <% end %>
-        </div>
 
-        <svg id="arrow-<%= site.id %>" class="w-6 h-6 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      
-      <div id="site-<%= site.id %>" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <% pages.sort_by(&:updated_at).reverse.each do |web_page| %>
-        <div class="bg-gray-700 p-1 rounded-lg">
-            <div class="aspect-w-16 aspect-h-24 bg-gray-700">
-              <% if web_page.content.present? %>
-                <iframe srcdoc="<%= CGI.escapeHTML(web_page.content).html_safe %>" class="w-full h-full" sandbox="allow-scripts"></iframe>
+          <button 
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            Generate Website
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Your Sites Section -->
+  <div class="mb-12">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 flex items-center mb-6">
+        <i class="fas fa-history text-blue-500 mr-3"></i>
+        Your Previous Creations
+      </h2>
+
+      <% sorted_sites = @pages.group_by(&:site)
+                             .sort_by { |site, _| site.id == current_user.default_site_id ? 0 : 1 } %>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <% sorted_sites.each do |site, pages| %>
+          <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 overflow-hidden">
+            <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+              <% if pages.first&.content.present? %>
+                <div class="w-full h-full overflow-hidden">
+                  <iframe
+                    srcdoc="<%= CGI.escapeHTML(pages.first.content).html_safe %>"
+                    class="w-full h-full"
+                    sandbox="allow-same-origin allow-scripts"
+                    scrolling="no"
+                    style="pointer-events: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
+                  ></iframe>
+                </div>
               <% else %>
                 <div class="flex items-center justify-center h-full text-gray-400">
-                  <span>No preview available</span>
+                  <span class="text-sm">No preview</span>
                 </div>
               <% end %>
             </div>
-            <div class="p-6 border-t-2 border-gray-700">
-              <div class="flex items-center mb-3">
-                <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" class="h-12 mr-3 object-cover">
-                <%# if web_page.organization.logo.attached? %>
-                  <%# image_tag web_page.organization.logo, class: "h-12 mr-3 object-cover" %>
-                <%# else %>
-                <%# end %>
-                <h2 class="font-bold text-xl text-white"><%= web_page.slug %></h2>
+            
+            <div class="p-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base font-semibold text-gray-900 truncate">
+                  <%= site.name %>
+                  <% if site.id == current_user.default_site_id %>
+                    <span class="ml-1 text-yellow-400">
+                      <i class="fas fa-star"></i>
+                    </span>
+                  <% end %>
+                </h3>
               </div>
-                <p class="text-lg text-gray-300 mb-2"><%= web_page.site.name %></p>
-                <%= link_to page_path(web_page.id), class: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 my-2 rounded-lg flex items-center" do %>
-                    <i class="fas fa-eye mr-2"></i> View Page
-                  <% end %>
-                  <%= link_to edit_page_path(web_page.id), class: "bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 my-2 rounded-lg flex items-center" do %>
-                    <i class="fas fa-cog mr-2"></i> Settings
-                  <% end %>
+              <p class="text-xs text-gray-600 mb-3 truncate"><%= site.slug %></p>
+              
+              <div class="flex space-x-2">
+                <%= link_to site_path(site.id), 
+                    class: "flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center px-3 py-2 rounded-lg transition-colors duration-200" do %>
+                  <i class="fas fa-eye mr-1"></i> View
+                <% end %>
+                <%= link_to page_path(pages.first.id), 
+                    class: "flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-center px-3 py-2 rounded-lg transition-colors duration-200" do %>
+                  <i class="fas fa-pencil-alt mr-1"></i> Edit
+                <% end %>
+              </div>
             </div>
           </div>
         <% end %>
       </div>
     </div>
-  <% end %>
-
-  <br>
-  <%= link_to 'New Web Page', new_page_path, class: "mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
-</div>
+  </div>
+</main>
 
 <script>
   function toggleSite(siteId) {
     const content = document.getElementById(`site-${siteId}`);
     const arrow = document.getElementById(`arrow-${siteId}`);
+
+    // Toggle the hidden class
     content.classList.toggle('hidden');
     arrow.classList.toggle('rotate-180');
   }

@@ -8,7 +8,6 @@
   <% if site.errors.any? %>
     <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
       <h2><%= pluralize(site.errors.count, "error") %> prohibited this site from being saved:</h2>
-
       <ul>
         <% site.errors.each do |error| %>
           <li><%= error.full_message %></li>
@@ -19,37 +18,157 @@
 
   <%= form.hidden_field :organization_id, value: current_user.organization.id %>
 
+  <!-- BASIC Fields (Always Visible) -->
   <div class="my-5">
-    <%= form.label :name %>
-    <%= form.text_field :name, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :name, "Site Name (e.g. My Cool New Website)" %>
+    <%= form.text_field :name,
+          class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
   <div class="my-5">
-    <%= form.label :slug, "Domain (e.g: example.com)" %>
-    <%= form.text_field :slug, class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+    <%= form.label :slug, "Site URL (e.g. mysite.com)" %>
+    <%= form.text_field :slug,
+          class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>  
 
+
   <div class="my-5">
-    <%= form.label :home_page_id, "Home Page" %>
-    <%= form.collection_select :home_page_id, 
-        Page.where(site_id: site.id), 
-        :id, 
-        :slug, 
-        { prompt: "Select Home Page" }, 
-        { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+    <div class="flex justify-between items-center">
+      <%= form.label :system_prompt, "Additional Instructions to LlamaBot (Brand Guidelines, Image URLs, Site Map, etc.)" %>
+      <button type="button" 
+              id="expand_prompt" 
+              class="ml-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm font-medium transition-colors duration-150 flex items-center">
+        <span>Expand</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+    <%= form.text_area :system_prompt,
+          placeholder: "Custom instructions for the AI when generating content for this site",
+          rows: 4,
+          class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full transition-all duration-200",
+          id: "system_prompt_textarea" %>
   </div>
 
   <div class="my-5">
-    <%= form.label :after_submission_page_id, "After Submission Page" %>
-    <%= form.collection_select :after_submission_page_id, 
-        Page.where(site_id: site.id), 
-        :id, 
-        :slug, 
-        { prompt: "Select After Submission Page" }, 
-        { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+    <%= form.label :llamabot_agent_name, "LlamaBot Agent Name" %>
+    <%= form.text_field :llamabot_agent_name,
+          class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
   </div>
 
+  <!-- PUBLISH TO WORDPRESS (Checkbox + Token Field) -->
+  <div class="my-5">
+    <!-- "Publish site to WordPress" checkbox -->
+    <label class="inline-flex items-center">
+      <input type="checkbox" id="publish_to_wordpress" class="mr-2" />
+      Publish site to WordPress
+    </label>
+
+    <!-- WordPress API Token field (hidden by default) -->
+    <div id="wordpress_token_container" class="hidden mt-2">
+      <%= form.text_field :wordpress_api_encoded_token,
+            placeholder: "WordPress API Token",
+            class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" %>
+    </div>
+  </div>
+
+  <!-- ADVANCED FIELDS (Hidden by Default) -->
+  <div id="advanced_fields" class="hidden">
+
+    <div class="my-5">
+      <%= form.label :home_page_id, "Home Page" %>
+      <%= form.collection_select :home_page_id, 
+          Page.where(site_id: site.id),
+          :id, :slug,
+          { prompt: "Select Home Page" },
+          { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+    </div>
+    <div class="my-5">
+      <%= form.label :after_submission_page_id, "After Submission Page" %>
+      <%= form.collection_select :after_submission_page_id,
+          Page.where(site_id: site.id),
+          :id, :slug,
+          { prompt: "Select After Submission Page" },
+          { class: "block shadow rounded-md border border-gray-400 outline-none px-3 py-2 mt-2 w-full" } %>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
   <div class="inline">
-    <%= form.submit class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    <%= form.submit "Save",
+          class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
   </div>
 <% end %>
+
+<!-- ADVANCED CHECKBOX (fixed position at bottom-right corner of the viewport) -->
+<div class="fixed bottom-4 right-4 flex items-center space-x-2 bg-white p-2 rounded shadow z-50">
+  <label for="advanced_checkbox" class="text-sm text-gray-600">Advanced</label>
+  <input type="checkbox" id="advanced_checkbox" />
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1) ADVANCED TOGGLE
+    const advancedCheckbox = document.getElementById("advanced_checkbox");
+    const advancedFields   = document.getElementById("advanced_fields");
+
+    function toggleAdvanced() {
+      if (advancedCheckbox.checked) {
+        advancedFields.classList.remove("hidden");
+      } else {
+        advancedFields.classList.add("hidden");
+      }
+    }
+    toggleAdvanced();
+    advancedCheckbox.addEventListener("change", toggleAdvanced);
+
+    // 2) PUBLISH TO WORDPRESS TOGGLE
+    const publishToWordpressCheckbox = document.getElementById("publish_to_wordpress");
+    const wordpressTokenContainer    = document.getElementById("wordpress_token_container");
+
+    function toggleWordpressToken() {
+      if (publishToWordpressCheckbox.checked) {
+        wordpressTokenContainer.classList.remove("hidden");
+      } else {
+        wordpressTokenContainer.classList.add("hidden");
+      }
+    }
+    toggleWordpressToken();
+    publishToWordpressCheckbox.addEventListener("change", toggleWordpressToken);
+
+    // 3) SYSTEM PROMPT EXPAND/COLLAPSE
+    const expandButton = document.getElementById("expand_prompt");
+    const expandButtonText = expandButton.querySelector('span');
+    const expandButtonIcon = expandButton.querySelector('svg');
+    const textarea = document.getElementById("system_prompt_textarea");
+    let isExpanded = false;
+
+    function updateExpandButton() {
+      expandButtonText.textContent = isExpanded ? "Collapse" : "Expand";
+      expandButtonIcon.style.transform = isExpanded ? "rotate(180deg)" : "rotate(0)";
+    }
+
+    function adjustTextareaHeight() {
+      if (isExpanded) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      } else {
+        textarea.style.height = 'auto'; // Reset to default
+      }
+    }
+
+    expandButton.addEventListener("click", function() {
+      isExpanded = !isExpanded;
+      updateExpandButton();
+      adjustTextareaHeight();
+    });
+
+    // Adjust height on input to handle content changes
+    textarea.addEventListener("input", function() {
+      if (isExpanded) {
+        adjustTextareaHeight();
+      }
+    });
+  });
+</script>

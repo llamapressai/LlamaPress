@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head data-llama="app/views/layouts/llama_bot.html.erb">
+
   <!--<title>LlamaBot</title>-->
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
@@ -70,82 +71,64 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="flex flex-col min-h-screen" data-llama="app/views/layouts/llama_bot.html.erb">
-  <nav class="bg-gray-800 p-4" data-llama="app/views/layouts/llama_bot.html.erb">
-    <div class="container mx-auto" data-llama="app/views/layouts/llama_bot.html.erb">
-      <div class="flex justify-between items-center" data-llama="app/views/layouts/llama_bot.html.erb">
-        <div class="flex items-center" data-llama="app/views/layouts/llama_bot.html.erb">
-          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Icon" class="h-8 w-8 mr-2" data-llama="app/views/layouts/llama_bot.html.erb">
-          <a href="/home" class="text-white font-bold text-xl" data-llama="app/views/layouts/llama_bot.html.erb">LlamaPress</a>
-        </div>
-        <% if current_user %>
-        <div class="hidden md:flex items-center space-x-4">
-          <a href="/home" class="text-white hover:text-gray-300" title="Home" data-llama="app/views/layouts/llama_bot.html.erb">
-            <i class="fas fa-home" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-          </a>
-<!--          <a href="/pages" class="text-white hover:text-gray-300" title="Webpages" data-llama="app/views/layouts/llama_bot.html.erb">
-            <i class="fas fa-file-alt" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-          </a>
-          <a href="/llama_bot/source" class="text-white hover:text-gray-300" title="Source Code" data-llama="app/views/layouts/llama_bot.html.erb">
-            <i class="fas fa-code" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-          </a>
-          <a href="/llama_bot/models" class="text-white hover:text-gray-300" title="Activated Features" data-llama="app/views/layouts/llama_bot.html.erb">
-            <i class="fas fa-puzzle-piece" data-llama="app/views/layouts/llama_bot.html.erb"></i>
-          </a>
-          <a href="/llama_bot/database" class="text-white hover:text-gray-300" title="Show Database">
-            <i class="fas fa-database"></i>
-          </a>-->
-          <%= render partial: 'shared/llama_bot/user_menu' %>
-          <!-- Add more navbar links here -->
-        </div>
-        <div class="md:hidden">
-          <button id="menu-toggle" class="text-white focus:outline-none">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-            </svg>
-          </button>
-        </div>
-        <% else %>
-        <div class="hidden md:flex items-center space-x-4">
-           <a href="/pricing" class="text-white hover:text-gray-300" title="Pricing">
-            <i class="fas fa-tags"></i>
-          </a>
-          <a href="/how-it-works" class="text-white hover:text-gray-300" title="How It Works">
+  <nav class="bg-gray-800 p-4">
+    <div class="container mx-auto">
+      <div class="flex justify-between items-center">
+        <!-- Logo and brand section - always visible -->
+        <div class="flex items-center space-x-4">
+          <img src="https://service-jobs-images.s3.us-east-2.amazonaws.com/7rl98t1weu387r43il97h6ipk1l7" alt="LlamaBot Icon" class="h-8 w-8 mr-2">
+          <a href="/" class="text-white text-xl font-bold">LlamaPress</a>
+          <a href="/how-it-works" class="text-white hover:text-gray-300" aria-label="How It Works">
             <i class="fas fa-question-circle"></i>
           </a>
-          <a href="https://discord.gg/7DapkvmWKZ" target="_blank" class="text-white hover:text-gray-300" title="Join Discord">
+          <a href="https://discord.gg/7DapkvmWKZ" class="text-white hover:text-gray-300" aria-label="Discord">
             <i class="fab fa-discord"></i>
           </a>
-          <!-- Add more navbar links here -->
         </div>
-        <div class="md:hidden">
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center space-x-4">
+          <% if current_user %>
+            <!-- Signed-in user navigation -->
+            <%= render partial: 'shared/llama_bot/user_menu' %>
+            <% if current_user&.admin? %>
+              <li>
+                <%= link_to "View Reactions", admin_reactions_path, class: "text-blue-500 hover:text-blue-700" %>
+              </li>
+            <% end %>
+          <% else %>
+            <a href="/users/sign_in" class="text-white hover:text-gray-300" title="Sign In">
+              <i class="fas fa-sign-in-alt mr-1"></i>
+              <span>Sign In</span>
+            </a>
+          <% end %>
+        </div>
+
+        <!-- Mobile menu button -->
+        <div class="md:hidden flex items-center">
           <button id="menu-toggle" class="text-white focus:outline-none">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
             </svg>
           </button>
         </div>
-        <% end %>
       </div>
-      <div id="mobile-menu" class="md:hidden hidden mt-2" data-llama="app/views/layouts/llama_bot.html.erb">
-        <a href="/" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-home mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Home
-        </a>
-        <a href="/pages" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-file-alt mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Webpages
-        </a>
-        <a href="/llama_bot/source" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-code mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Source Code
-        </a>
-        <a href="/llama_bot/models" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-puzzle-piece mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Activated Features
-        </a>
-        <a href="/llama_bot/show_database" class="block text-white py-2 hover:bg-gray-700" title="Show Database" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-database mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Show Database
-        </a>
-        <a href="/llama_bot/templates" class="block text-white py-2 hover:bg-gray-700" data-llama="app/views/layouts/llama_bot.html.erb">
-          <i class="fas fa-rocket mr-2" data-llama="app/views/layouts/llama_bot.html.erb"></i> Templates
-        </a>
-        <!-- Add more navbar links here -->
+
+      <!-- Mobile menu -->
+      <div id="mobile-menu" class="md:hidden hidden mt-2">
+        <% if current_user %>
+          <!-- Signed-in mobile navigation -->
+          <%= render partial: 'shared/llama_bot/user_menu' %>
+          <% if current_user&.admin? %>
+            <li>
+              <%= link_to "View Reactions", admin_reactions_path, class: "block text-white py-2 hover:bg-gray-700" %>
+            </li>
+          <% end %>
+        <% else %>
+          <a href="/users/sign_in" class="block text-white py-2 hover:bg-gray-700">
+            <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+          </a>
+        <% end %>
       </div>
     </div>
   </nav>

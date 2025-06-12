@@ -1,0 +1,22 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Image Uploads</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <% @images.each do |image| %>
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="aspect-w-16 aspect-h-9 mb-4">
+          <%= image_tag rails_blob_path(image), class: "w-full h-full object-cover rounded" %>
+        </div>
+        <div class="text-sm text-gray-600">
+          <p>Filename: <%= image.filename %></p>
+          <p>Uploaded: <%= image.created_at.strftime("%B %d, %Y") %></p>
+          <p>Size: <%= number_to_human_size(image.byte_size) %></p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-8">
+    <%= paginate @images %>
+  </div>
+</div>

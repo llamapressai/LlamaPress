@@ -16,7 +16,16 @@
     <select id="site-select" name="page[site_id]" class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
       <option value="">Select a site...</option>
       <% current_user.organization.sites.each do |site| %>
-        <option value="<%= site.id %>" <%= 'selected' if @site&.id == site.id || current_user.default_site_id == site.id %>>
+        <% 
+        should_this_site_be_selected = false 
+        site_selected_and_exists_in_this_account = !params[:site_id].blank? && current_user.organization.sites.find { |s| s.id == params[:site_id].to_i }
+        if site_selected_and_exists_in_this_account
+          should_this_site_be_selected = params[:site_id] == site.id.to_s
+        else
+          should_this_site_be_selected = @site&.id == site.id || current_user.default_site_id == site.id 
+        end
+        %>
+        <option value="<%= site.id %>" <%= 'selected' if should_this_site_be_selected %>>
           <%= site.name %>
         </option>
       <% end %>

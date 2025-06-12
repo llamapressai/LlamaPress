@@ -1,0 +1,193 @@
+<% content_for :title, "Turn Picture into HTML - Convert Images to HTML Code Instantly" %>
+<% content_for :meta_description, "Turn your pictures into HTML code effortlessly. Upload your image and get the HTML code in seconds." %>
+
+<div class="min-h-screen bg-gray-50 flex flex-col">
+
+
+  <!-- Hero Section -->
+  <div class="flex-1 flex items-center justify-center bg-gradient-to-r from-blue-500 to-green-500">
+    <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-5xl font-extrabold text-white mb-4">Picture to HTML Code Generator</h1>
+      <p class="text-xl text-white mb-8">Upload your picture/images and view the HTML code generated instantly using AI.</p>
+    </div>
+  </div>
+
+  <!-- Lead Capture Form -->
+  <div id="lead-form" class="bg-white py-24">
+    <div class="max-w-xl mx-auto">
+      <div class="bg-white p-12 rounded-2xl shadow-2xl">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold text-gray-800 mb-3">Upload Picture Here to Generate HTML Code</h2>
+          <p class="text-gray-600 text-lg">Transform any image into clean, responsive HTML</p>
+        </div>
+
+        <%= form_for @lead, url: public_leads_path, html: { class: "space-y-8" }, multipart: true do |f| %>
+          <% if @lead.errors.any? %>
+            <div class="bg-red-50 text-red-500 px-6 py-4 rounded-xl mb-8">
+              <ul class="list-disc list-inside">
+                <% @lead.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="space-y-2">
+            <%= f.label :email, "Email Address", class: "block text-base font-semibold text-gray-700" %>
+            <p class="text-sm text-gray-500 mb-2">We'll send the HTML code to this address</p>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-envelope text-gray-400 text-lg"></i>
+              </div>
+              <%= f.email_field :email, 
+                  class: "pl-12 block w-full px-4 py-4 rounded-xl border-gray-200 bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-base", 
+                  placeholder: "you@example.com" %>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <%= f.label :notes, "What Are You Building?", class: "block text-base font-semibold text-gray-700" %>
+            <p class="text-sm text-gray-500 mb-2">This will help us generate the best HTML code for your specific project</p>
+            <div class="relative rounded-xl shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-pencil text-gray-400 text-lg"></i>
+              </div>
+              <%= f.text_field :notes, 
+                  class: "pl-12 block w-full px-4 py-4 rounded-xl border-gray-200 bg-gray-50 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-base", 
+                  placeholder: "e.g., Landing page, product showcase, portfolio...", 
+                  id: "userInput" %>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <%= f.label :image, "Upload Design", class: "block text-base font-semibold text-gray-700" %>
+            <p class="text-sm text-gray-500 mb-2">Select your image file (PNG, JPG, or WebP)</p>
+            <div class="mt-2">
+              <div class="relative">
+                <%= f.file_field :image, 
+                    accept: 'image/*', 
+                    class: "block w-full px-4 pl-12 py-4 text-base text-gray-700 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <i class="fas fa-cloud-upload-alt text-gray-400 text-lg"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%= f.submit "Generate HTML Code", 
+              class: "mt-8 w-full flex justify-center py-4 px-6 border border-transparent rounded-xl text-base font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition duration-200 hover:scale-[1.02] shadow-lg" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div id="features" class="bg-gray-50 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Why Convert Pictures to HTML?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Fast and Efficient</h3>
+          <p class="text-gray-600">Convert images to HTML code quickly without any technical skills.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Improved Loading Times</h3>
+          <p class="text-gray-600">Embedding images directly can enhance your website's performance.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Multiple Formats Supported</h3>
+          <p class="text-gray-600">Our tool supports various image formats for your convenience.</p>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Free to Use</h3>
+          <p class="text-gray-600">Enjoy all the features without any cost.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <div id="how-it-works" class="bg-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">How It Works</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="mb-4">
+            <i class="fas fa-upload text-blue-600 text-4xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Upload Your Image</h3>
+          <p class="text-gray-600">Select the image you want to convert.</p>
+        </div>
+        <div class="text-center">
+          <div class="mb-4">
+            <i class="fas fa-cogs text-blue-600 text-4xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">We Process It</h3>
+          <p class="text-gray-600">Our tool converts your image into HTML code instantly.</p>
+        </div>
+        <div class="text-center">
+          <div class="mb-4">
+            <i class="fas fa-code text-blue-600 text-4xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Get the Code</h3>
+          <p class="text-gray-600">We will email you the HTML code so you can use it wherever you need.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-gray-400">&copy; <%= Time.now.year %> LlamaPress. All rights reserved.</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const placeholders = [
+    "A website for my Garage Door Company...",
+    "A landing page for my solar scheduling software ...",
+    "A portfolio for my watercolor paintings...",
+    "A blog for my PhD dissertation...",
+  ];
+
+  let currentIndex = 0;
+  let isDeleting = false;
+  let currentText = '';
+  let typingSpeed = 50; // Speed for typing
+  let deletingSpeed = 30; // Speed for deleting
+  let pauseEnd = 1000; // Pause when text is fully typed
+  const userInput = document.getElementById('userInput');
+
+  function typeEffect() {
+    const currentPhrase = placeholders[currentIndex];
+    
+    if (isDeleting) {
+      // Deleting text
+      currentText = currentPhrase.substring(0, currentText.length - 1);
+    } else {
+      // Typing text
+      currentText = currentPhrase.substring(0, currentText.length + 1);
+    }
+
+    userInput.placeholder = currentText;
+
+    let typeSpeed = isDeleting ? deletingSpeed : typingSpeed;
+
+    if (!isDeleting && currentText === currentPhrase) {
+      // Pause at the end of typing
+      typeSpeed = pauseEnd;
+      isDeleting = true;
+    } else if (isDeleting && currentText === '') {
+      isDeleting = false;
+      currentIndex = (currentIndex + 1) % placeholders.length;
+    }
+
+    setTimeout(typeEffect, typeSpeed);
+  }
+
+  // Start the typing effect
+  typeEffect();
+</script>
