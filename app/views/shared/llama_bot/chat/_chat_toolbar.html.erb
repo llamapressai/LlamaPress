@@ -78,6 +78,24 @@
             </div>
         </div>
 
+        <div id="debugContainer" class="llama-chat-toolbar-window hidden p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
+            <!-- Debug Mode Toggle Switch -->
+            <div class="flex items-center justify-between mb-4 p-3 bg-white rounded-lg shadow-sm border">
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-gray-700">Debug Mode</span>
+                    <span class="text-xs text-gray-500">This tells LlamaBot something is wrong. He will try to fix it.</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="debugModeToggle" class="sr-only peer"">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+            
+            <ul id="relevantErrorsList" class="list-disc pl-5 space-y-1 text-sm">
+                <!-- Errors will be displayed here -->
+            </ul>
+        </div>
+
         <!-- Buttons container on chat toolbar -->
         <div class="p-1 md:p-2 border-t border-gray-300 flex items-center justify-start bg-gray-100" data-llama="app/views/shared/_chat.html.erb">
             <!-- Button to Toggle Select Element Mode -->
@@ -169,6 +187,23 @@
                 </svg>
                 <span class="text-xs mt-1 text-gray-600">
                     Prompts
+                </span>
+            </button>   
+
+            <!-- Button to Toggle Debug Window -->
+            <button id="toggleDebug" class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center relative" title="Toggle prompt suggestions" onclick="toggleDebugContainer()" data-llama="app/views/shared/_chat.html.erb">
+                <!-- Red badge for bug count -->
+                <span id="debugBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold hidden">0</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-gray-600"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5s-.96.06-1.42.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z"/>
+                </svg>
+                <span class="text-xs mt-1 text-gray-600">
+                    Debug
                 </span>
             </button>        
             

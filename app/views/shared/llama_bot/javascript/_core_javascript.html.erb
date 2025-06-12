@@ -1,9 +1,42 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script data-llama="exclude_when_saving_contenteditable_edits">
+  // Make sure these are at the top of the file, outside any functions
+  // Add these lines at the very top, before any other JavaScript
+  window.messageTraces = {}; // Make it global
+  window.currentReaction = {
+    messageId: null,
+    type: null, 
+    button: null
+  };
+
+  window.uncaughtErrors = [];
+
+  window.onerror = function(message, source, lineno, colno, error) {
+    // Check if the error source is from the same origin and path
+    const errUrl = new URL(source)
+
+    const isSameOrigin = errUrl.origin === location.origin;
+    const isSamePath = errUrl.pathname === location.pathname;
+    const thisErrorOriginatedFromCurrentPage = isSameOrigin && isSamePath;
+
+    if (thisErrorOriginatedFromCurrentPage) {
+      uncaughtErrors.push({
+          message,
+          source,
+          lineno,
+          colno,
+          error,
+      });
+      incrementDebugBadge();
+    }
+  };
+
+
   document.addEventListener("DOMContentLoaded", () => {
     const chatIcon = document.getElementById("chatIcon");
     const chatbotContainer = document.getElementById("chatbotContainer");
     const closeButton = document.getElementById("closeButton");
-    const chatbotMessages = document.getElementById("chatbotMessages");
+    const chatbotMessagesContainer = document.getElementById("chatbotMessagesContainer");
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
 
@@ -11,6 +44,146 @@
     const closeModal = document.getElementById("closeModal");
     const leftArrow = document.getElementById("leftArrow");
     const rightArrow = document.getElementById("rightArrow");
+
+    /**
+     * Sends the user's message from this Chat UI Frontend to LlamaBot.
+     * Handles all the UI logic for sending the message, displaying the new message, and showing the loading indicator, hiding chat tool windows, etc.
+     */
+    async function sendMessageToLlamaBot() {
+      if (userInput.value.trim() === "" || isLoading) return;
+
+      const connectionStatusIconForLlamaBot = document.getElementById('connectionStatusIconForLlamaBot');
+      const isYellow = connectionStatusIconForLlamaBot.classList.contains('bg-yellow-400');
+
+      let userMessage = userInput.value;
+      addMessage(userMessage, "user");
+      userInput.value = "";
+      autoResizeUserInputArea();
+      isLoading = true;
+      showLoadingIndicator();
+
+      if (isYellow) {
+        const MAX_ATTEMPTS = 10;
+        let attempts = 0;
+
+        while (attempts < MAX_ATTEMPTS) {
+          attempts++;
+          const connectionStatusIconForLlamaBot = document.getElementById('connectionStatusIconForLlamaBot');
+          const isYellow = connectionStatusIconForLlamaBot.classList.contains('bg-yellow-400');
+          if (!isYellow) {
+            addMessage("LlamaBot is online. Sending message now!", "bot");
+            addMessage(userMessage, "user");
+            break;
+          }
+          else {
+            addMessage("Connecting to LlamaBot.. Attempt " + attempts + " of " + MAX_ATTEMPTS, "bot");
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+
+        if (attempts >= MAX_ATTEMPTS) {
+          addMessage("Error: Failed to connect to LlamaBot. Refresh page & try again.", "error");
+        }
+      }
+
+
+      //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
+      let selectedElement = document.getElementById("selectedElementContent");
+
+      let selectedElementInnerHtml = selectedElement.innerHTML.trim() || null; //trim to remove any whitespace or newline characters
+
+      if (selectedElementInnerHtml) {
+        selectedElementInnerHtml = selectedElementInnerHtml.replace(
+          "selected-element",
+          ""
+        );
+      }
+
+      if (debugModeToggle.checked) {
+        userMessage = " [debug mode toggled]: " + userMessage;
+      }
+
+      hideAllChatToolWindows();
+
+      sendUserMessageOverSocket(
+        userMessage, 
+        selectedElementInnerHtml, 
+        (error) => {
+          console.error("Error sending message:", error);
+        }, 
+        get_relevant_errors());
+    }
+
+  function get_relevant_errors() {
+    /**
+    * Strip out errors that aren't from the current page.
+    * @param {Array<{source: string}>} errors
+    * @returns {Array<object>}  Only the relevant errors.
+    */
+    const relevantErrors = uncaughtErrors.reduce((acc, item) => {
+      try {
+        const errUrl = new URL(item.source);                        // parse the error's URL
+        if (
+          errUrl.origin === location.origin &&                      // same protocol+host(+port)
+          errUrl.pathname === location.pathname                     // same path
+        ) {
+          acc.push(item);                                           // keep it
+        }
+      } catch (_) {
+          /* ignore malformed URLs */
+        }
+        return acc;
+      }, []);
+
+      return formatErrors(relevantErrors);
+  }
+  
+  window.get_relevant_errors = get_relevant_errors;
+    
+    function formatErrors(errors) {
+        return errors.map(e => {
+            return `Error Message: ${e.message}
+            Source URL: ${e.source}
+            Line: ${e.lineno}, Column: ${e.colno}`;
+                }).join('\n\n');
+    }
+
+    window.formatErrors = formatErrors;
+
+
+    /**
+     * Helper to show the loading indicator for when llamabot is thinking, called from sendMessageToLlamaBot.
+     */
+    function showLoadingIndicator() {
+      // show all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
+        element.classList.remove("hidden");
+      });
+      const spinner = makeLoadingSpinner();
+      const loadingDiv = document.createElement("div");
+      loadingDiv.id = "loadingIndicator";
+      loadingDiv.classList.add("is-thinking");
+      loadingDiv.appendChild(spinner);
+      chatbotMessagesContainer.appendChild(loadingDiv);
+    }
+
+    /**
+     * Helper method to hides the loading indicator for when llamabot is done thinking.
+     */
+    function hideLoadingIndicator() {
+      isLoading = false;
+      // hide all instances of is-thinking class
+      document.querySelectorAll(".is-thinking").forEach(element => {
+        element.classList.add("hidden");
+      });
+
+      const loadingDiv = document.getElementById("loadingIndicator");
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
+    window.hideLoadingIndicator = hideLoadingIndicator;
+
 
     closeModal.addEventListener("click", () => {
       modal.classList.add("hidden");
@@ -25,7 +198,7 @@
       // Implement right navigation logic
     });
 
-    var isOpen = false;
+    var isOpen = true; // isopen is true by default now.
     let isLoading = false;
     let messages = [];
 
@@ -46,16 +219,16 @@
       //  isOpen = !isOpen;
       //  chatbotContainer.classList.toggle("hidden", !isOpen);
       //
-      //  const chatbotMessages = document.getElementById('chatbotMessages');            
-      //  chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      //  const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');            
+      //  chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
       //}
       //else {
         isOpen = !isOpen;
         chatbotContainer.classList.toggle("hidden", !isOpen);
 
         console.log("Chat window has been toggled to " + (isOpen ? "open" : "closed"));
-        const chatbotMessages = document.getElementById('chatbotMessages');            
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');            
+        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
       //}
     }
 
@@ -76,22 +249,14 @@
     closeButton.addEventListener("click", toggleChat);
 
     /**
-     * Formats the message to display code blocks properly
+     * WARNING: This is duplicated code in _websocket.html.erb. This is really ugly. Formats the message to display code blocks properly
+     * This was used to format code blocks so that the user could see formatted code when the chatbot responds.
      */
     function formatMessage(text, sender) {
       // Custom renderer to handle code blocks
       const renderer = new marked.Renderer();
-      renderer.code = (code, language) => {
-        const validLanguage = Prism.languages[language] ? language : 'markup';
-        const highlightedCode = Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
-        const escapedCode = escapeHtml(highlightedCode);
-        const uniqueId = 'code-' + Math.random().toString(36).substr(2, 9);
-        return `
-          <div class="relative">
-            <pre class="language-${validLanguage}"><code id="${uniqueId}">${sender == "user" ? code : escapedCode}</code></pre>
-            <button class="copy-button absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm" onclick="copyCode('${uniqueId}')">Copy</button>
-          </div>
-        `;
+      renderer.code = (code) => {
+        return code;
       };
 
       // Configure marked options
@@ -123,6 +288,175 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
     }
+
+    // Create the handleThumbsClick function - add this at the end of the file
+    function handleThumbsClick(messageId, type, button) {
+      console.log(`CLICKED: ${type} reaction for message ${messageId}`);
+      
+      // Store current reaction data
+      window.currentReaction = {
+        messageId: messageId,
+        type: type, 
+        button: button
+      };
+      
+      // Debug what element we found
+      const feedbackModal = document.getElementById('feedbackModal');
+      console.log('Found modal?', !!feedbackModal);
+      
+      if (!feedbackModal) {
+        alert('Feedback modal not found! Please check the console for more details.');
+        console.error('feedbackModal element not found in the DOM');
+        return;
+      }
+      
+      // Set title based on reaction type
+      const feedbackTitle = document.getElementById('feedbackTitle');
+      if (feedbackTitle) {
+        feedbackTitle.textContent = type === 'up' 
+          ? 'What did you like about this response?' 
+          : 'What could be improved about this response?';
+      }
+      
+      // Clear previous feedback
+      const feedbackText = document.getElementById('feedbackText');
+      if (feedbackText) {
+        feedbackText.value = '';
+      }
+      
+      // Show the modal
+      feedbackModal.style.display = 'flex'; // Try direct style
+      feedbackModal.classList.remove('hidden');
+      feedbackModal.classList.add('flex');
+      
+      console.log('Modal display style:', feedbackModal.style.display);
+      console.log('Modal classes:', feedbackModal.className);
+
+      // Set direct contentEditable="false" on the modal and all children
+      feedbackModal.contentEditable = false;
+      feedbackModal.setAttribute('contentEditable', 'false');
+      
+      // Also add to all elements inside the modal
+      feedbackModal.querySelectorAll('*').forEach(el => {
+        el.contentEditable = false;
+        el.setAttribute('contentEditable', 'false');
+        el.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits');
+      });
+      
+      // Add direct event handlers to the buttons
+      const cancelButton = document.getElementById('cancelFeedback');
+      if (cancelButton) {
+        // Remove existing event listeners
+        const newCancelButton = cancelButton.cloneNode(true);
+        cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+        
+        newCancelButton.addEventListener('click', function() {
+          console.log('Cancel button clicked');
+          feedbackModal.style.display = 'none';
+          feedbackModal.classList.add('hidden');
+          feedbackModal.classList.remove('flex');
+        });
+      }
+
+      const submitButton = document.getElementById('submitFeedback');
+      if (submitButton) {
+        // Remove existing event listeners
+        const newSubmitButton = submitButton.cloneNode(true);
+        submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+        
+        newSubmitButton.addEventListener('click', function() {
+          console.log('Submit button clicked');
+          const feedback = document.getElementById('feedbackText').value;
+          
+          submitReaction(
+            window.currentReaction.messageId, 
+            window.currentReaction.type, 
+            window.currentReaction.button, 
+            feedback
+          );
+          
+          feedbackModal.style.display = 'none';
+          feedbackModal.classList.add('hidden');
+          feedbackModal.classList.remove('flex');
+        });
+      }
+    }
+
+    // Make sure it's available globally
+    window.handleThumbsClick = handleThumbsClick;
+
+    // Add this new function to handle the reaction submission
+    function submitReaction(messageId, type, button, feedback) {
+      console.log('Submitting reaction:', { messageId, type, feedback });
+      
+      // Visual feedback immediately
+      if (button.classList.contains('text-gray-500')) {
+        button.classList.remove('text-gray-500');
+        button.classList.add(type === 'up' ? 'text-green-600' : 'text-red-600');
+        
+        // If this button is activated, make sure the opposite one is deactivated
+        const oppositeButton = button.parentNode.querySelector(
+          type === 'up' ? '.text-red-600' : '.text-green-600'
+        );
+        if (oppositeButton) {
+          oppositeButton.classList.add('text-gray-500');
+          oppositeButton.classList.remove(type === 'up' ? 'text-red-600' : 'text-green-600');
+        }
+      } else {
+        // Deactivating the button
+        button.classList.add('text-gray-500');
+        button.classList.remove(type === 'up' ? 'text-green-600' : 'text-red-600');
+      }
+      
+      // Get CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      
+      // Simplified payload - we only need the message ID and reaction type
+      const payload = {
+        message_reaction: {
+          page_history_id: messageId,
+          reaction_type: type,
+          feedback: feedback
+        }
+      };
+      
+      console.log('Sending payload:', payload);
+      
+      // Send the data to server
+      fetch('/message_reactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Reaction saved successfully:', data);
+        if (window.showNotification) {
+          window.showNotification('Feedback submitted successfully!', 'success');
+        }
+      })
+      .catch(error => {
+        console.error('Error saving reaction:', error);
+        // Revert the UI change on error
+        button.classList.toggle('text-gray-500');
+        button.classList.toggle(type === 'up' ? 'text-green-600' : 'text-red-600');
+        
+        if (window.showNotification) {
+          window.showNotification('Failed to submit feedback. Please try again.', 'error');
+        }
+      });
+    }
+
+    // Make it available globally
+    window.submitReaction = submitReaction;
 
     /**
      * Adds a message to the chatbot messages container.
@@ -163,8 +497,16 @@
       contentWrapper.appendChild(labelContainer);
 
       const messageDiv = document.createElement("div");
+      //TODO: This is a hacky way to format our message to format styling.
+                // We need to DRY up this code
+                // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb
       messageDiv.className = `p-2 rounded ${
-        sender === "bot" ? "bg-blue-100" : "bg-green-100"
+        sender === "bot" ? "bg-blue-100" : 
+        sender === "user" ? "bg-green-100" : 
+        sender === "error" ? "bg-red-100" : 
+        sender === "system" ? "bg-yellow-100" : 
+        sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+        "bg-gray-100"
       }`;
       
       const formattedContent = formatMessage(text, sender);
@@ -175,10 +517,10 @@
       wrapper.appendChild(contentWrapper);
 
       if (appendToTop) {
-        chatbotMessages.insertBefore(wrapper, chatbotMessages.firstChild);
+        chatbotMessagesContainer.insertBefore(wrapper, chatbotMessagesContainer.firstChild);
       } else {
-        chatbotMessages.appendChild(wrapper);
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        chatbotMessagesContainer.appendChild(wrapper);
+        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
       }
       
       if (onClickCallback) {
@@ -208,72 +550,6 @@
         <span class="thinking-pulse">Thinking... (this may take a while)</span>
         </div>`.trim();
       return spinner.firstElementChild;
-    }    
-
-    /**
-     * Shows the loading indicator for when llamabot is thinking.
-     */
-    function showLoadingIndicator() {
-      // show all instances of is-thinking class
-      document.querySelectorAll(".is-thinking").forEach(element => {
-        element.classList.remove("hidden");
-      });
-      const spinner = makeLoadingSpinner();
-      const loadingDiv = document.createElement("div");
-      loadingDiv.id = "loadingIndicator";
-      loadingDiv.classList.add("is-thinking");
-      loadingDiv.appendChild(spinner);
-      chatbotMessages.appendChild(loadingDiv);
-    }
-
-    /**
-     * Hides the loading indicator for when llamabot is done thinking.
-     */
-    function hideLoadingIndicator() {
-      isLoading = false;
-      // hide all instances of is-thinking class
-      document.querySelectorAll(".is-thinking").forEach(element => {
-        element.classList.add("hidden");
-      });
-
-      const loadingDiv = document.getElementById("loadingIndicator");
-      if (loadingDiv) {
-        loadingDiv.remove();
-      }
-    }
-    window.hideLoadingIndicator = hideLoadingIndicator;
-
-    /**
-     * Sends a message to the LLM and handles the response.
-     * Handles the UI logic for sending the message, displaying the message, and hiding the loading indicator, hiding chat tool windows, etc.
-     */
-    async function sendMessage() {
-      if (userInput.value.trim() === "" || isLoading) return;
-      const userMessage = userInput.value;
-      addMessage(userMessage, "user");
-      userInput.value = "";
-      autoResizeUserInputArea();
-      isLoading = true;
-      showLoadingIndicator();
-
-      //remove all selectedElement class so it doesn't get sent into LLM and get saved in database.
-      let selectedElement = document.getElementById("selectedElementContent");
-
-      let selectedElementInnerHtml = selectedElement.innerHTML.trim() || null; //trim to remove any whitespace or newline characters
-
-      if (selectedElementInnerHtml) {
-        selectedElementInnerHtml = selectedElementInnerHtml.replace(
-          "selected-element",
-          ""
-        );
-      }
-
-      hideAllChatToolWindows();
-
-      sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, (error) => {
-        console.error("Error sending message:", error);
-      });
-
     }
 
     /**
@@ -290,7 +566,7 @@
      */
     function insertPrompt(prompt) {
       userInput.value = prompt;
-      sendMessage();
+      sendMessageToLlamaBot();
     }
     //make global access to insert prompt
     window.insertPrompt = insertPrompt;
@@ -308,11 +584,15 @@
       document.getElementById("selectedElementContainer").style.display =
         "none";
       document.getElementById("selectedElementContent").innerHTML = "";
+      document.getElementById("debugContainer").classList.add("hidden");
+      
+
+
     }
     //make global access to hide all chat tool windows
     window.hideAllChatToolWindows = hideAllChatToolWindows;
 
-    sendButton.addEventListener("click", sendMessage);
+    sendButton.addEventListener("click", sendMessageToLlamaBot);
     
     userInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -321,7 +601,7 @@
           return;
         }
         e.preventDefault(); // Prevent default Enter behavior
-        sendMessage();
+        sendMessageToLlamaBot();
       }
     });
 
@@ -365,8 +645,8 @@
 
             if (page === 1) {
               // Only do these for initial load
-              const chatbotMessages = document.getElementById('chatbotMessages');            
-              chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+              const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');            
+              chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
               addMessage("What do you want to change?", "bot");
               document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded'));
             }
@@ -381,7 +661,7 @@
     }
 
     // Add scroll event listener to load more message history when user scrolls near the top
-    document.getElementById('chatbotMessages').addEventListener('scroll', function(e) {
+    document.getElementById('chatbotMessagesContainer').addEventListener('scroll', function(e) {
       const element = e.target;
       // Load more when user scrolls near the top (for older messages)
       if (element.scrollTop <= element.clientHeight * 0.05) { // when user is at least 5% from top, load more history
@@ -395,7 +675,7 @@
      * Creates a history in the chat window so user can see their page changes & restore if needed
      */
     function addPageHistoryToMessagesArea(history, insertAtTop = false) {
-      const chatbotMessages = document.getElementById('chatbotMessages');
+      const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');
       
       // Create header section if it doesn't exist
       //let headerSection = document.getElementById('pageHistoryHeader');
@@ -404,7 +684,7 @@
       //  headerSection.id = 'pageHistoryHeader';
       //  headerSection.className = 'mb-4 text-center font-bold text-lg';
       //  headerSection.textContent = 'Page Change History';
-      //  chatbotMessages.appendChild(headerSection);
+      //  chatbotMessagesContainer.appendChild(headerSection);
       //}
 
       const wrapper = document.createElement('div');
@@ -437,10 +717,14 @@
       label.className = 'text-xs text-gray-700 font-semibold';
       label.textContent = 'Page Change:';
 
+      // Create a container div for all buttons
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'flex ml-2';
+
       const viewButton = document.createElement('button');
-      viewButton.className = 'text-blue-500 hover:text-blue-700 text-xs underline ml-2';
+      viewButton.className = 'text-blue-500 hover:text-blue-700 text-xs underline mr-2';
       viewButton.textContent = 'View';
-      viewButton.addEventListener('click', function() {
+      viewButton.onclick = function() {
         console.log('History item clicked:', history);
         const modal = document.getElementById('historyModal');
         const mainIframe = document.getElementById('mainIframe');
@@ -451,11 +735,40 @@
         document
           .getElementById('restoreButton')
           .setAttribute('llama-data-web-page-history-id', history.id);
-      });
+      };
 
+      // Add thumbs up button
+      const thumbsUpButton = document.createElement('button');
+      thumbsUpButton.className = 'text-gray-500 hover:text-green-600 text-xs mr-2';
+      thumbsUpButton.innerHTML = '<i class="fas fa-thumbs-up text-blue-500 hover:text-blue-700 text-xs underline mr-2" style="font-size: 16px"></i>';
+      thumbsUpButton.onclick = function(e) {
+        e.stopPropagation();
+        console.log('Thumbs up clicked for history:', history.id);
+        // Call the handleThumbsClick function with the history id, reaction type, and button element
+        handleThumbsClick(history.id, 'up', thumbsUpButton);
+      };
+
+      // Add thumbs down button
+      const thumbsDownButton = document.createElement('button');
+      thumbsDownButton.className = 'text-gray-500 hover:text-red-600 text-xs';
+      thumbsDownButton.innerHTML = '<i class="fas fa-thumbs-down text-blue-500 hover:text-blue-700 text-xs underline mr-2" style="font-size: 16px"></i>';
+      thumbsDownButton.onclick = function(e) {
+        e.stopPropagation();
+        console.log('Thumbs down clicked for history:', history.id);
+        // Call the handleThumbsClick function with the history id, reaction type, and button element
+        handleThumbsClick(history.id, 'down', thumbsDownButton);
+      };
+
+      // Add buttons to the buttons container
+      buttonsContainer.appendChild(viewButton);
+      buttonsContainer.appendChild(thumbsUpButton);
+      buttonsContainer.appendChild(thumbsDownButton);
+
+      // Append elements to their containers
       labelContainer.appendChild(timestamp);
       labelContainer.appendChild(label);
-      labelContainer.appendChild(viewButton);
+      labelContainer.appendChild(buttonsContainer);
+
       contentWrapper.appendChild(labelContainer);
 
       const pageHistoryDiv = document.createElement('div');
@@ -469,17 +782,16 @@
         return htmlRegex.test(str);
       }
 
-      // Render content based on whether it contains HTML. We do this because we want to show the HTML that was edited in the history item,
-      // but we want it sandboxed so it doesn't break any of the current page or chatbot functionality.
+      // Render content based on whether it contains HTML
       if (containsHTML(prompt)) {
         // Create iframe for HTML content
         const iframe = document.createElement('iframe');
         iframe.style.width = '100%';
         iframe.style.border = 'none';
         iframe.style.height = '100px';
-        iframe.style.maxWidth = '400px'; // Add max width
-        iframe.style.maxHeight = '300px'; // Add max height
-        iframe.style.overflow = 'auto'; // Add scrolling if content exceeds dimensions
+        iframe.style.maxWidth = '400px';
+        iframe.style.maxHeight = '300px';
+        iframe.style.overflow = 'auto';
         iframe.setAttribute('sandbox', 'allow-same-origin');
 
         iframe.srcdoc = prompt;
@@ -503,14 +815,14 @@
       // Change the insertion point based on whether we're loading older messages
       if (insertAtTop) {
         // Insert after the header for older messages
-        headerSection.insertAdjacentElement('afterend', wrapper);
+        chatbotMessagesContainer.insertBefore(wrapper, chatbotMessagesContainer.firstChild);
       } else {
         // Append to bottom for newest messages
-        chatbotMessages.appendChild(wrapper);
+        chatbotMessagesContainer.appendChild(wrapper);
       }
 
       if (!insertAtTop) {
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
       }
     }
 
@@ -745,6 +1057,40 @@
     }
 
     window.redoPageChange = redoPageChange
+
+    // Add this code at the end of the file
+    document.addEventListener('DOMContentLoaded', function() {
+      const feedbackModal = document.getElementById('feedbackModal');
+      
+      if (feedbackModal) {
+        // Set non-editable attribute on the modal and all its children
+        feedbackModal.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits');
+        feedbackModal.querySelectorAll('*').forEach(el => {
+          el.setAttribute('data-llama', 'exclude_when_saving_contenteditable_edits');
+        });
+        
+        // Handle cancel button
+        document.getElementById('cancelFeedback')?.addEventListener('click', function() {
+          feedbackModal.classList.remove('flex');
+          feedbackModal.classList.add('hidden');
+          // Reset current reaction
+          currentReaction = { messageId: null, type: null, button: null };
+        });
+        
+        // Handle submit button
+        document.getElementById('submitFeedback')?.addEventListener('click', function() {
+          const feedback = document.getElementById('feedbackText').value;
+          submitReaction(
+            currentReaction.messageId, 
+            currentReaction.type, 
+            currentReaction.button, 
+            feedback
+          );
+          feedbackModal.classList.remove('flex');
+          feedbackModal.classList.add('hidden');
+        });
+      }
+    });
   });
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1017,6 +1363,49 @@
         1000;
       content.style.color = brightness > 125 ? "black" : "white";
     }
+  }
+
+  function toggleDebugContainer() {
+    const debugContainer = document.getElementById('debugContainer');
+    const relevantErrorsList = document.getElementById('relevantErrorsList');
+    //debugger;
+    //debugContainer.classList.toggle('hidden');
+    //relevantErrorsList.classList.toggle('hidden');
+
+    if (debugContainer.classList.contains('hidden')) {
+        debugContainer.classList.remove('hidden');
+    } else {
+        debugContainer.classList.add('hidden');
+    }
+    relevantErrorsList.innerHTML = '';
+    for (const error of uncaughtErrors) {
+      relevantErrorsList.innerHTML += `<li class="text-sm text-red-600">${error.message}</li>`;
+    }
+    
+
+  }
+
+  // Function to update the debug badge count
+  function updateDebugBadge(count) {
+      const badge = document.getElementById('debugBadge');
+      if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : count;
+          badge.classList.remove('hidden');
+      } else {
+          badge.classList.add('hidden');
+      }
+  }
+
+  // Function to increment the debug badge
+  function incrementDebugBadge() {
+      const badge = document.getElementById('debugBadge');
+      const currentCount = parseInt(badge.textContent) || 0;
+      updateDebugBadge(currentCount + 1);
+  }
+
+  // Function to clear the debug badge
+  function clearDebugBadge() {
+      updateDebugBadge(0);
   }
 
   // Add this near the end of the script

@@ -312,14 +312,18 @@
      */
     function injectImageIntoLlamaBotImageContainer(image, appendToBeginning = false) {
       let element;
-      const fileExtension = image.url.split('.').pop().toLowerCase();
+      
+      // Try to get filename from image.image.filename, fallback to image.url if needed
+      const filename = image.image?.filename || image.url || '';
+      const fileExtension = filename.split('.').pop().toLowerCase();
       const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(fileExtension);
+      const isTxt = fileExtension === 'txt';
       
       if (isImage) {
         element = document.createElement('img');
         element.src = image.url;
         element.className = 'h-24 object-cover rounded-lg m-2';
-      } else {
+      } else if (isTxt) {
         element = document.createElement('div');
         element.className = 'h-24 w-24 flex flex-col rounded-lg m-2 bg-gray-100 border border-gray-300 relative group';
         
@@ -370,6 +374,16 @@
               </div>
             `;
           });
+      } else {
+        element = document.createElement('div');
+        element.className = 'h-24 w-24 flex flex-col rounded-lg m-2 bg-gray-100 border border-gray-300 relative group';
+        element.innerHTML = `
+          <div class="absolute inset-0 p-2">
+            <div class="text-[8px] text-gray-500 overflow-hidden h-full opacity-30">
+              ${image.url}
+            </div>
+          </div>
+        `;
       }
 
       element.setAttribute('data-llama-editable', 'true');

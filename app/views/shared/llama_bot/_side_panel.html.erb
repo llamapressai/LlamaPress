@@ -1,3 +1,4 @@
+
 <!-- Side panel for the Llama Bot, includes the html and javascript for managing it -->
 <div id="llama-side-panel" class="fixed top-0 left-0 h-full w-80 bg-gradient-to-br from-slate-800 to-slate-900 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 text-gray-100 shadow-2xl" data-llama="exclude_when_saving_contenteditable_edits">
   <!-- Toggle Button with smooth hover effect -->
@@ -20,8 +21,8 @@
 
     <% if @page&.id.present? %>
     <button id="llama-select-mode-button" onclick="toggleSelectionMode()" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 pr-4 relative z-20">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" data-llama="app/views/shared/_chat.html.erb">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-llama="app/views/shared/_chat.html.erb"></path>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
       </svg>
       <span class="text-xs mt-1 text-purple-400"> Select </span>
     </button>
@@ -37,6 +38,13 @@
       </svg>
       <span class="text-xs mt-1 text-purple-400">Redo</span>
     </button>
+    <button onclick="window.open('<%= page_preview_path(@page) %>', '_blank')" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 relative z-20">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 20px;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+      <span class="text-xs mt-1 text-purple-400">Preview</span>
+    </button>        
     <button onclick="window.location.href='<%= edit_page_path(@page.id) %>'" class="mt-6 bg-slate-800 bg-opacity-0 hover:bg-opacity-100 p-3 rounded-r-lg cursor-pointer transition-all duration-300 shadow-lg group flex flex-col items-center gap-1 relative z-20">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="min-width: 20px;">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -94,13 +102,29 @@
           <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
         </a>
 
-        <a href="/pages/new" class="flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
-          <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-all duration-300">
-            <i class="fas fa-plus text-emerald-400 group-hover:text-emerald-300"></i>
-          </div>
-          <span class="ml-3 font-medium text-gray-200 group-hover:text-white">New Page</span>
-          <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
-        </a>
+        <form action="/pages" method="post" class="contents">
+          <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+          
+          <input type="hidden" name="page[site_id]" value="<%= @page&.site_id %>">
+          <input type="hidden" name="page[slug]" value="new-page">
+          <input type="hidden" name="page[content]" value="
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta content='width=device-width, initial-scale=1.0' name='viewport'>
+            <script src='https://cdn.tailwindcss.com'></script>
+          </head>
+          <body><h1>New Page</h1></body>
+          </html>">
+          <input type="hidden" name="page[organization_id]" value="<%= @page&.organization_id %>">
+          <button type="submit" class="w-full flex items-center p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-all duration-300 group">
+            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-all duration-300">
+              <i class="fas fa-plus text-emerald-400 group-hover:text-emerald-300"></i>
+            </div>
+            <span class="ml-3 font-medium text-gray-200 group-hover:text-white">New Page</span>
+            <i class="fas fa-chevron-right text-gray-500 ml-auto group-hover:text-gray-300"></i>
+          </button>
+        </form>
       </div>
     </div>
 
@@ -215,108 +239,6 @@
     </script>
 
     <hr class="my-2"/>
-<!--    <h2 class="text-xl font-bold mb-2">Drag and Drop</h2>
-    <div id="drag-and-drop-list" class="space-y-6">-->
-    <%# snippets.each do |snippet| %> 
-    <!-- Button Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Button</h3>
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" draggable="true">
-        Click me
-      </button>
-    </div>-->
-
-    <!-- Card Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Card</h3>
-      <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white" draggable="true">
-        <div class="px-6 py-4">
-          <div class="font-bold text-xl mb-2">Card Title</div>
-          <p class="text-gray-700 text-base">
-            This is a sample card component that you can drag and drop onto your page.
-          </p>
-        </div>
-      </div>
-    </div>-->
-
-    <!-- Alert Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Alert</h3>
-      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert" draggable="true">
-        <p class="font-bold">Warning</p>
-        <p>This is an example alert message.</p>
-      </div>
-    </div>-->
-
-    <!-- Form Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Contact Form</h3>
-      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" draggable="true">
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
-            Name
-          </label>
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Your Name">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-            Email
-          </label>
-          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="your@email.com">
-        </div>
-        <div class="mb-6">
-          <label class="block text-gray-700 text-sm font-bold mb-2" for="message">
-            Message
-          </label>
-          <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="message" placeholder="Your message"></textarea>
-        </div>
-        <div class="flex items-center justify-between">
-          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-            Send
-          </button>
-        </div>
-      </form>
-    </div>
--->
-    <!-- Navigation Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Navigation</h3>
-      <nav class="bg-gray-800 p-4" draggable="true">
-        <div class="flex items-center justify-between flex-wrap">
-          <div class="flex items-center flex-shrink-0 text-white mr-6">
-            <span class="font-semibold text-xl tracking-tight">Logo</span>
-          </div>
-          <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-            <div class="text-sm lg:flex-grow">
-              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">
-                Home
-              </a>
-              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white mr-4">
-                About
-              </a>
-              <a href="#" class="block mt-4 lg:inline-block lg:mt-0 text-gray-300 hover:text-white">
-                Contact
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </div>-->
-
-    <!-- Testimonial Component -->
-    <!--<div class="draggable-component mb-4">
-      <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Testimonial</h3>
-      <div class="bg-white shadow-lg rounded-lg p-6" draggable="true">
-        <div class="flex items-center mb-4">
-          <img class="h-12 w-12 rounded-full mr-4" src="https://via.placeholder.com/48" alt="Avatar">
-          <div>
-            <h4 class="text-lg font-bold">John Doe</h4>
-            <p class="text-gray-600">CEO, Example Company</p>
-          </div>
-        </div>
-        <p class="text-gray-700">"This product has completely transformed our business. We've seen amazing results and couldn't be happier!"</p>
-      </div>
-    </div>-->
 
     <!-- Feature List Component -->
     <!--<div class="draggable-component mb-4">
@@ -579,6 +501,414 @@
       });
     </script>
     </div>
+    <% if @page&.id.present? && params[:disable_publish_button].blank? %>
+        <% if @page.site.wordpress_api_encoded_token.present? %>
+          <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+              <button id="publish-content" data-page-id="<%= @page&.id %>" class="bg-slate-800 hover:bg-slate-700 p-6 rounded-xl cursor-pointer transition-all duration-300 shadow-2xl group flex items-center gap-3 px-8">
+                <i class="fab fa-wordpress text-2xl text-gray-400 group-hover:text-gray-300"></i>
+                <div class="flex flex-col items-center">
+                  <% if @page.published_to_wordpress? %>
+                    <span class="text-lg text-blue-400">Update WordPress Page</span>
+                    <span class="text-sm text-green-400">Published • Click to update</span>
+                  <% else %>
+                    <span class="text-lg text-blue-400">Publish to WordPress</span>
+                    <span class="text-sm text-gray-400">First publication</span>
+                  <% end %>
+                </div>
+              </button>
+            </div>
+          <script>
+            //function publishToWordPress() {
+            //  console.log('Publishing to WordPress');
+            //  alert('Publishing to WordPress');
+            //  // /pages/1/publish_to_wordpress
+            //  //window.location.href = `/pages/<%= @page&.id %>/publish_to_wordpress`;
+            //}
+
+              // Add WordPress publish functionality
+              const publishButton = document.getElementById('publish-content');
+              if (publishButton) {
+                publishButton.addEventListener('click', async function() {
+                  const pageId = publishButton.getAttribute('data-page-id');
+                  try {
+                    publishButton.disabled = true;
+                    
+                    // Track publish attempt
+                    mixpanel.track('WordPress Publish Attempted', {
+                      page_id: pageId,
+                      url: window.location.href
+                    });
+                    
+                    const response = await fetch(`/pages/${pageId}/publish_to_wordpress.json`, {
+                      method: 'POST',
+                      headers: {
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                      throw new Error(data.message || 'Publishing failed');
+                    }
+
+                    // Track successful publish
+                    mixpanel.track('WordPress Publish Succeeded', {
+                      page_id: pageId,
+                      url: window.location.href
+                    });
+
+                    showNotification('Successfully published to WordPress!', 'success');
+                  } catch (error) {
+                    console.error('Publishing error:', error);
+                    const errorMessage = error.message || 'Failed to publish to WordPress. Please try again.';
+                    
+                    // Track failed publish
+                    mixpanel.track('WordPress Publish Failed', {
+                      page_id: pageId,
+                      url: window.location.href,
+                      error: errorMessage
+                    });
+                    
+                    showNotification(errorMessage, 'error');
+                  } finally {
+                    publishButton.disabled = false;
+                    publishButton.innerHTML = `
+                      <i class="fab fa-wordpress text-2xl text-gray-400 group-hover:text-gray-300"></i>
+                      <div class="flex flex-col items-center">
+                        <span class="text-lg text-blue-400">Update WordPress Page</span>
+                        <span class="text-sm text-green-400">Published • Click to update</span>
+                      </div>
+                    `;
+                  }
+                });
+              }
+              
+          </script>
+        <% else %>
+          <div class="fixed bottom-2 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+            <div class="relative">
+              <button onclick="showPublishDialog()" class="bg-slate-800 hover:bg-slate-700 p-2 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer transition-all duration-300 shadow-2xl group">
+                <div class="flex items-center gap-1 sm:gap-3 px-1 sm:px-8 mb-0 sm:mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-8 sm:w-8 text-purple-400 group-hover:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                  </svg>
+                  <span class="text-xs sm:text-lg font-medium text-purple-400 group-hover:text-purple-300">Publish</span>
+                </div>
+                <p class="text-xs sm:text-sm text-gray-400 group-hover:text-gray-300 hidden sm:block">Publish instantly with shareable link.</p>
+              </button>
+              
+              <!-- Subtle X button -->
+              <button onclick="hidePublishButton(event)" class="absolute top-1 right-1 sm:top-2 sm:right-2 w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center transition-all duration-200 opacity-0 hover:opacity-75 group/close hidden sm:flex">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Publish Success Modal -->
+          <div id="publish-dialog" class="hidden fixed inset-0 bg-slate-900/75 flex items-center sm:items-center justify-center sm:justify-center z-[60] p-0 sm:p-4">
+            <div class="bg-slate-800 rounded-t-xl sm:rounded-xl p-4 sm:p-8 w-full sm:max-w-2xl mx-0 sm:mx-4 shadow-2xl transform transition-all max-h-screen sm:max-h-none overflow-y-auto mt-auto sm:mt-0">
+              <div class="flex justify-between items-start mb-4 sm:mb-6">
+                <div class="flex items-center gap-2 sm:gap-3">
+                  <span class="text-2xl sm:text-4xl">🎉</span>
+                  <h3 class="text-lg sm:text-2xl font-bold text-white">Your page is live!</h3>
+                </div>
+                <button onclick="hidePublishDialog()" class="text-gray-400 hover:text-gray-300 transition-colors">
+                  <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="space-y-4 sm:space-y-6">
+                <!-- Live Link Section -->
+                <div class="bg-slate-700 p-3 sm:p-4 rounded-lg">
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                    <input type="text" 
+                           id="live-link" 
+                           value="https://llamapress.ai/p/<%= @page&.id %>"
+                           readonly
+                           class="bg-transparent text-white flex-1 text-sm sm:text-base mr-0 sm:mr-3 truncate">
+                    <button onclick="copyToClipboard('live-link')" class="px-3 py-2 sm:px-4 sm:py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors text-sm">
+                      Copy Link
+                    </button>
+                  </div>
+                </div>
+
+                <!-- QR Code and Share Buttons - Mobile: Stacked, Desktop: Grid -->
+                <div class="flex flex-col sm:grid sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div class="bg-white p-3 sm:p-4 rounded-lg order-2 sm:order-1">
+                    <!-- QR Code will be generated via JavaScript -->
+                    <div id="qrcode" class="flex justify-center"></div>
+                    <p class="text-center text-xs sm:text-sm text-gray-600 mt-2">Scan to view on mobile</p>
+                  </div>
+
+                  <div class="space-y-2 sm:space-y-3 order-1 sm:order-2">
+                    <button onclick="shareToTwitter()" class="w-full px-3 py-2 sm:px-4 sm:py-3 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                      <i class="fab fa-twitter text-sm sm:text-base"></i>
+                      Share on Twitter
+                    </button>
+                    <button onclick="shareToLinkedIn()" class="w-full px-3 py-2 sm:px-4 sm:py-3 bg-[#0A66C2] hover:bg-[#094d92] text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                      <i class="fab fa-linkedin text-sm sm:text-base"></i>
+                      Share on LinkedIn
+                    </button>
+                    <button onclick="shareToReddit()" class="w-full px-3 py-2 sm:px-4 sm:py-3 bg-[#FF4500] hover:bg-[#e03d00] text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                      <i class="fab fa-reddit-alien text-sm sm:text-base"></i>
+                      Share on Reddit
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Embed Code -->
+                <div class="bg-slate-700 p-3 sm:p-4 rounded-lg">
+                  <p class="text-xs sm:text-sm text-gray-300 mb-2">Embed on your website</p>
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                    <input type="text" 
+                           id="embed-code" 
+                           value='<iframe src="https://llamapress.ai/p/<%= @page&.slug %>" width="100%" height="600" frameborder="0"></iframe>' 
+                           readonly
+                           class="bg-transparent text-white flex-1 text-sm sm:text-base mr-0 sm:mr-3 truncate">
+                    <button onclick="copyToClipboard('embed-code')" class="px-3 py-2 sm:px-4 sm:py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors text-sm">
+                      Copy Code
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Action Buttons - Mobile: Stacked, Desktop: Row -->
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <a href="mailto:kody@llamapress.ai?subject=Domain%20Connection%20Request&body=Hi%20Kody%2C%0A%0AI%20want%20to%20connect%20my%20domain%20to%20this%20page%3A%20https%3A//llamapress.ai/p/<%= @page&.slug %>%0A%0APlease%20let%20me%20know%20what%20steps%20I%20need%20to%20take.%0A%0AThanks!" 
+                     onclick="mixpanel.track('Connect Domain Clicked', { page_id: '<%= @page&.id %>', url: window.location.href }); return true;"
+                     class="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors text-center text-sm sm:text-base">
+                    Connect Domain
+                  </a>
+                  
+                  <!-- Native Share Button -->
+                  <button id="native-share-btn" onclick="shareNatively()" class="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-center flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
+                    </svg>
+                    Share
+                  </button>
+                  
+                  <a href="#" 
+                     onclick="handleDownload(event, <%=@page&.id%>, '<%= @page&.slug %>')"
+                     class="flex-1 px-3 py-2 sm:px-4 sm:py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition-colors text-center relative text-sm sm:text-base">
+                    <span id="download-text">Download</span>
+                    <div id="download-spinner" class="hidden absolute inset-0 flex items-center justify-center">
+                      <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Proof Toast - Also Mobile Optimized -->
+          <div id="social-proof-toast" class="hidden fixed bottom-4 right-4 left-4 sm:left-auto sm:right-4 bg-slate-800 p-3 sm:p-4 rounded-lg shadow-lg z-[70] max-w-none sm:max-w-md">
+            <div class="flex items-start gap-3 sm:gap-4">
+              <div class="flex-1">
+                <p class="text-white font-medium text-sm sm:text-base">Share your page & we'll promote the best ones on our homepage.</p>
+                <div class="mt-2 sm:mt-3 flex gap-2">
+                  <button onclick="shareToTwitter()" class="px-2 py-1 sm:px-3 sm:py-1 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white rounded transition-colors text-xs sm:text-sm">
+                    Share on Twitter
+                  </button>
+                  <button onclick="shareToReddit()" class="px-2 py-1 sm:px-3 sm:py-1 bg-[#FF4500] hover:bg-[#e03d00] text-white rounded transition-colors text-xs sm:text-sm">
+                    Post on Reddit
+                  </button>
+                </div>
+              </div>
+              <button onclick="hideToast()" class="text-gray-400 hover:text-gray-300">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+          <script>
+            function showPublishDialog() {
+              document.getElementById('publish-dialog').classList.remove('hidden');
+              generateQRCode();
+              setTimeout(showSocialProofToast, 5000);
+              
+              // Track publish dialog opened
+              mixpanel.track('Publish Dialog Opened', {
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+            }
+
+            function hidePublishDialog() {
+              document.getElementById('publish-dialog').classList.add('hidden');
+            }
+
+            function showSocialProofToast() {
+              document.getElementById('social-proof-toast').classList.remove('hidden');
+            }
+
+            function hideToast() {
+              document.getElementById('social-proof-toast').classList.add('hidden');
+            }
+
+            function generateQRCode() {
+              const qrContainer = document.getElementById('qrcode');
+              qrContainer.innerHTML = '';
+              new QRCode(qrContainer, {
+                text: document.getElementById('live-link').value,
+                width: 128,
+                height: 128
+              });
+              
+              // Track QR code generation
+              mixpanel.track('QR Code Generated', {
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+            }
+
+            function copyToClipboard(elementId) {
+              const element = document.getElementById(elementId);
+              element.select();
+              document.execCommand('copy');
+              
+              // Track what was copied
+              mixpanel.track('Content Copied', {
+                content_type: elementId === 'live-link' ? 'share_link' : 'embed_code',
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+              
+              // Show feedback
+              const button = element.nextElementSibling;
+              const originalText = button.textContent;
+              button.textContent = 'Copied!';
+              setTimeout(() => button.textContent = originalText, 2000);
+            }
+
+            function shareToTwitter() {
+              const url = document.getElementById('live-link').value;
+              const text = "Check out my website built with @llamapressai! 🦙✨";
+              
+              // Track Twitter share
+              mixpanel.track('Social Share Clicked', {
+                platform: 'twitter',
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+              
+              window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+            }
+
+            function shareToLinkedIn() {
+              const url = document.getElementById('live-link').value;
+              
+              // Track LinkedIn share
+              mixpanel.track('Social Share Clicked', {
+                platform: 'linkedin',
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+              
+              window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+            }
+
+            function shareToReddit() {
+              const url = document.getElementById('live-link').value;
+              const title = "Check out my website built with LlamaPress!";
+              
+              // Track Reddit share
+              mixpanel.track('Social Share Clicked', {
+                platform: 'reddit',
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+              
+              window.open(`https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, '_blank');
+            }
+
+            async function shareNatively() {
+              const url = document.getElementById('live-link').value;
+              const title = "Check out my website built with LlamaPress!";
+              const text = "I just created this website with AI - take a look! 🦙✨";
+              
+              // Check if Web Share API is supported
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: title,
+                    text: text,
+                    url: url
+                  });
+                  
+                  // Track native share
+                  mixpanel.track('Native Share Used', {
+                    page_id: '<%= @page&.id %>',
+                    url: window.location.href
+                  });
+                  
+                  console.log('Successfully shared');
+                } catch (error) {
+                  console.log('Error sharing:', error);
+                  // Fallback to copying URL to clipboard
+                  fallbackShare(url, title);
+                }
+              } else {
+                // Fallback for browsers that don't support Web Share API
+                fallbackShare(url, title);
+              }
+            }
+
+            function fallbackShare(url, title) {
+              // Copy to clipboard as fallback
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                  // Show a temporary notification
+                  const shareBtn = document.getElementById('native-share-btn');
+                  const originalText = shareBtn.innerHTML;
+                  shareBtn.innerHTML = '✓ Copied!';
+                  
+                  setTimeout(() => {
+                    shareBtn.innerHTML = originalText;
+                  }, 2000);
+                  
+                  // Track fallback share
+                  mixpanel.track('Share Fallback Used', {
+                    page_id: '<%= @page&.id %>',
+                    url: window.location.href,
+                    method: 'clipboard'
+                  });
+                });
+              } else {
+                // Last resort - show the URL in an alert
+                alert(`Share this link: ${url}`);
+              }
+            }
+
+            function hidePublishButton(event) {
+              event.preventDefault();
+              event.stopPropagation(); // Prevent the showPublishDialog from firing
+              
+              // Track the hide action
+              mixpanel.track('Publish Button Hidden', {
+                page_id: '<%= @page&.id %>',
+                url: window.location.href
+              });
+              
+              // Add the disable parameter to the current URL
+              const currentUrl = new URL(window.location.href);
+              currentUrl.searchParams.set('disable_publish_button', 'true');
+              window.location.href = currentUrl.toString();
+            }
+          </script>
+        <% end %>
+    <% end %>
   </div>
 </div>
 
@@ -700,3 +1030,55 @@
 </style>
 
 <%= render partial: 'shared/llama_bot/timeline_overlay' %>
+
+<script>
+  function handleDownload(event, pageId, pageSlug) {
+    event.preventDefault();
+    
+    // Track click in Mixpanel
+    mixpanel.track('Download Clicked', { 
+      page_id: pageId, 
+      url: window.location.href 
+    });
+
+    // Show loading spinner
+    const downloadText = document.getElementById('download-text');
+    const downloadSpinner = document.getElementById('download-spinner');
+    downloadText.classList.add('invisible');
+    downloadSpinner.classList.remove('hidden');
+
+    try {
+      // Simple approach: just navigate to the download URL
+      window.location.href = `/pages/${pageId}/download_html`;
+      
+      // Track successful download attempt
+      mixpanel.track('Download Completed', { 
+        page_id: pageId, 
+        url: window.location.href 
+      });
+
+    } catch (error) {
+      console.error('Download failed:', error);
+      
+      // Track failed download
+      mixpanel.track('Download Failed', { 
+        page_id: pageId, 
+        url: window.location.href,
+        error: error.message 
+      });
+      
+      // Show user-friendly error message
+      if (typeof showNotification === 'function') {
+        showNotification('Download failed. Please try again.', 'error');
+      } else {
+        alert('Download failed. Please try again.');
+      }
+    } finally {
+      // Hide loading spinner after a short delay
+      setTimeout(() => {
+        downloadText.classList.remove('invisible');
+        downloadSpinner.classList.add('hidden');
+      }, 1000);
+    }
+  }
+</script>

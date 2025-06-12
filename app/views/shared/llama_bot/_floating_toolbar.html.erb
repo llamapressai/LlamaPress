@@ -92,7 +92,8 @@
         }
 
         function hideToolbar(e) {
-            if (e && !toolbar.contains(e.target) && e.target !== toolbar) {
+            // If no event is provided, or if clicked outside toolbar, hide it
+            if (!e || (!toolbar.contains(e.target) && e.target !== toolbar)) {
                 toolbar.style.display = 'none';
             }
         }

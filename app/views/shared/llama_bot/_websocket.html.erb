@@ -5,25 +5,103 @@
   let isLoading = false;
   let lastPongTime = Date.now() - 30000;
   let connectionCheckInterval;
+  let redStatusStartTime = null;
+  let errorModalShown = false;
+
+  // Create error modal element
+  const errorModal = document.createElement('div');
+  errorModal.innerHTML = `
+    <div id="connectionErrorModal" class="hidden fixed inset-0 z-50 overflow-auto bg-red-100 bg-opacity-90 flex">
+      <div class="relative p-8 bg-white w-full max-w-md m-auto flex-col flex rounded-lg border-4 border-red-500">
+        <div class="text-red-500 text-2xl font-bold mb-4">Connection Error</div>
+        <div class="text-red-700 mb-4">
+          Unable to establish connection to LlamaBot. Please try:
+          <ul class="list-disc ml-4 mt-2">
+            <li>Refreshing the page</li>
+            <li>Checking your internet connection</li>
+            <li>Trying again in a few minutes</li>
+          </ul>
+        </div>
+        <button onclick="window.location.reload()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+          Refresh Page
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(errorModal);
+
+  function showErrorModal() {
+    if (!errorModalShown) {
+      const modal = document.getElementById('connectionErrorModal');
+      modal.classList.remove('hidden');
+      errorModalShown = true;
+    }
+  }
+
+  function hideErrorModal() {
+    const modal = document.getElementById('connectionErrorModal');
+    modal.classList.add('hidden');
+    errorModalShown = false;
+  }
+
+
+  const GREEN_CONNECTED_STATUS_COLOR = 'bg-green-500';
+  const YELLOW_CONNECTED_STATUS_COLOR = 'bg-yellow-400';
+  const RED_CONNECTED_STATUS_COLOR = 'bg-red-500';
 
   // Add this function to update the status indicator
   function updateConnectionStatus() {
     const timeSinceLastPong = Date.now() - lastPongTime;
     
     if (timeSinceLastPong < 30000) { // Less than 30 seconds
-      updateStatusIcon('bg-green-500');
+      updateStatusIcon(GREEN_CONNECTED_STATUS_COLOR);
+      redStatusStartTime = null;
+      errorModalShown = false;
     } else if (timeSinceLastPong < 50000) { // Between 30-50 seconds
-      updateStatusIcon('bg-yellow-400');
+      updateStatusIcon(YELLOW_CONNECTED_STATUS_COLOR);
+      redStatusStartTime = null;
+      errorModalShown = false;
     } else { // More than 50 seconds
-      updateStatusIcon('bg-red-500');
+      updateStatusIcon(RED_CONNECTED_STATUS_COLOR);
+      if (!redStatusStartTime) {
+        redStatusStartTime = Date.now();
+      } else if (Date.now() - redStatusStartTime > 5000 && !errorModalShown) { // 5 seconds in red status
+        showErrorModal();
+      }
     }
   }
 
   // Update the status icon with the given color
   function updateStatusIcon(color) {
-    const statusIndicator = document.getElementById('statusIcon');
-    statusIndicator.classList.remove('bg-yellow-400', 'bg-red-500', 'bg-green-500');  // Remove all existing classes
+    const statusIndicator = document.getElementById('connectionStatusIconForLlamaBot');
+    statusIndicator.classList.remove(YELLOW_CONNECTED_STATUS_COLOR, RED_CONNECTED_STATUS_COLOR, GREEN_CONNECTED_STATUS_COLOR);  // Remove all existing classes
     statusIndicator.classList.add(color);
+  }
+
+  function handleChatUrlParams() {
+    // Check if a chat message exists in the Rails flash
+    
+    // this is not broken 
+    const chatMessage = <%= raw (flash[:chat_message] || "").to_json %>;
+    // this is not broken ^ 
+
+    if (chatMessage) {
+      // Show chat container if it's hidden
+      const chatbotContainer = document.getElementById('chatbotContainer');
+      if (chatbotContainer.classList.contains('hidden')) {
+        chatbotContainer.classList.remove('hidden');
+      }
+      
+      // Set the message in the input
+      const userInput = document.getElementById('userInput');
+      userInput.value = chatMessage;
+      
+      // Automatically send the message
+      setTimeout(() => {
+        const sendButton = document.getElementById('sendButton');
+        sendButton.click();
+      }, 1000); // Small delay to ensure everything is loaded
+    }
   }
 
   /**
@@ -42,7 +120,7 @@
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
     chatChannel = consumer.subscriptions.create(
-      { channel: "ChatChannel", session_id: "<%= session.id %>" },
+      { channel: "ChatChannel", session_id: "<%= @chat_channel_session_id %>" },
       {
         /**
          * Receives message responses from LlamaBot Backend.
@@ -62,26 +140,102 @@
             const parsedData = JSON.parse(parsed.message);
 
             // This will run regardless of success or failure
-            isLoading = false;
-
-            hideLoadingIndicator();
+            if (parsedData.type !== 'think_message') {
+              isLoading = false;
+              hideLoadingIndicator();
+            }
+            
             // Reset send button state
             const sendButton = document.getElementById('sendButton');
             sendButton.textContent = 'Send';
             sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
             sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
 
-            // if (parsedData.content === 'Workflow completed') {
-            //   window.location.reload();
-            //   return;
-            // }
+            if (parsedData.content === 'Workflow completed') {
+              window.location.reload();
+              return;
+            }
             
             switch (parsedData.type) {
               case 'ai_message':
-                addMessage(parsedData.content, "bot");
+                //TODO: This is a hacky way to format our message to add a brain for tool-calling. We need to refactor this.
+                // We need to DRY up this code somehow by making the formatting be handled in a single place. 
+                // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb, chat_channel.rb, and pages_controller.rb.
+                if (!parsedData.content && "tool_calls" in parsedData.additional_kwargs){
+                  //sorry for using this quick & dirty way to titleize the tool name.
+                  let titleized_tool_name = parsedData.additional_kwargs["tool_calls"][0]["function"]["name"].replace( //https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+                      /\w\S*/g,
+                      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+                    );
+
+                  parsedData.content = "🧠: " + titleized_tool_name + " called with arguments: " + parsedData.additional_kwargs["tool_calls"][0]["function"]["arguments"]
+                }
+
+                const messageElement = addMessage(parsedData.content, "bot");
+                
+                // Store trace info if available
+                if (parsedData.langsmith_trace) {
+                  // Generate a unique ID for this message if it doesn't have one already
+                  const messageId = messageElement.getAttribute('data-message-id') || 
+                                   `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+                  
+                  if (!messageElement.hasAttribute('data-message-id')) {
+                    messageElement.setAttribute('data-message-id', messageId);
+                  }
+                  
+                  // Store trace info for this message
+                  window.messageTraces[messageId] = parsedData.langsmith_trace;
+                  console.log(`Stored trace info for message ${messageId}:`, parsedData.langsmith_trace);
+                  
+                  // Add reaction buttons
+                  const reactionsContainer = document.createElement('div');
+                  reactionsContainer.className = 'mt-2 flex items-center space-x-2';
+                  
+                  // Thumbs up button
+                  const thumbsUpButton = document.createElement('button');
+                  thumbsUpButton.className = 'text-gray-500 hover:text-green-600 text-xs';
+                  thumbsUpButton.innerHTML = '<i class="fas fa-thumbs-up" style="font-size: 16px"></i>';
+                  thumbsUpButton.setAttribute('title', 'This response was helpful');
+                  thumbsUpButton.onclick = function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('Thumbs up clicked for messageId:', messageId);
+                    handleThumbsClick(messageId, 'up', this);
+                  };
+                  
+                  // Thumbs down button
+                  const thumbsDownButton = document.createElement('button');
+                  thumbsDownButton.className = 'text-gray-500 hover:text-red-600 text-xs';
+                  thumbsDownButton.innerHTML = '<i class="fas fa-thumbs-down" style="font-size: 16px"></i>';
+                  thumbsDownButton.setAttribute('title', 'This response was not helpful');
+                  thumbsDownButton.onclick = function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('Thumbs down clicked websocket, calling handleThumbsClick');
+                    // Try both global and local handleThumbsClick to ensure it works
+                    if (window.handleThumbsClick) {
+                      window.handleThumbsClick(messageId, 'down', this);
+                    } else {
+                      handleThumbsClick(messageId, 'down', this);
+                    }
+                  };
+                  
+                  // Add buttons to container
+                  reactionsContainer.appendChild(thumbsUpButton);
+                  reactionsContainer.appendChild(thumbsDownButton);
+                  
+                  // Add container to message
+                  messageElement.appendChild(reactionsContainer);
+                }
                 break;
               case 'system_message':
                 addMessage(parsedData.content, "system");
+                break;
+              case 'think_message':
+                addMessage(parsedData.content, "system");
+                break;
+              case 'fragment_from_html_stream_message':
+                handleFragment(parsedData.content);
                 break;
               case 'user_input_required':
                 addMessage(parsedData.content, "bot");
@@ -93,6 +247,9 @@
               case 'external_ws_pong':
                 lastPongTime = Date.now();
                 console.log("Received pong response from LlamaBot Backend, which means we're connected");
+                break;
+              case 'error':
+                addMessage(parsedData.content, "error");
                 break;
               default:
                 console.warn("Unknown message type:", parsedData.type);
@@ -108,7 +265,11 @@
             // Reset send button state
             const sendButton = document.getElementById('sendButton');
             sendButton.textContent = 'Send';
+
+            //Remove 'Cancel' Button Red Background Color
             sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+
+            //Set the Blue button for the 'Send'
             sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
           }
         },
@@ -166,16 +327,16 @@
   
 
 document.addEventListener("visibilitychange", function() {
-        if (document.visibilityState === 'visible' && !consumer.connection.isOpen()) {
-            console.log("Tab is active. Reconnecting...");
-            consumer.connection.reopen();
-        }
-    });
-
-
-
-    console.log("ChatChannel created:", chatChannel); // Add this line
+  if (document.visibilityState === 'visible' && !consumer.connection.isOpen()) {
+      console.log("Tab is active. Reconnecting...");
+      consumer.connection.reopen();
   }
+});
+
+
+
+console.log("ChatChannel created:", chatChannel); // Add this line
+}
 
     const textarea = document.getElementById('userInput');
     const maxRows = 10; // Set this to your desired maximum number of rows
@@ -213,14 +374,191 @@ document.addEventListener("visibilitychange", function() {
 
     function addMessage(text, sender) {
       const messageDiv = document.createElement("div");
-      messageDiv.className = `mb-2 p-2 rounded ${
-        sender === "bot" ? "bg-blue-100" : sender === "user" ? "bg-green-100" : "bg-gray-100"
-      } ${sender === "bot" ? "self-start" : sender === "user" ? "self-end" : "self-center"}`;
+      messageDiv.className = `p-2 rounded ${
+        sender === "bot" ? "bg-blue-100" : 
+        sender === "user" ? "bg-green-100" : 
+        sender === "error" ? "bg-red-100" : 
+        sender === "system" ? "bg-gray-100 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+        sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+        "bg-gray-100"
+      }`;
       
       const formattedContent = formatMessage(text, sender);
       messageDiv.innerHTML = formattedContent;
-      chatbotMessages.appendChild(messageDiv);
-      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      chatbotMessagesContainer.appendChild(messageDiv);
+      chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
+      return messageDiv;
+    }
+
+    /**
+    * This function handles the fragment from the html stream and constructs the modal that displays it to the user.
+    */
+    function handleFragment(text) {
+      let modal = document.getElementById('fragmentModal');
+      if (!modal) {
+        // Create modal container with basic styles
+        modal = document.createElement('div');
+        modal.id = 'fragmentModal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '10000';
+
+        // Create the iframe container
+        const iframeContainer = document.createElement('div');
+        iframeContainer.style.width = '80%';
+        iframeContainer.style.height = '80%';
+        iframeContainer.style.backgroundColor = '#fff';
+        iframeContainer.style.borderRadius = '8px';
+        iframeContainer.style.position = 'relative';
+
+        // Create the iframe
+        const iframe = document.createElement('iframe');
+        iframe.id = 'fragmentIframe';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '8px';
+
+        // Create overlay div
+        const overlay = document.createElement('div');
+        overlay.style.position = 'absolute';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.background = 'rgba(0, 0, 0, 0.4)';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '1';
+        overlay.style.borderTopLeftRadius = '8px';
+        overlay.style.borderTopRightRadius = '8px';
+        
+        // Create text for overlay
+        const overlayText = document.createElement('div');
+        overlayText.textContent = 'Your Page is Being Built!';
+        overlayText.style.color = 'white';
+        overlayText.style.fontSize = '52px';
+        overlayText.style.fontWeight = 'bold';
+        overlayText.style.fontFamily = 'Arial, sans-serif';
+
+        // Create text container for the top
+        const textContainer = document.createElement('div');
+        textContainer.style.padding = '30px';
+        textContainer.style.width = '100%';
+        textContainer.style.textAlign = 'center';
+
+        // Create Lottie container
+        const lottieContainer = document.createElement('div');
+        lottieContainer.id = 'lottieAnimation';
+        lottieContainer.style.width = '300px';
+        lottieContainer.style.height = '300px';
+        lottieContainer.style.position = 'absolute';
+        lottieContainer.style.top = '50%';
+        lottieContainer.style.left = '50%';
+        lottieContainer.style.transform = 'translate(-50%, -50%)';
+
+        // Add script for Lottie if not already present
+        if (!document.querySelector('script[src*="lottie-player"]')) {
+          const lottieScript = document.createElement('script');
+          lottieScript.src = "https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.js";
+          document.head.appendChild(lottieScript);
+        }
+
+        // Create Lottie player element
+        const lottiePlayer = document.createElement('dotlottie-player');
+        //lottiePlayer.src = "https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/c8lbj2yhvu5vi0gt55un8wyxczio"; // 
+        //lottiePlayer.src = "https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/dkm4k1wfacwyyqtzx1tsow0rdbgx"; // Builder Image.
+        lottiePlayer.src = "https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/hffa8kqjfn9yzfx28pogpvqhn7cd"; // Builder Image.
+        
+        lottiePlayer.background = "transparent";
+        lottiePlayer.speed = "1";
+        lottiePlayer.style.width = "300px";
+        lottiePlayer.style.height = "300px";
+        lottiePlayer.setAttribute("autoplay", "");
+        lottiePlayer.setAttribute("loop", "");
+
+        // Append all elements
+        textContainer.appendChild(overlayText);
+        lottieContainer.appendChild(lottiePlayer);
+        overlay.appendChild(textContainer);
+        overlay.appendChild(lottieContainer);
+        iframeContainer.appendChild(overlay);
+        iframeContainer.appendChild(iframe);
+        modal.appendChild(iframeContainer);
+        document.body.appendChild(modal);
+
+        // Add a buffer property to the modal
+        modal.htmlBuffer = '';
+      }
+
+      modal.style.display = 'flex';
+      const iframe = document.getElementById('fragmentIframe');
+      
+      if (typeof text === 'string') {
+        // Append the new fragment to our buffer
+        modal.htmlBuffer += text;
+        
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(modal.htmlBuffer, 'text/html');
+          
+          const iframeDoc = iframe.contentDocument;
+          iframeDoc.open();
+          iframeDoc.write(modal.htmlBuffer);
+          iframeDoc.close();
+
+          // Improved iframe height and scroll handling
+          let scrollTimeout;
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            // Get the iframe container
+            const iframeContainer = iframe.parentElement;
+            
+            // Calculate the maximum available height (80% of viewport height as per the container style)
+            const maxHeight = window.innerHeight * 0.8;
+            
+            // Get the content height
+            const contentHeight = Math.max(
+              iframeDoc.documentElement.scrollHeight,
+              iframeDoc.documentElement.offsetHeight,
+              iframeDoc.documentElement.clientHeight,
+              iframeDoc.body.scrollHeight,
+              iframeDoc.body.offsetHeight
+            );
+
+            // Set iframe height to either content height or max height, whichever is smaller
+            iframe.style.height = Math.min(contentHeight, maxHeight) + 'px';
+            
+            // Enable scrolling if content is taller than available space
+            iframe.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
+            
+            // Ensure the iframe container doesn't exceed viewport
+            iframeContainer.style.maxHeight = '80vh';
+            iframeContainer.style.overflowY = 'hidden';
+            
+            // Scroll to bottom
+            if (iframeDoc.documentElement) {
+              iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
+            }
+            if (iframeDoc.body) {
+              iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
+            }
+          }, 600);
+          
+        } catch (e) {
+          console.log('Still building HTML document:', e);
+        }
+      } else {
+        console.error('Unexpected content type:', text);
+      }
     }
 
     function escapeHtml(unsafe) {
@@ -236,7 +574,7 @@ document.addEventListener("visibilitychange", function() {
       const loadingDiv = document.createElement("div");
       loadingDiv.id = "loadingIndicator";
       loadingDiv.appendChild(spinner);
-      chatbotMessages.appendChild(loadingDiv);
+      chatbotMessagesContainer.appendChild(loadingDiv);
     }
 
     //function hideLoadingIndicator() {
@@ -258,37 +596,10 @@ document.addEventListener("visibilitychange", function() {
 
 
     function formatMessage(text, sender) {
-      // Custom renderer to handle code blocks
-      const renderer = new marked.Renderer();
-      renderer.code = (code, language) => {
-        const validLanguage = Prism.languages[language] ? language : 'markup';
-        const highlightedCode = Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
-        const escapedCode = escapeHtml(highlightedCode);
-        const uniqueId = 'code-' + Math.random().toString(36).substr(2, 9);
-        return `
-          <div class="relative">
-            <pre class="language-${validLanguage}"><code id="${uniqueId}">${sender == "user" ? code : escapedCode}</code></pre>
-            <button class="copy-button absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 rounded px-2 py-1 text-sm" onclick="copyCode('${uniqueId}')">Copy</button>
-          </div>
-        `;
-      };
-
-      // Configure marked options
-      marked.setOptions({
-        renderer: renderer,
-        highlight: (code, lang) => {
-          const language = Prism.languages[lang] ? lang : 'markup';
-          return Prism.highlight(code, Prism.languages[language], language);
-        },
-        breaks: true,
-        gfm: true
-      });
-
       // Parse the markdown
       if (sender == "user") {
         return marked.parse(escapeHtml(text));
-      }
-      else {
+      } else {
         return marked.parse(text);
       }
     }
@@ -296,76 +607,88 @@ document.addEventListener("visibilitychange", function() {
 /**
  * This is the button handler for when the user clicks "send" on the chatbot.
  */
-async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, errorCallback) {
+async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, errorCallback, javaScriptConsoleErrors) {
   try {
-    if (chatChannel && chatChannel.send) {
-      // Add selected images if any exist
-      if (window.selectedImages && window.selectedImages.size > 0) {
-        userMessage += "\n\nThe user selected the following images:\n" + 
-          Array.from(window.selectedImages).join('\n');
+    // Create a promise that resolves when the connection is ready
+    const waitForConnection = () => {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 150; // 5 seconds (100ms * 50)
         
-        // Clear selected images after sending
-        window.selectedImages.clear();
-        
-        // Remove visual selection from all images
-        document.querySelectorAll('#image-container img').forEach(img => {
-          img.classList.remove('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
-        });
-      }
+        const checkConnection = () => {
+          if (chatChannel && !chatChannel.consumer.connection.disconnected) {
+            resolve();
+          } else if (attempts >= maxAttempts) {
+            reject(new Error("Connection timeout"));
+          } else {
+            attempts++;
+            setTimeout(checkConnection, 100); // Check every 100ms
+          }
+        };
+        checkConnection();
+      });
+    };
 
-      // Change button state and add click handler for cancel
-      const sendButton = document.getElementById('sendButton');
-      sendButton.textContent = 'Cancel';
-      sendButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-      sendButton.classList.add('bg-red-500', 'hover:bg-red-600');
+    // Wait for connection before proceeding
+    await waitForConnection();
+
+    // Rest of your existing send logic
+    if (window.selectedImages && window.selectedImages.size > 0) {
+      userMessage += "\n\nThe user selected the following images:\n" + 
+        Array.from(window.selectedImages).join('\n');
       
-      // Add cancel click handler
-      const cancelHandler = () => {
-        console.log("Cancel Sent");
-        
-        // Update the thinking text to "Cancelling..."
-        const thinkingElement = document.querySelector('.thinking-pulse');
-        if (thinkingElement) {
-          thinkingElement.textContent = 'Cancelling...';
-        }
-        
-        // Update button text and disable it temporarily
-        const sendButton = document.getElementById('sendButton');
-        sendButton.textContent = 'Cancelling...';
-        sendButton.disabled = true;
-        
-        chatChannel.send({
-          user_message: "cancel",
-          type: "cancel",
-          message_type: "cancel",
-          context: "<%=@view_path%>",
-          webPageId: "<%=@page&.id%>",
-        });
-        
-        // Remove the cancel handler after it's used
-        sendButton.removeEventListener('click', cancelHandler);
-        
-        // Re-enable the button after a short delay
-        setTimeout(() => {
-          sendButton.disabled = false;
-          sendButton.textContent = 'Send';
-          sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
-          sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
-        }, 1000);
-      };
+      window.selectedImages.clear();
       
-      sendButton.addEventListener('click', cancelHandler);
+      document.querySelectorAll('#image-container img').forEach(img => {
+        img.classList.remove('border-2', 'border-red-500', 'shadow-md', 'shadow-red-200');
+      });
+    }
+
+    const sendButton = document.getElementById('sendButton');
+    sendButton.textContent = 'Cancel';
+    sendButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+    sendButton.classList.add('bg-red-500', 'hover:bg-red-600');
+    
+    // Your existing cancel handler code
+    const cancelHandler = () => {
+      console.log("Cancel Sent");
+      
+      const thinkingElement = document.querySelector('.thinking-pulse');
+      if (thinkingElement) {
+        thinkingElement.textContent = 'Cancelling...';
+      }
+      
+      sendButton.textContent = 'Cancelling...';
+      sendButton.disabled = true;
       
       chatChannel.send({
-        message: userMessage,
+        user_message: "cancel",
+        type: "cancel",
+        message_type: "cancel",
         context: "<%=@view_path%>",
-        selectedElement: selectedElementInnerHtml,
         webPageId: "<%=@page&.id%>",
-        message_type: "message"
       });
-    } else {
-      console.error("Chat channel not initialized yet");
-    }
+      
+      sendButton.removeEventListener('click', cancelHandler);
+      
+      setTimeout(() => {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send';
+        sendButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+        sendButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+      }, 1000);
+    };
+    
+    sendButton.addEventListener('click', cancelHandler);
+    
+    chatChannel.send({
+      message: userMessage,
+      context: "<%=@view_path%>",
+      selectedElement: selectedElementInnerHtml,
+      webPageId: "<%=@page&.id%>",
+      message_type: "message",
+      javascript_console_errors: javaScriptConsoleErrors
+    });
   } catch (error) {
     console.error("Error sending message:", error);
     errorCallback(error);
@@ -374,5 +697,5 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
 window.sendUserMessageOverSocket = sendUserMessageOverSocket;
     
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.0.0" onload="initializeChat()"></script>
+<script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.0.0" onload="initializeChat(); handleChatUrlParams()"></script>
 
