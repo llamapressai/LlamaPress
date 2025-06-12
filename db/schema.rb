@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_14_170012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,9 +64,49 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.string "uuid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "trace_id"
+    t.string "trace_url"
     t.index ["chat_conversation_id"], name: "index_chat_messages_on_chat_conversation_id"
+    t.index ["trace_id"], name: "index_chat_messages_on_trace_id"
     t.index ["user_id"], name: "index_chat_messages_on_user_id"
     t.index ["uuid"], name: "index_chat_messages_on_uuid", unique: true
+  end
+
+  create_table "checkpoint_blobs", primary_key: ["thread_id", "checkpoint_ns", "channel", "version"], force: :cascade do |t|
+    t.text "thread_id", null: false
+    t.text "checkpoint_ns", default: "", null: false
+    t.text "channel", null: false
+    t.text "version", null: false
+    t.text "type", null: false
+    t.binary "blob"
+    t.index ["thread_id"], name: "checkpoint_blobs_thread_id_idx"
+  end
+
+  create_table "checkpoint_migrations", primary_key: "v", id: :integer, default: nil, force: :cascade do |t|
+  end
+
+  create_table "checkpoint_writes", primary_key: ["thread_id", "checkpoint_ns", "checkpoint_id", "task_id", "idx"], force: :cascade do |t|
+    t.text "thread_id", null: false
+    t.text "checkpoint_ns", default: "", null: false
+    t.text "checkpoint_id", null: false
+    t.text "task_id", null: false
+    t.integer "idx", null: false
+    t.text "channel", null: false
+    t.text "type"
+    t.binary "blob", null: false
+    t.text "task_path", default: "", null: false
+    t.index ["thread_id"], name: "checkpoint_writes_thread_id_idx"
+  end
+
+  create_table "checkpoints", primary_key: ["thread_id", "checkpoint_ns", "checkpoint_id"], force: :cascade do |t|
+    t.text "thread_id", null: false
+    t.text "checkpoint_ns", default: "", null: false
+    t.text "checkpoint_id", null: false
+    t.text "parent_checkpoint_id"
+    t.text "type"
+    t.jsonb "checkpoint", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.index ["thread_id"], name: "checkpoints_thread_id_idx"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -78,6 +118,36 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.index ["slug", "sluggable_type", "scope"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type_and_scope", unique: true
     t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_type", "sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_type_and_sluggable_id"
+  end
+
+  create_table "hello_dolly_greetings", force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "leads", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "notes"
+    t.index ["email"], name: "index_leads_on_email", unique: true
+  end
+
+  create_table "message_reactions", force: :cascade do |t|
+    t.bigint "chat_message_id"
+    t.bigint "user_id"
+    t.string "reaction_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "feedback"
+    t.bigint "page_history_id"
+    t.index ["chat_message_id", "user_id"], name: "index_message_reactions_on_chat_message_id_and_user_id", unique: true
+    t.index ["chat_message_id"], name: "index_message_reactions_on_chat_message_id"
+    t.index ["page_history_id"], name: "index_message_reactions_on_page_history_id"
+    t.index ["user_id"], name: "index_message_reactions_on_user_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -100,6 +170,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.text "user_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "human_chat_message_id"
+    t.bigint "ai_chat_message_id"
+    t.index ["ai_chat_message_id"], name: "index_page_histories_on_ai_chat_message_id"
+    t.index ["human_chat_message_id"], name: "index_page_histories_on_human_chat_message_id"
     t.index ["page_id"], name: "index_page_histories_on_page_id"
   end
 
@@ -111,6 +185,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.datetime "updated_at", null: false
     t.integer "organization_id"
     t.integer "current_version_id"
+    t.integer "wordpress_page_id"
     t.index ["current_version_id"], name: "index_pages_on_current_version_id"
     t.index ["site_id"], name: "index_pages_on_site_id"
   end
@@ -133,8 +208,12 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.string "slug"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "wordpress_api_encoded_token"
     t.bigint "home_page_id"
     t.bigint "after_submission_page_id"
+    t.text "system_prompt"
+    t.string "llamabot_agent_name"
+    t.text "code_snippets"
     t.index ["after_submission_page_id"], name: "index_sites_on_after_submission_page_id"
     t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
@@ -177,9 +256,16 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.integer "tutorial_step", default: 0
+    t.datetime "mixpanel_profile_last_set_at"
     t.string "api_token"
-    t.index ["api_token"], name: "index_users_on_api_token"
+    t.integer "tutorial_step", default: 0
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "subscription_plan"
+    t.datetime "stripe_subscription_start_date"
+    t.datetime "stripe_subscription_end_date"
+    t.boolean "admin", default: false
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
@@ -195,6 +281,11 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_21_235117) do
   add_foreign_key "chat_conversations", "users"
   add_foreign_key "chat_messages", "chat_conversations"
   add_foreign_key "chat_messages", "users"
+  add_foreign_key "message_reactions", "chat_messages"
+  add_foreign_key "message_reactions", "page_histories", on_delete: :nullify
+  add_foreign_key "message_reactions", "users"
+  add_foreign_key "page_histories", "chat_messages", column: "ai_chat_message_id"
+  add_foreign_key "page_histories", "chat_messages", column: "human_chat_message_id"
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"
