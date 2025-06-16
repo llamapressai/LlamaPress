@@ -82,3 +82,5 @@ gem 'builder'
 
 gem 'google-cloud-logging'
 gem 'ostruct'
+
+gem 'llama_bot_rails', path: "../llama_bot_rails"

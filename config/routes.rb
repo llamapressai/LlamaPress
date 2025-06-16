@@ -11,6 +11,9 @@ Rails.application.routes.draw do
     end
   end
 
+  mount LlamaBotRails::Engine => "/llama_bot"
+
+
   get 'twilio_verify_example' => 'pages#twilio_verify_example'
 
   resources :pages do
