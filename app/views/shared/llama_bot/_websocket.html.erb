@@ -187,45 +187,7 @@
                   window.messageTraces[messageId] = parsedData.langsmith_trace;
                   console.log(`Stored trace info for message ${messageId}:`, parsedData.langsmith_trace);
                   
-                  // Add reaction buttons
-                  const reactionsContainer = document.createElement('div');
-                  reactionsContainer.className = 'mt-2 flex items-center space-x-2';
-                  
-                  // Thumbs up button
-                  const thumbsUpButton = document.createElement('button');
-                  thumbsUpButton.className = 'text-gray-500 hover:text-green-600 text-xs';
-                  thumbsUpButton.innerHTML = '<i class="fas fa-thumbs-up" style="font-size: 16px"></i>';
-                  thumbsUpButton.setAttribute('title', 'This response was helpful');
-                  thumbsUpButton.onclick = function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Thumbs up clicked for messageId:', messageId);
-                    handleThumbsClick(messageId, 'up', this);
-                  };
-                  
-                  // Thumbs down button
-                  const thumbsDownButton = document.createElement('button');
-                  thumbsDownButton.className = 'text-gray-500 hover:text-red-600 text-xs';
-                  thumbsDownButton.innerHTML = '<i class="fas fa-thumbs-down" style="font-size: 16px"></i>';
-                  thumbsDownButton.setAttribute('title', 'This response was not helpful');
-                  thumbsDownButton.onclick = function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Thumbs down clicked websocket, calling handleThumbsClick');
-                    // Try both global and local handleThumbsClick to ensure it works
-                    if (window.handleThumbsClick) {
-                      window.handleThumbsClick(messageId, 'down', this);
-                    } else {
-                      handleThumbsClick(messageId, 'down', this);
-                    }
-                  };
-                  
-                  // Add buttons to container
-                  reactionsContainer.appendChild(thumbsUpButton);
-                  reactionsContainer.appendChild(thumbsDownButton);
-                  
-                  // Add container to message
-                  messageElement.appendChild(reactionsContainer);
+
                 }
                 break;
               case 'system_message':

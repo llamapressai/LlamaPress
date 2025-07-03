@@ -8,12 +8,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
-    super do |user|
-      if params[:prompt].present?
-        session[:prompt] = params[:prompt]
-        return redirect_to create_from_prompt_public_leads_path(prompt: params[:prompt]), method: :post
-      end
-    end
+    super
   end
 
   protected
