@@ -7,9 +7,7 @@ class Page < ApplicationRecord
   belongs_to :organization
   belongs_to :current_version, class_name: 'PageHistory', optional: true, foreign_key: 'current_version_id'
   
-  has_many :page_histories, dependent: :destroy
-  has_many :chat_conversations, dependent: :destroy
-  has_many :chat_messages, through: :chat_conversations 
+  has_many :page_histories, dependent: :destroy 
 
   friendly_id :slug, use: :slugged
 

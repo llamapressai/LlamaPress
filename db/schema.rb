@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_03_183643) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_03_190205) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,36 +40,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_183643) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
-  end
-
-  create_table "chat_conversations", force: :cascade do |t|
-    t.string "title"
-    t.bigint "user_id", null: false
-    t.bigint "site_id"
-    t.bigint "page_id"
-    t.string "uuid"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["page_id"], name: "index_chat_conversations_on_page_id"
-    t.index ["site_id"], name: "index_chat_conversations_on_site_id"
-    t.index ["user_id"], name: "index_chat_conversations_on_user_id"
-    t.index ["uuid"], name: "index_chat_conversations_on_uuid", unique: true
-  end
-
-  create_table "chat_messages", force: :cascade do |t|
-    t.text "content"
-    t.integer "sender"
-    t.bigint "user_id", null: false
-    t.bigint "chat_conversation_id", null: false
-    t.string "uuid"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "trace_id"
-    t.string "trace_url"
-    t.index ["chat_conversation_id"], name: "index_chat_messages_on_chat_conversation_id"
-    t.index ["trace_id"], name: "index_chat_messages_on_trace_id"
-    t.index ["user_id"], name: "index_chat_messages_on_user_id"
-    t.index ["uuid"], name: "index_chat_messages_on_uuid", unique: true
   end
 
   create_table "checkpoint_blobs", primary_key: ["thread_id", "checkpoint_ns", "channel", "version"], force: :cascade do |t|
@@ -137,15 +107,12 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_183643) do
   end
 
   create_table "message_reactions", force: :cascade do |t|
-    t.bigint "chat_message_id"
     t.bigint "user_id"
     t.string "reaction_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "feedback"
     t.bigint "page_history_id"
-    t.index ["chat_message_id", "user_id"], name: "index_message_reactions_on_chat_message_id_and_user_id", unique: true
-    t.index ["chat_message_id"], name: "index_message_reactions_on_chat_message_id"
     t.index ["page_history_id"], name: "index_message_reactions_on_page_history_id"
     t.index ["user_id"], name: "index_message_reactions_on_user_id"
   end
@@ -170,10 +137,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_183643) do
     t.text "user_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "human_chat_message_id"
-    t.bigint "ai_chat_message_id"
-    t.index ["ai_chat_message_id"], name: "index_page_histories_on_ai_chat_message_id"
-    t.index ["human_chat_message_id"], name: "index_page_histories_on_human_chat_message_id"
     t.index ["page_id"], name: "index_page_histories_on_page_id"
   end
 
@@ -254,16 +217,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_183643) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "chat_conversations", "pages"
-  add_foreign_key "chat_conversations", "sites"
-  add_foreign_key "chat_conversations", "users"
-  add_foreign_key "chat_messages", "chat_conversations"
-  add_foreign_key "chat_messages", "users"
-  add_foreign_key "message_reactions", "chat_messages"
   add_foreign_key "message_reactions", "page_histories", on_delete: :nullify
   add_foreign_key "message_reactions", "users"
-  add_foreign_key "page_histories", "chat_messages", column: "ai_chat_message_id"
-  add_foreign_key "page_histories", "chat_messages", column: "human_chat_message_id"
   add_foreign_key "page_histories", "pages"
   add_foreign_key "pages", "organizations", on_delete: :nullify
   add_foreign_key "pages", "sites"

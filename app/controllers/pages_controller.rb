@@ -87,7 +87,6 @@ class PagesController < ApplicationController
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
-    @chat_messages = @page.chat_messages
     
     if (current_user&.organization_id == @page.organization_id) || 
        (params[:user_api_token].present? && User.find_by(api_token: params[:user_api_token])&.tap { |u| sign_in(u) })
@@ -208,18 +207,7 @@ class PagesController < ApplicationController
       @message_history = @llamabot_state_history["messages"]
     end  
 
-    @chat_messages = @page.chat_messages #Here is where we get chat message history for the page.
-    
-    # Combine and sort both types of records
-
-    # TODO: This broke our page_history interweaving. It's only chat messages now.
-    # We need to fix this if we want to let the user view page history within their chat messages. 
-
-    # We didn't add page history back in because these messages (saved by LangGraph in our Checkpoint table) 
-    # don't have time-stamps when we fetch them from LlamaBot via LangGraph Checkpoint SDK (see FastAPI route for chat-history/{thread_id})
-    # so we can't interleave them.
-
-    # @combined_history = (@page_histories + @llamabot_state_history).sort_by(&:created_at).reverse
+    # Use page histories and llamabot state history (no more chat messages)
     @combined_history = @message_history.nil? ? @page_histories : @message_history
     
     # Manual pagination
@@ -236,7 +224,7 @@ class PagesController < ApplicationController
               type: 'page_history',
               content: Base64.strict_encode64(item.content),
             })
-          else # ChatMessage
+          else # LlamaBot message
             content = item["content"]
             #bot and user magic strings are used in the javascript client to determine which color & style to use for the message.
             # role = item["type"] == "ai" ? "bot" : item["type"] == "user" ? "user" : item["type"] == "system" ? "system" : item["type"] == "tool" ? "tool" : "user"

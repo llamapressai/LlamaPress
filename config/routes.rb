@@ -1,6 +1,4 @@
 Rails.application.routes.draw do
-  resources :chat_messages
-  resources :chat_conversations
   
   resources :submissions do
     collection do

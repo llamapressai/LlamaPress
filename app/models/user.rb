@@ -7,9 +7,6 @@ class User < ApplicationRecord
 
   belongs_to :organization
   has_many :sites, through: :organization
-  
-  has_many :chat_conversations, dependent: :destroy
-  has_many :chat_messages, dependent: :destroy
 
   accepts_nested_attributes_for :organization
   after_create :notify_registration
@@ -84,8 +81,9 @@ class User < ApplicationRecord
   end
 
   #Used to check the number of messages the user has sent today.
+  # Note: Chat messages are now handled by LlamaBot backend, so this returns 0
   def today_message_count
-    self.chat_messages.where(created_at: Time.zone.now.beginning_of_day..Time.zone.now.end_of_day, sender: :human_message).count
+    0
   end
 
   private

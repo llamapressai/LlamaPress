@@ -152,18 +152,8 @@ class ChatChannel < ApplicationCable::Channel
 
       message = data["message"]
 
-      #In this case, conversation short-term memory belongs to a page
-      chat_conversation = ChatConversation.find_by(page_id: data["webPageId"])
-      if chat_conversation.nil?
-          chat_conversation = ChatConversation.create(page_id: data["webPageId"], user: current_user)
-      end
-
-      data["previous_messages"] = chat_conversation.chat_messages.map do |msg|
-        {
-          "role" => msg.ai_message? ? "assistant" : "user",
-          "content" => msg.content
-        }
-      end
+      # No more chat conversation storage - using LlamaBot's internal memory now
+      data["previous_messages"] = []
 
 
       @web_page = Page.find_by(id: data["webPageId"])
@@ -183,8 +173,6 @@ class ChatChannel < ApplicationCable::Channel
       else
         data["wordpress_api_encoded_token"] = nil
       end
-
-      chat_message = ChatMessage.create(content: message, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:human_message], created_at: Time.now)
       
       # Forward the processed data to the LlamaBot Backend Socket
       send_to_external_application(data)
@@ -213,44 +201,7 @@ class ChatChannel < ApplicationCable::Channel
     if trace_info.present?
       message_data[:langsmith_trace] = trace_info
       
-      # Save trace info with the message in the database
-      if type == 'ai_message'
-        begin
-          # Find the chat conversation for this session or page
-          conversation = if params[:session_id].present?
-            ChatConversation.find_by(session_id: params[:session_id])
-          elsif params[:web_page_id].present?
-            ChatConversation.find_by(page_id: params[:web_page_id])
-          end
-          
-          Rails.logger.info "TRACE DEBUG: Found conversation? #{conversation.present?} with ID: #{conversation&.id}"
-          
-          if conversation.present?
-            # Find the most recent AI message in this conversation
-            chat_message = conversation.chat_messages.where(sender: ChatMessage.senders[:ai_message]).order(created_at: :desc).first
-            
-            Rails.logger.info "TRACE DEBUG: Found message? #{chat_message.present?} with ID: #{chat_message&.id}"
-            
-            if chat_message.present?
-              # Update with trace info
-              trace_id = trace_info[:trace_id] || trace_info['trace_id']
-              trace_url = trace_info[:trace_url] || trace_info['trace_url']
-              
-              Rails.logger.info "TRACE DEBUG: Updating message with trace_id: #{trace_id}, trace_url: #{trace_url}"
-              
-              success = chat_message.update(
-                trace_id: trace_id,
-                trace_url: trace_url
-              )
-              
-              Rails.logger.info "TRACE DEBUG: Update success: #{success}, errors: #{chat_message.errors.full_messages.join(', ')}"
-            end
-          end
-        rescue => e
-          Rails.logger.error "ERROR SAVING TRACE INFO: #{e.message}"
-          Rails.logger.error e.backtrace.join("\n")
-        end
-      end
+      # Trace info is now handled by LlamaBot backend - no more local storage
     end
     
     formatted_message = { message: message_data.to_json }.to_json
@@ -364,12 +315,7 @@ class ChatChannel < ApplicationCable::Channel
           # Broadcast the message to the public channel so llamabot/_chat.html.erb can display it
           formatted_message = { message: message_content }.to_json
 
-          #Get the last chat conversation for this page and save this message to it
-          # chat_conversation = ChatConversation.find_by(page_id: parsed_message["page_id"])
-          # if chat_conversation.nil?
-          #   chat_conversation = ChatConversation.create(page_id: parsed_message["page_id"], user: current_user)
-          # end
-          # chat_message = ChatMessage.create(content: response, user: current_user, chat_conversation: chat_conversation, sender: ChatMessage.senders[:ai_message], created_at: Time.now)
+
 
           Rails.logger.info "--------Completed system_message message!----------"
         
@@ -407,33 +353,7 @@ class ChatChannel < ApplicationCable::Channel
           message_content_with_trace = message_content
           formatted_message = { message: message_content_with_trace }.to_json
 
-          #In this case, conversation short-term memory belongs to a page
-          web_page_id = parsed_message["web_page_id"]
-          Rails.logger.info "---------Web Page Id: #{web_page_id} ----------"
-          begin 
-            if web_page_id.present?
-              chat_conversation = ChatConversation.find_by(page_id: web_page_id)
-              
-              if chat_conversation.nil?
-                chat_conversation = ChatConversation.create(page_id: web_page_id, user: current_user)
-              end
-
-              # Store trace info in the chat message
-              chat_message = ChatMessage.create(
-                content: response, 
-                user: current_user, 
-                chat_conversation: chat_conversation, 
-                sender: ChatMessage.senders[:ai_message], 
-                created_at: Time.now,
-                trace_id: trace_info&.dig('trace_id'),
-                trace_url: trace_info&.dig('trace_url')
-              )
-              chat_message.save!
-
-            end
-          rescue => e
-            Rails.logger.error "Error saving chat message: #{e.message}"
-          end
+          # AI messages are now stored by LlamaBot backend - no local storage needed
 
         when "write_code"
           tracing_info = parsed_message["langsmith_trace"]
@@ -444,32 +364,7 @@ class ChatChannel < ApplicationCable::Channel
           #This is where the the magic happens. Write the new HTML code directly to the database.
           result = handle_write_code(response)
 
-          # Save trace info if available for write_code messages
-          web_page_id = parsed_message["web_page_id"]
-
-          if trace_info.present? && web_page_id.present?
-            begin
-              chat_conversation = ChatConversation.find_by(page_id: web_page_id)
-              
-              if chat_conversation.nil?
-                chat_conversation = ChatConversation.create(page_id: web_page_id, user: current_user)
-              end
-              
-              # Create a record of this write_code action with trace info
-              chat_message = ChatMessage.create(
-                content: "Code update: #{response['payload']['destination'] if response['payload']}",
-                user: current_user,
-                chat_conversation: chat_conversation,
-                sender: ChatMessage.senders[:ai_message],
-                created_at: Time.now,
-                trace_id: trace_info.dig('trace_id'),
-                trace_url: trace_info.dig('trace_url')
-              )
-              Rails.logger.info "Saved trace info for write_code message: #{chat_message.id}"
-            rescue => e
-              Rails.logger.error "Error saving trace info for write_code: #{e.message}"
-            end
-          end
+          # Write code actions are now tracked by LlamaBot backend
 
           formatted_message = { message: message_content }.to_json
           Rails.logger.info "--------Completed write_code message!----------"
@@ -512,7 +407,6 @@ class ChatChannel < ApplicationCable::Channel
 
   # Send messages from the user to the LlamaBot Backend Socket
   def send_to_external_application(message)
-    #   ChatMessage.create(content: message_content, user: current_user, chat_conversation: ChatConversation.last, ai_chat_message: true, created_at: Time.now)
 
     payload = message.to_json
     if @external_ws_connection
