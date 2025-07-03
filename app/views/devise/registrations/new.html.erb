@@ -22,6 +22,15 @@
               placeholder: "Email address" %>
         </div>
         
+        <%= f.fields_for :organization_attributes do |org_f| %>
+          <div>
+            <%= org_f.label :name, "Organization name", class: "sr-only" %>
+            <%= org_f.text_field :name, 
+                class: "appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm",
+                placeholder: "Organization name" %>
+          </div>
+        <% end %>
+        
         <div>
           <%= f.label :password, "Password", class: "sr-only" %>
           <%= f.password_field :password, autocomplete: "new-password",
