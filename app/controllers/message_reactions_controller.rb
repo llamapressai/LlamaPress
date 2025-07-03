@@ -43,7 +43,7 @@ class MessageReactionsController < ApplicationController
   def set_reaction
     @reaction = if current_user.present?
       MessageReaction.find_by(
-        chat_message: @page_history.ai_chat_message,
+        page_history: @page_history,
         user: current_user
       )
     else
@@ -52,7 +52,7 @@ class MessageReactionsController < ApplicationController
     
     if @reaction.nil?
       @reaction = MessageReaction.new(message_reaction_params)
-      @reaction.chat_message = @page_history.ai_chat_message
+      @reaction.page_history = @page_history
       @reaction.user = current_user
     end
   end

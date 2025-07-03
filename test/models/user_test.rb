@@ -18,70 +18,33 @@ class UserTest < ActiveSupport::TestCase
     assert user.should_we_allow_user_to_send_this_message?
   end
 
-  test "should_we_allow_user_to_send_this_message? returns true if user has less than 6 messages today" do
+  test "should_we_allow_user_to_send_this_message? returns true if user has less than 15 messages today" do
     user = users(:one)
     user.subscription_plan = nil  # Ensure no subscription
     
-    # Create 5 messages for today
-    5.times do
-      user.chat_messages.create(sender: :human_message, created_at: Date.today)
-    end
-    
+    # Since today_message_count now returns 0 (chat system removed), user should be allowed
     assert user.should_we_allow_user_to_send_this_message?
   end
 
-  test "should_we_allow_user_to_send_this_message? returns false if user has 6 or more messages today and no subscription" do
+  test "should_we_allow_user_to_send_this_message? returns true since chat system was removed" do
     user = users(:one)
     user.subscription_plan = nil  # Ensure no subscription
     
-    assert_difference 'user.today_message_count', 6 do
-      # Create 6 messages for today
-      chat_conversation = user.chat_conversations.create!
-      6.times do
-        user.chat_messages.create!(content: "test", sender: :human_message, created_at: Date.today, chat_conversation: chat_conversation)
-      end
-    end
-    
-    # byebug
-    refute user.should_we_allow_user_to_send_this_message?
+    # Since today_message_count now returns 0, user should always be allowed
+    assert user.should_we_allow_user_to_send_this_message?
   end
 
-  test "today_message_count only counts messages from today" do
+  test "today_message_count returns 0 since chat system was removed" do
     user = users(:one)
     
-    chat_conversation = user.chat_conversations.create!
-    
-    assert_difference 'user.chat_messages.count', 3 do
-      # Create messages from yesterday
-      3.times do
-        user.chat_messages.create!(content: "test", sender: :human_message, created_at: Date.yesterday, chat_conversation: chat_conversation)
-      end
-    end
-    
-    # Create messages from today
-    assert_difference 'user.today_message_count', 2 do
-      2.times do
-        user.chat_messages.create!(content: "test", sender: :human_message, created_at: Date.today, chat_conversation: chat_conversation)
-      end
-    end
-    
-    assert_equal 2, user.today_message_count
+    # Chat system was removed, so this should always return 0
+    assert_equal 0, user.today_message_count
   end
 
-  test "today_message_count only counts human messages" do
+  test "today_message_count returns 0 for all users since chat system was removed" do
     user = users(:one)
-    chat_conversation = user.chat_conversations.create!
     
-    # Create human messages
-    2.times do
-      user.chat_messages.create!(content: "test", sender: :human_message, created_at: Date.today, chat_conversation: chat_conversation)
-    end
-    
-    # Create AI messages
-    3.times do
-      user.chat_messages.create!(content: "test", sender: :ai_message, created_at: Date.today, chat_conversation: chat_conversation)
-    end
-    
-    assert_equal 2, user.today_message_count
+    # Chat system was removed, so this should always return 0
+    assert_equal 0, user.today_message_count
   end
 end
