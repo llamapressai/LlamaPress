@@ -10,7 +10,6 @@ class Site < ApplicationRecord
 
   has_many :chat_conversations, dependent: :destroy
   has_many :submissions, dependent: :destroy
-  has_many :snippets, dependent: :destroy
   has_many_attached :images
   validates :name, presence: true
   before_validation :make_unique_slug, on: :create

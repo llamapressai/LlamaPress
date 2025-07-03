@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_14_170012) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_03_182315) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -213,20 +213,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_14_170012) do
     t.bigint "after_submission_page_id"
     t.text "system_prompt"
     t.string "llamabot_agent_name"
-    t.text "code_snippets"
     t.index ["after_submission_page_id"], name: "index_sites_on_after_submission_page_id"
     t.index ["home_page_id"], name: "index_sites_on_home_page_id"
     t.index ["organization_id"], name: "index_sites_on_organization_id"
     t.index ["slug"], name: "index_sites_on_slug", unique: true
-  end
-
-  create_table "snippets", force: :cascade do |t|
-    t.string "name"
-    t.string "content"
-    t.bigint "site_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["site_id"], name: "index_snippets_on_site_id"
   end
 
   create_table "submissions", force: :cascade do |t|
@@ -294,7 +284,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_14_170012) do
   add_foreign_key "sites", "organizations"
   add_foreign_key "sites", "pages", column: "after_submission_page_id"
   add_foreign_key "sites", "pages", column: "home_page_id"
-  add_foreign_key "snippets", "sites"
   add_foreign_key "submissions", "sites"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "sites", column: "default_site_id"

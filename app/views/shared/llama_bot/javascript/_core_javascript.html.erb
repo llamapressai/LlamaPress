@@ -578,7 +578,7 @@
       //hide all chat tool windows
       document.getElementById("promptsContainer").classList.add("hidden");
       document.getElementById("imagesForUserToSelect").style.display = "none";
-      document.getElementById('codeSnippetsContainer').classList.add("hidden");
+
       
       // clear selected element 
       document.getElementById("selectedElementContainer").style.display =
@@ -891,12 +891,7 @@
       return summary;
     }
 
-    const toggleCodeSnippetsButton = document.getElementById('toggleCodeSnippets');
-    const codeSnippetsContainer = document.getElementById('codeSnippetsContainer');
 
-    toggleCodeSnippetsButton.addEventListener('click', function() {
-        codeSnippetsContainer.classList.toggle('hidden');
-    });
 
     // Initial bot message
     loadChatHistory();

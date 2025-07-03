@@ -21,26 +21,7 @@ class ChatChannel < ApplicationCable::Channel
     code_to_write = response['payload']['code']
     destination = response['payload']['destination']
     should_we_write_page_to_database = true #response["query_params"]["context"]&.include? "pages/show"
-    # Check if the response contains snippets
-    doc = Nokogiri::HTML.fragment(code_to_write)
-    snippet_elements = doc.css('[data-llama-snippet-id]')
     user_message = extract_user_message(response['query_params']['user_message'])
-  
-    if snippet_elements.any?
-      snippet_elements.each do |snippet_element|
-        snippet_id = snippet_element['data-llama-snippet-id']
-        snippet_content = snippet_element.to_html
-  
-        # Update the snippet in the database if it exists
-        # Temporary: disable saving snippet to database when LLM responds (we need snippet history before we implement this, we keep overwriting the snippet on accident)
-        # snippet = Snippet.find_by(id: snippet_id)
-        # if snippet
-        #   snippet.update(content: snippet_content)
-        # else
-        #   return "Snippet with ID #{snippet_id} not found."
-        # end
-      end
-    end
   
     if should_we_write_page_to_database
       # Write the full page content to the database
@@ -63,7 +44,7 @@ class ChatChannel < ApplicationCable::Channel
       # Write the code to the specified file destination
       File.write(destination, code_to_write)
     end
-    return "Got it! Snippets have been updated and here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
+    return "Got it! Here is the code you asked for: #{code_to_write}. Refresh your browser to see the new code."
   end
 
   # _chat.html.erb front-end subscribes to this channel in _websocket.html.erb.

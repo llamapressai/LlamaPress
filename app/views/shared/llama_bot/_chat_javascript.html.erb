@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 <script data-llama="exclude_when_saving_contenteditable_edits">
-// IMPORTANT! Don't move. We need the copyCode function outside of the DomContentLoad so that it's in the global scope. This is used when the LLM returns a code snippet for the user to copy -- mainly on pages/1/edit where you can view the code, but eventually we'll allow user to edit code on the show page as well.
+// IMPORTANT! Don't move. We need the copyCode function outside of the DomContentLoad so that it's in the global scope. This is used when the LLM returns code for the user to copy -- mainly on pages/1/edit where you can view the code, but eventually we'll allow user to edit code on the show page as well.
 /**
  * This method copies the code from the element with the given ID and then changes the text of the button to say "Copied!"
  * @param {string} elementId - The ID of the element containing the code to copy.

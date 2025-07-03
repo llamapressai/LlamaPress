@@ -20,48 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentContent = document.documentElement.outerHTML;
         // Only save if content has changed
         if (currentContent !== originalContent) {
-            //see what node got edited -- check if it has the data-llama-snippet-id attribute, if it does, do an PUT to /snippets/:id with just the nodes of that snippet 
-            if (lastElementClicked.hasAttribute('data-llama-snippet-id')) {
-                saveSnippetChanges(lastElementClicked);
-            } else {
-                savePageChanges();
-            }
+            savePageChanges();
         }
     }
     window.saveChanges = saveChanges; //make this available to the core javascript file
 
-    function saveSnippetChanges(element) {
-        const snippetId = element.getAttribute('data-llama-snippet-id');
-        let snippetElement = element;
-        
-        //Find parent snippet element
-        while (snippetElement.parentElement && snippetElement.parentElement.hasAttribute('data-llama-snippet-id')) {
-            snippetElement = snippetElement.parentElement;
-        }
-        const snippetContent = snippetElement.outerHTML;
 
-        fetch(`/snippets/${snippetId}.json`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ content: snippetContent }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Snippet save successful:', data);
-            showNotification('Snippet changes saved successfully!', 'success');
-        })
-        .catch((error) => {
-            console.error('Error saving snippet changes:', error);
-            showNotification('Error saving snippet changes. Please try again.', 'error');
-        });
-    }
 
     function savePageChanges() {
         // Clone the entire document
@@ -261,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * 
      * What's tricky is that we don't want to save HTML page changes injected from 3rd party sources such as plugins. 
      * 
-     * We also don't want to save changes to nodes that are injected dynamically for LlamaBot such as the chat history, snippets, images, etc.
+     * We also don't want to save changes to nodes that are injected dynamically for LlamaBot such as the chat history, images, etc.
      * 
      * We have this debug mode to help us see what nodes are being edited, which ones won't be saved, etc. 
      * 
