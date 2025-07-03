@@ -2,7 +2,7 @@ class DropChatTables < ActiveRecord::Migration[7.2]
   def change
     # Remove foreign key constraints first
     remove_foreign_key :page_histories, :chat_messages, column: :human_chat_message_id if foreign_key_exists?(:page_histories, :chat_messages, column: :human_chat_message_id)
-    remove_foreign_xkey :page_histories, :chat_messages, column: :ai_chat_message_id if foreign_key_exists?(:page_histories, :chat_messages, column: :ai_chat_message_id)
+    remove_foreign_key :page_histories, :chat_messages, column: :ai_chat_message_id if foreign_key_exists?(:page_histories, :chat_messages, column: :ai_chat_message_id)
     remove_foreign_key :message_reactions, :chat_messages if foreign_key_exists?(:message_reactions, :chat_messages)
     remove_foreign_key :chat_messages, :chat_conversations if foreign_key_exists?(:chat_messages, :chat_conversations)
     remove_foreign_key :chat_conversations, :users if foreign_key_exists?(:chat_conversations, :users)
