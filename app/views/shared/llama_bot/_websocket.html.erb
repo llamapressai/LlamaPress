@@ -117,10 +117,11 @@
     
     const consumer = ActionCable.createConsumer();
     connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
+
+    const sessionId = "<%= @chat_channel_session_id %>";
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
-    chatChannel = consumer.subscriptions.create(
-      { channel: "ChatChannel", session_id: "<%= @chat_channel_session_id %>" },
+      chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
       {
         /**
          * Receives message responses from LlamaBot Backend.
