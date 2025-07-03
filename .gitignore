@@ -7,6 +7,15 @@
 # Ignore bundler config.
 /.bundle
 
+/gems
+/cache
+/bin
+/specifications
+/extensions
+/binstub
+/build_info
+
+
 # Ignore all environment files (except templates).
 /.env*
 !/.env*.erb
