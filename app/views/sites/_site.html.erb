@@ -81,27 +81,6 @@
     </div>
   </div>
 
-  <!-- Posts Section -->
-  <h2 class="text-2xl font-bold mt-10 mb-4">Posts</h2>
-  <%= link_to new_post_path(site_id: site.id), class: "inline-block mb-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors duration-300" do %>
-    <i class="fas fa-plus mr-2"></i>
-    Create New Post
-  <% end %>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <% @posts.each do |post| %>
-      <%= link_to post_path(post), class: "block p-6 border-2 border-gray-900 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 bg-gray-800" do %>
-        <h3 class="font-bold text-xl text-white mb-2"><%= post.title %></h3>
-        <div class="bg-gray-700 p-4 rounded-lg overflow-x-auto">
-          <p class="text-sm text-gray-300"><%= truncate(post.summarized_content, length: 150) %></p>
-        </div>
-        <p class="text-sm text-gray-400 mt-4">
-          Last updated: <%= time_ago_in_words(post.updated_at) %> ago
-        </p>
-      <% end %>
-    <% end %>
-  </div>
-
-
   <!-- Submissions Section -->
   <h2 class="text-2xl font-bold mt-10 mb-4">Submissions</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
