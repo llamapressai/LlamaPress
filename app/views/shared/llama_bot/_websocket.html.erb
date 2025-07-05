@@ -677,7 +677,7 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
       thread_id: sessionId, // Use session ID as thread ID for conversation tracking
       context: "<%=@view_path%>",
       selectedElement: selectedElementInnerHtml,
-      webPageId: "<%=@page&.id%>",
+      page_id: "<%=@page&.id%>",
       message_type: "message",
       javascript_console_errors: javaScriptConsoleErrors
     });
