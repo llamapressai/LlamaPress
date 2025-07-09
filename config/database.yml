@@ -2,16 +2,21 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  url: <%= ENV.fetch('DATABASE_URL') %>
 
 development:
   <<: *default
-  database: LlamaPress_development
+  database: <%= ENV.fetch("POSTGRES_DB") { 'LlamaPress_development' } %>
+  host: <%= ENV.fetch("POSTGRES_HOST") { 'localhost' } %>
+  username: <%= ENV["POSTGRES_USER"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
 
 test:
   <<: *default
-  database: LlamaPress_test
+  database: <%= ENV.fetch("POSTGRES_DB_TEST") { 'LlamaPress_test' } %>
+  host: <%= ENV.fetch("POSTGRES_HOST") { 'localhost' } %>
+  username: <%= ENV["POSTGRES_USER"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
 
 production:
   <<: *default
-  database: LlamaPress_production
+  url: <%= ENV.fetch('DATABASE_URL', '') %>
