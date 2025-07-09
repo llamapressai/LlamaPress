@@ -1,13 +1,3 @@
-PATH
-  remote: ../llama_bot_rails
-  specs:
-    llama_bot_rails (0.1.8)
-      actioncable (>= 6.0, < 9.0)
-      async
-      async-http
-      async-websocket
-      rails (>= 6.0, < 9.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -145,7 +135,6 @@ GEM
       addressable
       capybara
       playwright-ruby-client (>= 1.16.0)
-    charlock_holmes (0.7.9)
     concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
     console (1.27.0)
@@ -164,6 +153,8 @@ GEM
       responders
       warden (~> 1.2.3)
     diffy (3.4.2)
+    dockerfile-rails (1.7.10)
+      rails (>= 3.0.0)
     drb (2.2.1)
     erubi (1.13.0)
     faraday (2.12.0)
@@ -291,6 +282,12 @@ GEM
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
     language_server-protocol (3.17.0.3)
+    llama_bot_rails (0.1.8)
+      actioncable (>= 6.0, < 9.0)
+      async
+      async-http
+      async-websocket
+      rails (>= 6.0, < 9.0)
     logger (1.6.1)
     loofah (2.22.0)
       crass (~> 1.0.2)
@@ -531,16 +528,16 @@ DEPENDENCIES
   byebug
   capybara
   capybara-playwright-driver
-  charlock_holmes
   debug
   devise
   diffy
+  dockerfile-rails (>= 1.7)
   friendly_id
   google-cloud-logging
   importmap-rails
   jbuilder
   kaminari
-  llama_bot_rails!
+  llama_bot_rails
   mocha
   ostruct
   pg (= 1.5.7)

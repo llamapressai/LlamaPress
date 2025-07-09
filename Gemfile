@@ -66,7 +66,6 @@ gem 'devise'
 
 # LlamaBot
 gem 'rouge'
-gem 'charlock_holmes'
 gem 'friendly_id'
 gem 'diffy'
 #S3
@@ -83,4 +82,5 @@ gem 'builder'
 gem 'google-cloud-logging'
 gem 'ostruct'
 
-gem 'llama_bot_rails', path: "../llama_bot_rails"
+gem 'llama_bot_rails'#, path: "../llama_bot_rails"
+gem "dockerfile-rails", ">= 1.7", :group => :development
