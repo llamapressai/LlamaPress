@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: llamapress
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -b '0.0.0.0'"
+    volumes:
+      - .:/rails
+      # The bundle_cache volume is used to persist gems, speeding up subsequent builds.
+      - bundle_cache:/usr/local/bundle
+      # This mapping is to avoid a permissions issue with the bootsnap cache.
+      - bootsnap_cache:/rails/tmp/cache/bootsnap
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgres://user:password@db:5432/llamapress
+      - BUNDLE_PATH=/usr/local/bundle
+      # - POSTGRES_HOST=db
+      # - POSTGRES_DB=llamapress
+      # - POSTGRES_USER=user
+      # - POSTGRES_PASSWORD=password
+      - REDIS_URL=redis://redis:6379/1
+      - BOOTSNAP_CACHE_DIR=/rails/tmp/cache/bootsnap
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  bundle_cache:
+  bootsnap_cache: 

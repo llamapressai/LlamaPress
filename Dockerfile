@@ -6,7 +6,7 @@
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.3.5
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+FROM ruby:$RUBY_VERSION-slim-bookworm AS base
 
 # Rails app lives here
 WORKDIR /rails
@@ -26,7 +26,7 @@ ENV RAILS_ENV="production" \
 FROM base AS build
 
 # Install packages needed to build gems
-RUN apt-get update -qq && \
+RUN apt-get clean && apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 

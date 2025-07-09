@@ -1,0 +1,47 @@
+# syntax = docker/dockerfile:1
+ARG RUBY_VERSION=3.3.5
+FROM ruby:$RUBY_VERSION-slim-bookworm
+
+# Add apt configs to prevent caching issues
+RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
+    echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
+    echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
+
+# Install base packages and build dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      git \
+      libpq-dev \
+      pkg-config \
+      curl \
+      postgresql-client \
+      nodejs \
+      npm && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure npm
+RUN npm config set fund false --global
+
+WORKDIR /rails
+
+# Set ENV for bundler
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BOOTSNAP_CACHE_DIR="/rails/tmp/cache/bootsnap"
+
+# Copy Gemfiles
+COPY Gemfile Gemfile.lock ./
+
+# Install gems
+RUN bundle install
+
+# Copy application code
+COPY . .
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the Rails server
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"] 
