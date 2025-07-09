@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:16
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: LlamaPress_development
-      POSTGRES_USER: postgres
+      POSTGRES_DB: llamapress
+      POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
       - "5433:5432"
@@ -34,7 +32,7 @@ services:
       - "3000:3000"
     environment:
       - RAILS_ENV=development
-      - DATABASE_URL=postgres://postgres:password@db:5432/LlamaPress_development
+      - DATABASE_URL=postgres://user:password@db:5432/llamapress
       - REDIS_URL=redis://redis:6379/1
       - BOOTSNAP_CACHE_DIR=/rails/tmp/cache/bootsnap
     depends_on:
