@@ -1,21 +1,28 @@
 # syntax = docker/dockerfile:1
 ARG RUBY_VERSION=3.3.5
 # FROM ruby:$RUBY_VERSION-slim-bookworm
-FROM ruby:3.3.0
+
+# Ruby 3.3.5 pinned by digest; always build for amd64
+FROM --platform=linux/amd64 ruby@sha256:bceec7582aaa80630bb51a04e2df3af658e64c0640c174371776928ad3bd57b4
+
+
+# RUN sed -i 's|http://deb.debian.org/debian|https://snapshot.debian.org/archive/debian/20240701T000000Z|g' /etc/apt/sources.list
+
+# Freeze Debian mirror to a snapshot (method B shown)
+RUN rm -f /etc/apt/sources.list /etc/apt/sources.list.d/* \
+ && echo "deb [trusted=yes] https://snapshot.debian.org/archive/debian/20240701T000000Z bookworm main contrib non-free" \
+    > /etc/apt/sources.list
+
 
 RUN printf 'Acquire::http::Pipeline-Depth "0";\n\
 Acquire::http::No-Cache "true";\n\
 Acquire::BrokenProxy "true";\n' \
   > /etc/apt/apt.conf.d/99fixbadproxy
 
-RUN rm -rf /var/lib/apt/lists/* && \
-    apt-get clean && \
-    apt-get update -o Acquire::CompressionTypes::Order::=gz
-
-# Add apt configs to prevent caching issues
-# RUN echo "Acquire::http::Pipeline-Depth 0;" > /etc/apt/apt.conf.d/99custom && \
-#     echo "Acquire::http::No-Cache true;" >> /etc/apt/apt.conf.d/99custom && \
-#     echo "Acquire::BrokenProxy    true;" >> /etc/apt/apt.conf.d/99custom
+# Always start from a clean slate, then update once
+RUN rm -rf /var/lib/apt/lists/* \
+ && apt-get clean \
+ && apt-get update -o Acquire::CompressionTypes::Order::=gz
 
 # Install base packages and build dependencies
 # Use a stable Debian mirror to avoid flaky CDN issues (especially on arm64)
