@@ -4,7 +4,8 @@ require 'nokogiri'
 
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo download_html ]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt, :update] #temporarily allowing update for local dev testing.
+  before_action :authenticate_user_or_agent!, only: [:update]
   skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
   # GET /
@@ -87,7 +88,6 @@ class PagesController < ApplicationController
   # GET /pages/1 or /pages/1.json
   def show
     content = @page.render_content
-    @chat_messages = @page.chat_messages
     
     if (current_user&.organization_id == @page.organization_id) || 
        (params[:user_api_token].present? && User.find_by(api_token: params[:user_api_token])&.tap { |u| sign_in(u) })
@@ -158,6 +158,7 @@ class PagesController < ApplicationController
 
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
+    # byebug
     message = params[:message].present? ? params[:message] : "User Edit"
     Rails.logger.info "Attempting to update page #{@page.id} with message: #{message}"
     
@@ -208,18 +209,7 @@ class PagesController < ApplicationController
       @message_history = @llamabot_state_history["messages"]
     end  
 
-    @chat_messages = @page.chat_messages #Here is where we get chat message history for the page.
-    
-    # Combine and sort both types of records
-
-    # TODO: This broke our page_history interweaving. It's only chat messages now.
-    # We need to fix this if we want to let the user view page history within their chat messages. 
-
-    # We didn't add page history back in because these messages (saved by LangGraph in our Checkpoint table) 
-    # don't have time-stamps when we fetch them from LlamaBot via LangGraph Checkpoint SDK (see FastAPI route for chat-history/{thread_id})
-    # so we can't interleave them.
-
-    # @combined_history = (@page_histories + @llamabot_state_history).sort_by(&:created_at).reverse
+    # Use page histories and llamabot state history (no more chat messages)
     @combined_history = @message_history.nil? ? @page_histories : @message_history
     
     # Manual pagination
@@ -236,7 +226,7 @@ class PagesController < ApplicationController
               type: 'page_history',
               content: Base64.strict_encode64(item.content),
             })
-          else # ChatMessage
+          else # LlamaBot message
             content = item["content"]
             #bot and user magic strings are used in the javascript client to determine which color & style to use for the message.
             # role = item["type"] == "ai" ? "bot" : item["type"] == "user" ? "user" : item["type"] == "system" ? "system" : item["type"] == "tool" ? "tool" : "user"
@@ -464,5 +454,29 @@ class PagesController < ApplicationController
       else
         return session.id
       end
+    end
+
+    def authenticate_user_or_agent!
+      # First try to authenticate as a user
+      if user_signed_in?
+        return true
+      end
+      
+      # If user authentication fails, try agent authentication
+      begin
+        authenticate_agent!
+        return true
+      rescue => e
+        # If both fail, use default user authentication which will redirect to sign in
+        authenticate_user!
+      end
+    end
+
+    def authenticate_agent!
+      auth_header = request.headers["Authorization"]
+      token = auth_header&.split("Bearer ")&.last  # Extract token after "Bearer "
+      @session_payload = Rails.application.message_verifier(:llamabot_ws).verify(token)
+    rescue ActiveSupport::MessageVerifier::InvalidSignature
+        head :unauthorized
     end
 end

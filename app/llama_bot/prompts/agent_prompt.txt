@@ -1,0 +1,1 @@
+To remember key information, you can use Rails Console to run `LlamaBotRails.add_instruction_to_agent_prompt!("<new instructions/memory>")`

@@ -146,28 +146,7 @@
                 </span>
             </button>
             
-            <!-- Button to Toggle Code Snippets Window -->
-            <button id="toggleCodeSnippets" class="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center" title="Show code snippets" data-llama="app/views/shared/_chat.html.erb">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 text-gray-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    data-llama="app/views/shared/_chat.html.erb"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                        data-llama="app/views/shared/_chat.html.erb"
-                    />
-                </svg>
-                <span class="text-xs mt-1 text-gray-600">
-                    Snippets
-                </span>
-            </button>
+
 
             <!-- Button to Toggle Prompts Window -->
             <button id="togglePrompts" class="mr-2 p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 flex flex-col items-center" title="Toggle prompt suggestions" onclick="togglePromptsContainer()" data-llama="app/views/shared/_chat.html.erb">
@@ -209,49 +188,6 @@
             
         </div>
 
-        <!-- Code Snippets Window (this displays underneath the chat toolbar) -->
-        <div id="codeSnippetsContainer" class="llama-chat-toolbar-window hidden p-2 md:p-4 border-t border-gray-300 bg-gray-50 max-h-60 overflow-y-auto">
-            <h3 class="font-semibold text-lg mb-2">Code Snippets</h3>
-            <% if current_user&.organization&.snippets&.any? %>
-                <ul class="space-y-2"> 
-                    <% current_user.organization.snippets.each do |snippet| %>
-                    <li class="bg-white p-2 rounded shadow">
-                        <h4 class="font-medium"><%= snippet.name %></h4>
-                        <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="copyToClipboard('<%= j snippet.get_snippet_component %>')" data-content="<%= j snippet.content %>">Copy</button>
-                        <button class="mt-1 text-sm text-blue-500 hover:text-blue-700" onclick="toggleSnippetContent('<%= snippet.id %>')">View</button>
-                        <span class="text-sm bg-gray-100 p-2 mt-1 rounded hidden" id="snippet-content-<%= snippet.id %>"><%= raw snippet.content %></span>
-                        <pre class="text-sm bg-gray-100 p-2 mt-1 rounded"><code><%= snippet.get_snippet_component %></code></pre>
-                    </li>
-                    <% end %>
-                </ul>
-                
-                <!-- Code Snippets Javascript Logic -->
-                <script>
-                        function copyToClipboard(text) {
-                            navigator.clipboard.writeText(text).then(function() {
-                            console.log('Copying to clipboard was successful!');
-                            }, function(err) {
-                            console.error('Could not copy text: ', err);
-                            });
-                        }
 
-                        function toggleSnippetContent(snippetId) {
-                            var contentId = 'snippet-content-' + snippetId;
-                            var content = document.getElementById(contentId);
-                            var button = content.previousElementSibling;
-                            
-                            if (content.classList.contains('hidden')) {
-                                content.classList.remove('hidden');
-                                button.textContent = 'Hide';
-                            } else {
-                                content.classList.add('hidden');
-                                button.textContent = 'View';
-                            }
-                        }
-                </script>
-            <% else %>
-                <p class="text-gray-600">No code snippets available.</p>
-            <% end %>
-        </div>
     </div> <!-- TODO: does this div line up right? We need to make sure our divs are lined up properly across all our chat partials. -->
 </div>

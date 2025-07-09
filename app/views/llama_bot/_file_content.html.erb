@@ -1,9 +1,9 @@
 <%
   require 'rouge'
   begin
-    file_content = File.read(path)
-    detection = CharlockHolmes::EncodingDetector.detect(file_content)
-    utf8_content = CharlockHolmes::Converter.convert(file_content, detection[:encoding], 'UTF-8')
+    #file_content = File.read(path)
+    #detection = CharlockHolmes::EncodingDetector.detect(file_content)
+    #utf8_content = CharlockHolmes::Converter.convert(file_content, detection[:encoding], 'UTF-8')
   rescue => e
     utf8_content = "Error reading file: #{e.message}"
   end

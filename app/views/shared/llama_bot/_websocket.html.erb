@@ -1,5 +1,6 @@
 <script>
   let chatChannel;
+  let sessionId; // Global sessionId variable
   console.log("Loaded...");
 
   let isLoading = false;
@@ -117,27 +118,44 @@
     
     const consumer = ActionCable.createConsumer();
     connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
+
+    sessionId = "<%= @chat_channel_session_id %>"; // Assign to global variable
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
-    chatChannel = consumer.subscriptions.create(
-      { channel: "ChatChannel", session_id: "<%= @chat_channel_session_id %>" },
+      chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
       {
         /**
          * Receives message responses from LlamaBot Backend.
          */
         received(data) {
           console.log("Received response from LlamaBot Backend:", data);
+          console.log("Data type:", typeof data);
 
           try {
             // Parse the incoming data - simplify the parsing chain
-            const parsed = JSON.parse(data);
+            let parsed;
+            if (typeof data === 'string') {
+              parsed = JSON.parse(data);
+            } else {
+              parsed = data;
+            }
+            
+            console.log("Parsed data:", parsed);
 
-            if(parsed.message.type == "external_ws_pong") {
+            // Handle pong messages that might be objects
+            if (parsed.message && typeof parsed.message === 'object' && (parsed.message.type === "external_ws_pong" || parsed.message.type === "pong")) {
               lastPongTime = Date.now(); // Update last pong time, which will keep the status icon green
               return;
             }
 
-            const parsedData = JSON.parse(parsed.message);
+            let parsedData;
+            if (typeof parsed.message === 'string') {
+              parsedData = JSON.parse(parsed.message);
+            } else {
+              parsedData = parsed.message;
+            }
+            
+            console.log("Parsed message data:", parsedData);
 
             // This will run regardless of success or failure
             if (parsedData.type !== 'think_message') {
@@ -158,6 +176,7 @@
             
             switch (parsedData.type) {
               case 'ai_message':
+              case 'ai': // New gem format
                 //TODO: This is a hacky way to format our message to add a brain for tool-calling. We need to refactor this.
                 // We need to DRY up this code somehow by making the formatting be handled in a single place. 
                 // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb, chat_channel.rb, and pages_controller.rb.
@@ -187,46 +206,11 @@
                   window.messageTraces[messageId] = parsedData.langsmith_trace;
                   console.log(`Stored trace info for message ${messageId}:`, parsedData.langsmith_trace);
                   
-                  // Add reaction buttons
-                  const reactionsContainer = document.createElement('div');
-                  reactionsContainer.className = 'mt-2 flex items-center space-x-2';
-                  
-                  // Thumbs up button
-                  const thumbsUpButton = document.createElement('button');
-                  thumbsUpButton.className = 'text-gray-500 hover:text-green-600 text-xs';
-                  thumbsUpButton.innerHTML = '<i class="fas fa-thumbs-up" style="font-size: 16px"></i>';
-                  thumbsUpButton.setAttribute('title', 'This response was helpful');
-                  thumbsUpButton.onclick = function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Thumbs up clicked for messageId:', messageId);
-                    handleThumbsClick(messageId, 'up', this);
-                  };
-                  
-                  // Thumbs down button
-                  const thumbsDownButton = document.createElement('button');
-                  thumbsDownButton.className = 'text-gray-500 hover:text-red-600 text-xs';
-                  thumbsDownButton.innerHTML = '<i class="fas fa-thumbs-down" style="font-size: 16px"></i>';
-                  thumbsDownButton.setAttribute('title', 'This response was not helpful');
-                  thumbsDownButton.onclick = function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Thumbs down clicked websocket, calling handleThumbsClick');
-                    // Try both global and local handleThumbsClick to ensure it works
-                    if (window.handleThumbsClick) {
-                      window.handleThumbsClick(messageId, 'down', this);
-                    } else {
-                      handleThumbsClick(messageId, 'down', this);
-                    }
-                  };
-                  
-                  // Add buttons to container
-                  reactionsContainer.appendChild(thumbsUpButton);
-                  reactionsContainer.appendChild(thumbsDownButton);
-                  
-                  // Add container to message
-                  messageElement.appendChild(reactionsContainer);
+
                 }
+                break;
+              case 'tool': // New gem format for tool messages
+                addMessage(parsedData.content, "tool");
                 break;
               case 'system_message':
                 addMessage(parsedData.content, "system");
@@ -245,6 +229,7 @@
                 window.location.reload();
                 break;
               case 'external_ws_pong':
+              case 'pong': // New gem format
                 lastPongTime = Date.now();
                 console.log("Received pong response from LlamaBot Backend, which means we're connected");
                 break;
@@ -577,12 +562,12 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       chatbotMessagesContainer.appendChild(loadingDiv);
     }
 
-    //function hideLoadingIndicator() {
-    //  const loadingDiv = document.getElementById("loadingIndicator");
-    //  if (loadingDiv) {
-    //    loadingDiv.remove();
-    //  }
-    //}
+    function hideLoadingIndicator() {
+      const loadingDiv = document.getElementById("loadingIndicator");
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
 
     function autoResizeUserInputArea() {
         textarea.style.height = 'auto';
@@ -681,11 +666,18 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
     
     sendButton.addEventListener('click', cancelHandler);
     
+    if (!sessionId) {
+      console.error("Session ID not available");
+      errorCallback(new Error("Session ID not available"));
+      return;
+    }
+
     chatChannel.send({
       message: userMessage,
+      thread_id: sessionId, // Use session ID as thread ID for conversation tracking
       context: "<%=@view_path%>",
-      selectedElement: selectedElementInnerHtml,
-      webPageId: "<%=@page&.id%>",
+      selected_element: selectedElementInnerHtml,
+      page_id: "<%=@page&.id%>",
       message_type: "message",
       javascript_console_errors: javaScriptConsoleErrors
     });

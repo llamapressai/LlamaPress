@@ -1,8 +1,4 @@
 Rails.application.routes.draw do
-  resources :chat_messages
-  resources :chat_conversations
-  resources :posts
-  resources :snippets
   
   resources :submissions do
     collection do
@@ -10,6 +6,9 @@ Rails.application.routes.draw do
       post :confirm_verify_code_with_twilio
     end
   end
+
+  mount LlamaBotRails::Engine => "/llama_bot"
+
 
   get 'twilio_verify_example' => 'pages#twilio_verify_example'
 
@@ -81,32 +80,10 @@ Rails.application.routes.draw do
   post 'api/sites/:slug/wordpress_api_token', to: 'sites#update_wordpress_token', defaults: { format: :json }
   post 'api/wordpress_sites', to: 'sites#create_wordpress_site'
 
-  get 'picture-to-html', to: 'public_leads#new'
-  
-  get 'brand-clone', to: 'public_leads#brand_clone'
-
-  get 'elementor', to: 'public_leads#elementor'
-
-  get 'demo', to: 'public_leads#demo'
-
-  resources :public_leads, only: [:create] do
-    collection do
-      post :create_from_prompt
-      post :create_from_prompt_in_wordpress_registration
-      post :register_and_brand_clone
-    end
-  end
-
-  # A catch all route for the user clicking thumbs up or thumbs down on a llamabot message. Simplifies the javascript code
-  post 'message_reactions', to: 'message_reactions#handle_reaction'
-
   namespace :admin do
-    resources :reactions, only: [:index]
     get '/', to: 'home#index'
     get '/image_uploads', to: 'home#view_image_uploads'
   end
-
-  get "/message_reactions_admin", to: "admin/reactions#index"
     # Make sure this is the LAST route
 
   get '*path', to: 'pages#resolve_slug', constraints: lambda { |request|

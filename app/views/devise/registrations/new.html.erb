@@ -19,34 +19,73 @@
         <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Sign Up</h2>
       </div>
 
-      <form action="/public_leads/create_from_prompt" method="POST" class="space-y-4 sm:space-y-6">
-        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4 sm:space-y-6" }) do |f| %>
         <input type="hidden" name="prompt" id="hidden-prompt">
+        
+        <!-- Error Messages Display -->
+        <% if resource.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-400"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  <%= pluralize(resource.errors.count, "error") %> prohibited this account from being saved:
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <% resource.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
           <div class="mt-1 relative rounded-md shadow-sm">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-envelope text-gray-400"></i>
             </div>
-            <input type="email" name="email" id="email" required autocomplete="email" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="you@example.com">
+            <%= f.email_field :email, required: true, autocomplete: "email", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "you@example.com" %>
           </div>
         </div>
 
+        <%= f.fields_for :organization_attributes do |org_f| %>
+          <%= org_f.hidden_field :name, id: "hidden-org-name", value: "My Organization" %>
+        <% end %>
+
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
           <div class="mt-1 relative rounded-md shadow-sm">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-lock text-gray-400"></i>
             </div>
-            <input type="password" name="password" id="password" required autocomplete="new-password" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="••••••••">
+            <%= f.password_field :password, required: true, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
+          </div>
+          <% if @minimum_password_length %>
+            <p class="mt-1 text-sm text-gray-500">
+              (<%= @minimum_password_length %> characters minimum)
+            </p>
+          <% end %>
+        </div>
+
+        <div>
+          <%= f.label :password_confirmation, "Confirm Password", class: "block text-sm font-medium text-gray-700" %>
+          <div class="mt-1 relative rounded-md shadow-sm">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-lock text-gray-400"></i>
+            </div>
+            <%= f.password_field :password_confirmation, required: true, autocomplete: "new-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
           </div>
         </div>
 
-        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Create my website
-        </button>
-      </form>
+        <%= f.submit "Create my website", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <% end %>
 
       <div class="mt-4 sm:mt-6 text-center text-sm text-gray-600">
         Already have an account? 
@@ -62,34 +101,45 @@
         <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Sign In</h2>
       </div>
 
-      <form action="/public_leads/create_from_prompt" method="POST" class="space-y-4 sm:space-y-6">
-        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-4 sm:space-y-6", id: "signin-form" }) do |f| %>
         <input type="hidden" name="prompt" id="hidden-prompt-signin">
 
+        <!-- Flash Messages for Sign In -->
+        <% if flash[:alert] %>
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-400"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-red-700"><%= flash[:alert] %></p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
           <div class="mt-1 relative rounded-md shadow-sm">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-envelope text-gray-400"></i>
             </div>
-            <input type="email" name="email" id="email-signin" required autocomplete="email" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="you@example.com">
+            <%= f.email_field :email, required: true, autocomplete: "email", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "you@example.com" %>
           </div>
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
           <div class="mt-1 relative rounded-md shadow-sm">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-lock text-gray-400"></i>
             </div>
-            <input type="password" name="password" id="password-signin" required autocomplete="current-password" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm" placeholder="••••••••">
+            <%= f.password_field :password, required: true, autocomplete: "current-password", class: "pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm", placeholder: "••••••••" %>
           </div>
         </div>
 
-        <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Sign in and create website
-        </button>
-      </form>
+        <%= f.submit "Sign in and create website", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      <% end %>
 
       <div class="mt-4 sm:mt-6 text-center text-sm text-gray-600">
         Don't have an account? 
@@ -183,9 +233,24 @@ function showSignupForm() {
   // Set the prompt in the hidden field
   document.getElementById('hidden-prompt').value = prompt;
   
+  // Set a default organization name (will be updated when email is entered)
+  document.getElementById('hidden-org-name').value = "My Organization";
+  
   // Hide prompt section and show signup form
   document.getElementById('prompt-section').classList.add('hidden');
   document.getElementById('signin-section').classList.add('hidden');
   document.getElementById('signup-section').classList.remove('hidden');
+  
+  // Add event listener to email field to update organization name
+  const emailField = document.querySelector('#user_email');
+  if (emailField) {
+    emailField.addEventListener('input', function(e) {
+      const email = e.target.value;
+      if (email && email.includes('@')) {
+        const orgName = email.split('@')[0] + "'s Organization";
+        document.getElementById('hidden-org-name').value = orgName;
+      }
+    });
+  }
 }
 </script>

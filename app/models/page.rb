@@ -7,10 +7,7 @@ class Page < ApplicationRecord
   belongs_to :organization
   belongs_to :current_version, class_name: 'PageHistory', optional: true, foreign_key: 'current_version_id'
   
-  has_many :page_histories, dependent: :destroy
-  has_many :posts, dependent: :nullify
-  has_many :chat_conversations, dependent: :destroy
-  has_many :chat_messages, through: :chat_conversations 
+  has_many :page_histories, dependent: :destroy 
 
   friendly_id :slug, use: :slugged
 
@@ -27,61 +24,11 @@ class Page < ApplicationRecord
 
   def render_content
     content = self.content
-    content = render_snippets(content)
     content = render_llama_contenteditable_tags(content)
     return content
   end
 
-  def render_snippets(content)
-    # a snippet syntax looks like {{snippet_name:header}} or {{snippet_name:footer}}, or {{snippet_id:1}}
-    # for each {{snippet_name:name}} or {{snippet_id:id}} in the content, see if there is a matching snippet
-    # if so, replace the {{snippet_name:name}} or {{snippet_id:id}} with the snippet content
 
-    # This works for both snippet id, and by snippet name
-    # if the snippet name is not found, then don't replace it
-    # if the snippet id is not found, then don't replace it
-    # if the snippet id is found, then replace it
-    # if the snippet name is found, then replace it
-    content.gsub!(/\{\{snippet_id:(.*?)\}\}/) do |match|
-      snippet_identifier = $1
-      snippet = Snippet.find_by(id: snippet_identifier)
-      if snippet.present?
-        # Parse the snippet content as a fragment
-        fragment = Nokogiri::HTML::DocumentFragment.parse(snippet.content)
-        
-        # Add the data-llama-snippet-id attribute to each node in the fragment. This snippet id is used to prevent the user from overwriting the snippet when they edit the page, and to allow the user to edit the snippet from any page it's referenced.
-        fragment.css('*').each do |node| #we inject this data-llama-snippet-id attribute to each node in the fragment so we know it's a global snippet. 
-          node.set_attribute('data-llama-snippet-id', snippet_identifier)
-        end
-        
-        # Convert the fragment back to HTML
-        fragment.to_html
-      else
-        match # Return the original match if snippet is not found
-      end
-    end
-
-    content.gsub!(/\{\{snippet_name:(.*?)\}\}/) do |match|
-      snippet_identifier = $1&.strip
-      snippet = Snippet.find_by(name: snippet_identifier)
-      if snippet.present?
-        # Parse the snippet content as a fragment
-        fragment = Nokogiri::HTML::DocumentFragment.parse(snippet.content) #we inject this data-llama-snippet-id attribute to each node in the fragment so we know it's a global snippet. 
-        
-        # Add the data-llama-snippet-id attribute to each node in the fragment
-        fragment.css('*').each do |node|
-          node.set_attribute('data-llama-snippet-id', snippet.id)
-        end
-        
-        # Convert the fragment back to HTML
-        fragment.to_html
-      else
-        match # Return the original match if snippet is not found
-      end
-    end
-
-    return content
-  end
 
   # LlamaPress allows the user to edit the document by clicking in the page, and typing changes. 
   # The javascript code in _chat_contenteditable_javascript.html.erb will save those changes to the database using a POST request.
@@ -110,7 +57,6 @@ class Page < ApplicationRecord
 
   def pre_save_processing
     add_llama_ids_to_content! #save llama_ids to sync with llamabot to ensure accurate edits
-    prevent_overwriting_snippets! #prevent overwriting snippet templates with syntax: {{snippet_id:id}} to it's rendered html. This would happen when the user edits the page directly after the snippet is rendered if we didn't have this check.
     ensure_doctype_html! #ensure the document has a doctype html. When the user edits page directly from the browser, it's possible for the doctype to be removed on accident. We must have this <!DOCTYPE html> tag for the browser to render the page correctly.
   end
 
@@ -127,26 +73,7 @@ class Page < ApplicationRecord
     self.content = document.to_html
   end
 
-  # We don't want the user to overwrite snippets when they use contenteditable to edit the page.
-  # This method checks for data-llama-snippet-id attribute, which means it was rendered from a {{snippet_id: 2}} or {{snippet_name: name}}
-  # If it has this snippet-id or snippet-name, then this method prevents the user from overwriting it.
-  # The limitation is that the user won't be able to edit the snippet from the page, but they won't accidentally overwrite it.
-  # Eventually, we can detect if the user is editing a snippet, and then allow them to edit it globally for all pages.
-  def prevent_overwriting_snippets!
-    # Parse the content as a full HTML document
-    document = Nokogiri::HTML5::Document.parse(self.content) #check for {{snippet_name:name}} and {{snippet_id:id}} and don't let the user overwrite those.
-    document.css('html *').each do |node|
-      if node.attributes['data-llama-snippet-id'].present?
-        #swap the content of the node with the snippet 
-        snippet_id = node.attributes['data-llama-snippet-id'].value
-        snippet = Snippet.find_by(id: snippet_id)
-        if snippet.present?
-          node.swap(snippet.get_snippet_component)
-        end
-      end
-    end
-    self.content = document.to_html
-  end
+
 
   def ensure_doctype_html!
     document = Nokogiri::HTML5::Document.parse(self.content)
