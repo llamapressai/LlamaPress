@@ -282,7 +282,7 @@ GEM
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
     language_server-protocol (3.17.0.3)
-    llama_bot_rails (0.1.8)
+    llama_bot_rails (0.1.9)
       actioncable (>= 6.0, < 9.0)
       async
       async-http
@@ -537,7 +537,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kaminari
-  llama_bot_rails
+  llama_bot_rails (= 0.1.9)
   mocha
   ostruct
   pg (= 1.5.7)
