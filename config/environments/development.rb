@@ -85,7 +85,9 @@ Rails.application.configure do
   config.action_cable.allowed_request_origins = ['http://localhost:3000']
 
 
-  config.active_storage.service = :amazon #change long term
+  # config.active_storage.service = :amazon #change long term
+  config.active_storage.service = :local #change long term
+
   
   #please do not change
   config.action_cable.log_tags = [ :action_cable, -> request { request.uuid } ]
