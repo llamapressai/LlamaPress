@@ -2,7 +2,6 @@ require 'securerandom'
 require 'llama_bot'
 
 class LlamaBotController < ApplicationController
-    include ActionController::Live
     skip_before_action :authenticate_user!, only: [:home, :source_code]
 
     def get_message_history_from_llamabot_checkpoint
