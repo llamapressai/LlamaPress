@@ -4,7 +4,7 @@ require 'nokogiri'
 
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo download_html ]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt, :update] #temporarily allowing update for local dev testing.
   skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
   # GET /
@@ -157,6 +157,7 @@ class PagesController < ApplicationController
 
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
+    # byebug
     message = params[:message].present? ? params[:message] : "User Edit"
     Rails.logger.info "Attempting to update page #{@page.id} with message: #{message}"
     
@@ -452,5 +453,13 @@ class PagesController < ApplicationController
       else
         return session.id
       end
+    end
+
+    def authenticate_agent!
+      auth_header = request.headers["Authorization"]
+      token = auth_header&.split("Bearer ")&.last  # Extract token after "Bearer "
+      @session_payload = Rails.application.message_verifier(:llamabot_ws).verify(token)
+    rescue ActiveSupport::MessageVerifier::InvalidSignature
+        head :unauthorized
     end
 end
