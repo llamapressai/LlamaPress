@@ -1,0 +1,32 @@
+# syntax = docker/dockerfile:1
+ARG RUBY_VERSION=3.3.5
+FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+
+WORKDIR /rails
+
+# Install base packages and build dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git libpq-dev curl postgresql-client nodejs npm && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Set development environment
+ENV RAILS_ENV="development" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BOOTSNAP_CACHE_DIR="/rails/tmp/cache/bootsnap"
+
+FROM base AS build
+
+COPY Gemfile Gemfile.lock ./
+
+# Install gems
+RUN bundle install
+
+# Copying the rest of the application code is not necessary here
+# because we will be mounting the local directory as a volume.
+# COPY . .
+
+# Expose port 3000 to allow communication to the Rails server
+EXPOSE 3000
+
+# Start the Rails server
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"] 
