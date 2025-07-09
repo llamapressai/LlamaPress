@@ -42,43 +42,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_195403) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "checkpoint_blobs", primary_key: ["thread_id", "checkpoint_ns", "channel", "version"], force: :cascade do |t|
-    t.text "thread_id", null: false
-    t.text "checkpoint_ns", default: "", null: false
-    t.text "channel", null: false
-    t.text "version", null: false
-    t.text "type", null: false
-    t.binary "blob"
-    t.index ["thread_id"], name: "checkpoint_blobs_thread_id_idx"
-  end
-
-  create_table "checkpoint_migrations", primary_key: "v", id: :integer, default: nil, force: :cascade do |t|
-  end
-
-  create_table "checkpoint_writes", primary_key: ["thread_id", "checkpoint_ns", "checkpoint_id", "task_id", "idx"], force: :cascade do |t|
-    t.text "thread_id", null: false
-    t.text "checkpoint_ns", default: "", null: false
-    t.text "checkpoint_id", null: false
-    t.text "task_id", null: false
-    t.integer "idx", null: false
-    t.text "channel", null: false
-    t.text "type"
-    t.binary "blob", null: false
-    t.text "task_path", default: "", null: false
-    t.index ["thread_id"], name: "checkpoint_writes_thread_id_idx"
-  end
-
-  create_table "checkpoints", primary_key: ["thread_id", "checkpoint_ns", "checkpoint_id"], force: :cascade do |t|
-    t.text "thread_id", null: false
-    t.text "checkpoint_ns", default: "", null: false
-    t.text "checkpoint_id", null: false
-    t.text "parent_checkpoint_id"
-    t.text "type"
-    t.jsonb "checkpoint", null: false
-    t.jsonb "metadata", default: {}, null: false
-    t.index ["thread_id"], name: "checkpoints_thread_id_idx"
-  end
-
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -170,14 +133,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_03_195403) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.datetime "mixpanel_profile_last_set_at"
     t.string "api_token"
     t.integer "tutorial_step", default: 0
-    t.string "stripe_customer_id"
-    t.string "stripe_subscription_id"
-    t.string "subscription_plan"
-    t.datetime "stripe_subscription_start_date"
-    t.datetime "stripe_subscription_end_date"
     t.boolean "admin", default: false
     t.index ["api_token"], name: "index_users_on_api_token", unique: true
     t.index ["default_site_id"], name: "index_users_on_default_site_id"
