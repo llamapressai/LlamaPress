@@ -3,7 +3,7 @@ class PageHistoriesController < ApplicationController
 
   # GET /page_histories or /page_histories.json
   def index
-    # @page_histories = current_user.organization.page_histories
+    @page_histories = PageHistory.all
   end
 
   # GET /page_histories/1 or /page_histories/1.json
@@ -12,7 +12,7 @@ class PageHistoriesController < ApplicationController
 
   # GET /page_histories/new
   def new
-    # @page_history = PageHistory.new
+    @page_history = PageHistory.new
   end
 
   # GET /page_histories/1/edit

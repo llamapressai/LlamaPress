@@ -7,7 +7,6 @@ one:
   last_name: MyString
   organization: one
   public_id: hash123
-  subscription_plan: "Pro"
 
 two:
   email: MyString2@email.com

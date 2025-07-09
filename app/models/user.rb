@@ -64,20 +64,7 @@ class User < ApplicationRecord
   end
 
   def should_we_allow_user_to_send_this_message?
-    # return true # temporarily disable the subscription plan check -- remove paywall. 
-    # return false
-    if self.valid_subscription?
-      return true
-    elsif self.today_message_count >= 15
-      return false
-    else
-      return true
-    end
-  end
-
-  #Used to check if the user has a valid subscription plan.
-  def valid_subscription?
-    self.subscription_plan.present?
+    return true
   end
 
   #Used to check the number of messages the user has sent today.
