@@ -5,6 +5,7 @@ require 'nokogiri'
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo download_html ]
   skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt, :update] #temporarily allowing update for local dev testing.
+  before_action :authenticate_user_or_agent!, only: [:update]
   skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
   # GET /
@@ -452,6 +453,22 @@ class PagesController < ApplicationController
         return "test_session_123" #for testing purposes, we need to return a predictable session id. See chat_frontend_llamabot_test.rb for more details.
       else
         return session.id
+      end
+    end
+
+    def authenticate_user_or_agent!
+      # First try to authenticate as a user
+      if user_signed_in?
+        return true
+      end
+      
+      # If user authentication fails, try agent authentication
+      begin
+        authenticate_agent!
+        return true
+      rescue => e
+        # If both fail, use default user authentication which will redirect to sign in
+        authenticate_user!
       end
     end
 
