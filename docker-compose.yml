@@ -34,8 +34,6 @@ services:
 
     volumes:
       - .:/rails
-      # The bundle_cache volume is used to persist gems, speeding up subsequent builds.
-      - bundle_cache:/usr/local/bundle
       # This mapping is to avoid a permissions issue with the bootsnap cache.
       - bootsnap_cache:/rails/tmp/cache/bootsnap
     ports:
