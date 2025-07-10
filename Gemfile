@@ -45,12 +45,13 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  gem 'byebug', platforms: %i[ mri mingw x64_mingw ]
+  gem "dotenv-rails"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  gem 'byebug', platforms: %i[ mri mingw x64_mingw ]
 end
 
 group :test do
@@ -59,7 +60,6 @@ group :test do
   gem "capybara-playwright-driver" #https://justin.searls.co/posts/running-rails-system-tests-with-playwright-instead-of-selenium/
   gem "rails-controller-testing"
   gem "mocha"
-  gem 'byebug', platforms: %i[ mri mingw x64_mingw ]
 end
 
 gem 'devise'

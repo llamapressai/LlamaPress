@@ -155,6 +155,10 @@ GEM
     diffy (3.4.2)
     dockerfile-rails (1.7.10)
       rails (>= 3.0.0)
+    dotenv (3.1.8)
+    dotenv-rails (3.1.8)
+      dotenv (= 3.1.8)
+      railties (>= 6.1)
     drb (2.2.1)
     erubi (1.13.0)
     faraday (2.12.0)
@@ -532,6 +536,7 @@ DEPENDENCIES
   devise
   diffy
   dockerfile-rails (>= 1.7)
+  dotenv-rails
   friendly_id
   google-cloud-logging
   importmap-rails
