@@ -9,11 +9,15 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5433:5432"
+    networks:
+      - shared-net
 
   redis:
     image: redis:7-alpine
     ports:
       - "6380:6379"
+    networks:
+      - shared-net
     volumes:
       - redis_data:/data
 
@@ -36,6 +40,8 @@ services:
       - bootsnap_cache:/rails/tmp/cache/bootsnap
     ports:
       - "3000:3000"
+    networks:
+      - shared-net
     environment:
       - RAILS_ENV=development
       - DATABASE_URL=postgres://user:password@db:5432/llamapress
@@ -55,3 +61,8 @@ volumes:
   redis_data:
   bundle_cache:
   bootsnap_cache: 
+
+# Declare the external network
+networks:
+  shared-net:
+    external: true
