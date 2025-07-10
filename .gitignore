@@ -17,8 +17,8 @@
 
 
 # Ignore all environment files (except templates).
-/.env*
-!/.env*.erb
+.env
+
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -64,4 +64,3 @@ load_database_from_s3.sh
 
 node_modules
 dump.rdb
-
