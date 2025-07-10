@@ -19,6 +19,9 @@ Rails.application.configure do
   # Enable server timing.
   config.server_timing = true
 
+  # Allow Docker container hostnames in dev
+  config.hosts.clear
+
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
   if Rails.root.join("tmp/caching-dev.txt").exist?
@@ -99,6 +102,4 @@ Rails.application.configure do
   if ENV["ENABLE_GOOGLE_CLOUD_LOGGING"] == "true"
     config.logger = ActiveSupport::TaggedLogging.new(GCPLogger.logger)
   end
-
-  config.hosts << "host.docker.internal"
 end
