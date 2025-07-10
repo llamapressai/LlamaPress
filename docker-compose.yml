@@ -10,14 +10,14 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - shared-net
+      - llama-network
 
   redis:
     image: redis:7-alpine
     ports:
       - "6380:6379"
     networks:
-      - shared-net
+      - llama-network
     volumes:
       - redis_data:/data
 
@@ -41,7 +41,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - shared-net
+      - llama-network
     environment:
       - RAILS_ENV=development
       - DATABASE_URL=postgres://user:password@db:5432/llamapress
@@ -64,5 +64,5 @@ volumes:
 
 # Declare the external network
 networks:
-  shared-net:
-    name: lenny-the-llama-network
+  llama-network:
+    name: llama-network
