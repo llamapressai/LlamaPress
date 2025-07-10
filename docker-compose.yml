@@ -65,4 +65,4 @@ volumes:
 # Declare the external network
 networks:
   shared-net:
-    external: true
+    name: lenny-the-llama-network
