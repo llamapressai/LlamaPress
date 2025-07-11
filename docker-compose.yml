@@ -54,6 +54,18 @@ services:
       - db
       - redis
 
+  llamabot-backend:
+    image: kody06/llamabot-backend:latest
+    env_file:
+      - .env
+    environment:
+      - DB_URI=postgres://user:password@db:5432/llamapress
+    command: bash -c "python init_pg_checkpointer.py --uri $$DB_URI && uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - llama-network
+
 volumes:
   postgres_data:
   redis_data:
