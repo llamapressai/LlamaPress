@@ -23,8 +23,7 @@ if ! grep -q '^OPENAI_API_KEY=' .env; then
 fi
 
 # 5) Init submodule on fresh clone only
-if [ ! -d "vendor/gems/llama_bot_rails" ]; then
-  echo "→ Initializing llama_bot_rails submodule…"
+if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
   git submodule sync
-  git submodule update --init vendor/gems/llama_bot_rails
+  git submodule update --init --recursive
 fi
