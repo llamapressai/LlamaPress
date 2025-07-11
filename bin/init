@@ -1,7 +1,29 @@
+#!/usr/bin/env bash
+set -e
+
+# 1) Seed .env from the example if missing
+[ ! -f .env ] && cp .env.example .env
+
+# 2) Remove any existing OPENAI_API_KEY line so we can re-add the real one
+# macOS/BSD sed:
+sed -i '' '/^OPENAI_API_KEY=/d' .env
+# If you ever run on Linux, use:
+# sed -i '/^OPENAI_API_KEY=/d' .env
+
+# 3) If they’ve exported it, grab it now
+if [ -n "$OPENAI_API_KEY" ]; then
+  echo "→ Adding OPENAI_API_KEY from your environment into .env"
+  echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+fi
+
+# 4) Otherwise, prompt once
+if ! grep -q '^OPENAI_API_KEY=' .env; then
+  read -p "🔑 Enter your OpenAI API key: " KEY
+  echo "OPENAI_API_KEY=$KEY" >> .env
+fi
+
+# 5) Init submodule on fresh clone only
 if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
   git submodule sync
   git submodule update --init --recursive
 fi
-
-# only copy if needed
-[ ! -f .env ] && cp .env.example .env
