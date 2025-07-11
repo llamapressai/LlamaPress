@@ -4,6 +4,13 @@
 
 # 🦙 LlamaPress
 
+## 🚀 Quickstart: 
+
+```
+bash bin/init
+docker-compose up
+``
+
 ** A Modern LLM Powered Playground **
 
 Welcome to LLamaPress! LLamaPress combines the power of Ruby on Rails and LLMs. Whether you're a seasoned developer or just starting out, LlamaPress empowers you to build customizable software solutions without the usual overhead using Ruby on Rails.
