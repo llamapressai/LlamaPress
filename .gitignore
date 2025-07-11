@@ -9,7 +9,6 @@
 
 /gems
 /cache
-/bin
 /specifications
 /extensions
 /binstub
@@ -54,8 +53,6 @@ config/local_env.yml
 #ignore byebug history
 .byebug_history
 
-#ignore the start script
-start
 .prettierignore
 
 load_database_from_s3.sh
@@ -64,3 +61,4 @@ load_database_from_s3.sh
 
 node_modules
 dump.rdb
+start_custom

@@ -1,0 +1,7 @@
+if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
+  git submodule sync
+  git submodule update --init --recursive
+fi
+
+# only copy if needed
+[ ! -f .env ] && cp .env.example .env
