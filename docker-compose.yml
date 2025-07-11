@@ -44,10 +44,6 @@ services:
       - RAILS_ENV=development
       - DATABASE_URL=postgres://user:password@db:5432/llamapress
       - BUNDLE_PATH=/usr/local/bundle
-      # - POSTGRES_HOST=db
-      # - POSTGRES_DB=llamapress
-      # - POSTGRES_USER=user
-      # - POSTGRES_PASSWORD=password
       - REDIS_URL=redis://redis:6379/1
       - BOOTSNAP_CACHE_DIR=/rails/tmp/cache/bootsnap
     depends_on:
