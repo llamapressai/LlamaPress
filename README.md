@@ -9,7 +9,7 @@
 ```
 bash bin/init
 docker-compose up
-``
+```
 
 ** A Modern LLM Powered Playground **
 
@@ -18,6 +18,7 @@ Welcome to LLamaPress! LLamaPress combines the power of Ruby on Rails and LLMs. 
 ## 📚 Table of Contents
 
 - [🦙 LlamaPress](#-llamapress)
+  - [� Quickstart:](#-quickstart)
   - [📚 Table of Contents](#-table-of-contents)
 - [Our Vision](#our-vision)
     - [🌱 Origin Story](#-origin-story)
