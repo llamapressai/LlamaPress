@@ -4,7 +4,13 @@ set -e
 # Pull submodules if missing
 if [ ! -d "vendor/gems/llama_bot_rails/.git" ]; then
   echo "== Initializing git submodules =="
-  git submodule update --init --recursive
+  git submodule sync
+  git submodule update --init --recursive || {
+    echo "‼️  ERROR: Could not update submodule. Try running:"
+    echo "    git submodule sync"
+    echo "    git submodule update --init --recursive"
+    exit 1
+  }
 fi
 
 # Install Ruby gems
