@@ -27,7 +27,6 @@ services:
       dockerfile: Dockerfile.dev
     stdin_open: true     # <-- enables byebug/irb input
     tty: true             # <-- attaches terminal output
-    entrypoint: ["/bin/bash", "bin/entrypoint.sh"]    
     env_file:
       - .env
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -b '0.0.0.0'"
