@@ -1,3 +1,13 @@
+PATH
+  remote: vendor/gems/llama_bot_rails
+  specs:
+    llama_bot_rails (0.1.10)
+      actioncable (>= 6.0, < 9.0)
+      async
+      async-http
+      async-websocket
+      rails (>= 6.0, < 9.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -286,12 +296,6 @@ GEM
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
     language_server-protocol (3.17.0.3)
-    llama_bot_rails (0.1.10)
-      actioncable (>= 6.0, < 9.0)
-      async
-      async-http
-      async-websocket
-      rails (>= 6.0, < 9.0)
     logger (1.6.1)
     loofah (2.22.0)
       crass (~> 1.0.2)
@@ -542,7 +546,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kaminari
-  llama_bot_rails (= 0.1.10)
+  llama_bot_rails!
   mocha
   ostruct
   pg (= 1.5.7)

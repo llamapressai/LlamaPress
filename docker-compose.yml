@@ -44,15 +44,23 @@ services:
       - RAILS_ENV=development
       - DATABASE_URL=postgres://user:password@db:5432/llamapress
       - BUNDLE_PATH=/usr/local/bundle
-      # - POSTGRES_HOST=db
-      # - POSTGRES_DB=llamapress
-      # - POSTGRES_USER=user
-      # - POSTGRES_PASSWORD=password
       - REDIS_URL=redis://redis:6379/1
       - BOOTSNAP_CACHE_DIR=/rails/tmp/cache/bootsnap
     depends_on:
       - db
       - redis
+
+  llamabot-backend:
+    image: kody06/llamabot-backend:latest
+    env_file:
+      - .env
+    environment:
+      - DB_URI=postgres://user:password@db:5432/llamapress
+    command: bash -c "python init_pg_checkpointer.py --uri $$DB_URI && uvicorn main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    networks:
+      - llama-network
 
 volumes:
   postgres_data:
