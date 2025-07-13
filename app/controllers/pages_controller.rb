@@ -3,9 +3,14 @@ require 'builder'
 require 'nokogiri'
 
 class PagesController < ApplicationController
+  include LlamaBotRails::ControllerExtensions
+  include LlamaBotRails::AgentAuth
+  
+  # ─── Allow the agent to hit these actions ────────────────────────────────
+  llama_bot_allow :update #, :show, :preview, :restore
+
   before_action :set_page, only: %i[ show edit update destroy restore preview page_redo page_undo download_html ]
-  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt, :update] #temporarily allowing update for local dev testing.
-  before_action :authenticate_user_or_agent!, only: [:update]
+  skip_before_action :authenticate_user!, only: [:home, :resolve_slug, :show, :sitemap_xml, :robots_txt] #temporarily allowing update for local dev testing.
   skip_before_action :verify_authenticity_token #, only: [:restore, :update]
 
   # GET /
@@ -57,11 +62,7 @@ class PagesController < ApplicationController
     Rails.logger.info "Resolving slug for path: #{params[:path]}"
     Rails.logger.info "Current site: #{current_site&.slug}"
   
-    
-    
     @page = current_site&.pages&.friendly&.find(params[:path]) || Page.find_by(slug: params[:path])
-    
-
 
     if @page.nil?
       redirect_to llama_bot_home_path and return
@@ -454,29 +455,5 @@ class PagesController < ApplicationController
       else
         return session.id
       end
-    end
-
-    def authenticate_user_or_agent!
-      # First try to authenticate as a user
-      if user_signed_in?
-        return true
-      end
-      
-      # If user authentication fails, try agent authentication
-      begin
-        authenticate_agent!
-        return true
-      rescue => e
-        # If both fail, use default user authentication which will redirect to sign in
-        authenticate_user!
-      end
-    end
-
-    def authenticate_agent!
-      auth_header = request.headers["Authorization"]
-      token = auth_header&.split("Bearer ")&.last  # Extract token after "Bearer "
-      @session_payload = Rails.application.message_verifier(:llamabot_ws).verify(token)
-    rescue ActiveSupport::MessageVerifier::InvalidSignature
-        head :unauthorized
     end
 end
