@@ -6,9 +6,14 @@ set -e
 
 # 2) Remove any existing OPENAI_API_KEY line so we can re-add the real one
 # macOS/BSD sed:
-sed -i '' '/^OPENAI_API_KEY=/d' .env
-# If you ever run on Linux, use:
-# sed -i '/^OPENAI_API_KEY=/d' .env
+# Cross-platform sed to delete OPENAI_API_KEY line
+if sed --version >/dev/null 2>&1; then
+  # GNU sed (Linux)
+  sed -i '/^OPENAI_API_KEY=/d' .env
+else
+  # BSD sed (macOS)
+  sed -i '' '/^OPENAI_API_KEY=/d' .env
+fi
 
 # 3) If they’ve exported it, grab it now
 if [ -n "$OPENAI_API_KEY" ]; then
@@ -27,3 +32,5 @@ if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
   git submodule sync
   git submodule update --init --recursive
 fi
+
+rails db:migrate
