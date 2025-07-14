@@ -16,7 +16,13 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
-          bundler-cache: true
+          bundler-cache: false
+
+      - name: Install dependencies
+        run: |
+          bundle config set deployment false
+          bundle config set frozen false
+          bundle install
 
       - name: Disable bundler frozen mode
         run: |
@@ -37,7 +43,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
-          bundler-cache: true
+          bundler-cache: false
+
+      - name: Install dependencies
+        run: |
+          bundle config set deployment false
+          bundle config set frozen false
+          bundle install
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
         run: bin/importmap audit
@@ -52,7 +64,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
-          bundler-cache: true
+          bundler-cache: false
+
+      - name: Install dependencies
+        run: |
+          bundle config set deployment false
+          bundle config set frozen false
+          bundle install
 
       - name: Lint code for consistent style
         run: bin/rubocop -f github
@@ -87,7 +105,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
-          bundler-cache: true
+          bundler-cache: false
+
+      - name: Install dependencies
+        run: |
+          bundle config set deployment false
+          bundle config set frozen false
+          bundle install
 
       - name: Run tests
         env:
