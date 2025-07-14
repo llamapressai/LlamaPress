@@ -1,0 +1,43 @@
+name: Reproduce Init Issue
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-init:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: llama_press_development
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+
+      - name: Install Docker & Compose (if needed)
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
+
+      - name: Run bin/init and docker-compose up
+        run: |
+          bash bin/init
+          docker-compose up -d
+
+      - name: Wait for app to boot
+        run: sleep 20
+
+      - name: Curl homepage
+        run: |
+          curl -v --fail http://localhost:3000 || echo "❌ Homepage failed to load"
