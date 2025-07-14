@@ -21,10 +21,15 @@ if [ -n "$OPENAI_API_KEY" ]; then
   echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
 fi
 
-# 4) Otherwise, prompt once
+# 4) Otherwise, prompt once (skip if in CI)
 if ! grep -q '^OPENAI_API_KEY=' .env; then
-  read -p "🔑 Enter your OpenAI API key: " KEY
-  echo "OPENAI_API_KEY=$KEY" >> .env
+  if [ -n "$CI" ]; then
+    echo "Skipping OpenAI API key prompt in CI"
+    echo "OPENAI_API_KEY=demo-placeholder" >> .env
+  else
+    read -p "🔑 Enter your OpenAI API key: " KEY
+    echo "OPENAI_API_KEY=$KEY" >> .env
+  fi
 fi
 
 # 5) Init submodule on fresh clone only
