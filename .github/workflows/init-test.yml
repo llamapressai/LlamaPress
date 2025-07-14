@@ -25,6 +25,9 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v3
 
+      - name: Enable BuildKit
+        run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
       - name: Install Docker & Compose (if needed)
         run: |
           sudo apt-get update
