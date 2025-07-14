@@ -38,4 +38,8 @@ if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
   git submodule update --init --recursive
 fi
 
-rails db:migrate
+# if command -v docker-compose >/dev/null 2>&1; then
+#   docker-compose run --rm web rails db:migrate
+# else
+#   echo "❌ docker-compose not found. Skipping migration."
+# fi
