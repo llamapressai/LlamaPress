@@ -33,8 +33,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install docker-compose -y
 
-      - name: Run bin/init and docker-compose up
+      - name: Run bin/init and docker-compose up with BuildKit
         run: |
+          export DOCKER_BUILDKIT=1
           bash bin/init
           docker-compose up -d
 
