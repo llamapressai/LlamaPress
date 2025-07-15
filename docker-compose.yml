@@ -29,7 +29,7 @@ services:
     tty: true             # <-- attaches terminal output
     env_file:
       - .env
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -b '0.0.0.0'"
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails db:prepare && bundle exec rails s -b '0.0.0.0'"
     platform: linux/amd64       # ← tells Compose “run this container as amd64 under QEMU”
 
     volumes:
