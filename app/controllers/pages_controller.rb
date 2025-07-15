@@ -159,10 +159,9 @@ class PagesController < ApplicationController
 
   # PATCH/PUT /pages/1 or /pages/1.json
   def update
-    # byebug
     message = params[:message].present? ? params[:message] : "User Edit"
     Rails.logger.info "Attempting to update page #{@page.id} with message: #{message}"
-    
+    Rails.logger.info "Current user: #{current_user.inspect}" #TODO: Write test to prove that currnent_user gets set when coming back from agent action via llama_bot_rails gem and llama_bot_allow method call
     respond_to do |format|
       if @page.update(page_params)
         Rails.logger.info "Successfully updated page #{@page.id}"

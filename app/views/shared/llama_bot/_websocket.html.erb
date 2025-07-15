@@ -119,7 +119,7 @@
     const consumer = ActionCable.createConsumer();
     connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
 
-    sessionId = "<%= @chat_channel_session_id %>"; // Assign to global variable
+    sessionId = "<%= @page&.id %>"; // This groups our convo message history by page id automatically using by relying on langgraph's psql checkpointer
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
       chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
