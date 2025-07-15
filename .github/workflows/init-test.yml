@@ -35,9 +35,12 @@ jobs:
 
       - name: Run bin/init and docker-compose up with BuildKit
         run: |
+          # Enable BuildKit + ensure docker-compose delegates build to the Docker CLI
           export DOCKER_BUILDKIT=1
-          bash bin/init
-          docker-compose up -d
+          export COMPOSE_DOCKER_CLI_BUILD=1
+
+          bash bin/init          # builds + runs migrations
+          docker-compose up -d   # now BuildKit is honoured
 
       - name: Wait for app to boot
         run: sleep 20
