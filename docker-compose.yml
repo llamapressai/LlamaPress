@@ -22,9 +22,10 @@ services:
       - redis_data:/data
 
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: kody06/llamapress:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.dev
     stdin_open: true     # <-- enables byebug/irb input
     tty: true             # <-- attaches terminal output
     env_file:

@@ -6,10 +6,10 @@
 
 ## 🚀 Quickstart: 
 
-```
+### ⚡ Super Quick Setup (Prebuilt Image)
+```bash
 git clone https://github.com/llamapressai/LlamaPress
 bash bin/init # 🔑 Paste in your OpenAI API key when prompted!
-docker-compose up
 ```
 
 ** A Modern LLM Powered Playground **
@@ -20,6 +20,7 @@ Welcome to LLamaPress! LLamaPress combines the power of Ruby on Rails and LLMs. 
 
 - [🦙 LlamaPress](#-llamapress)
   - [🚀 Quickstart:](#-quickstart)
+    - [⚡ Super Quick Setup (Prebuilt Image)](#-super-quick-setup-prebuilt-image)
   - [📚 Table of Contents](#-table-of-contents)
 - [Our Vision](#our-vision)
     - [🌱 Origin Story](#-origin-story)

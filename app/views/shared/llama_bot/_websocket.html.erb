@@ -79,12 +79,20 @@
     statusIndicator.classList.add(color);
   }
 
+  // Get chat_message from URL param if present
+  function getQueryParam(name) {
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name);
+  }
+
+
   function handleChatUrlParams() {
     // Check if a chat message exists in the Rails flash
-    
-    // this is not broken 
-    const chatMessage = <%= raw (flash[:chat_message] || "").to_json %>;
-    // this is not broken ^ 
+
+    // Fallback to flash if param is not present
+    const chatMessage =
+      getQueryParam('chat_message') ||
+      <%= raw (flash[:chat_message] || "").to_json %>;
 
     if (chatMessage) {
       // Show chat container if it's hidden

@@ -39,7 +39,11 @@ if [ ! -d ".git/modules/vendor/gems/llama_bot_rails" ]; then
 fi
 
 if command -v docker-compose >/dev/null 2>&1; then
+  docker-compose pull # pulls pre-built layers
   docker-compose run --rm web bundle exec rails db:migrate
+  docker-compose run --rm web bundle exec rails db:seed
 else
   echo "❌ docker-compose not found. Skipping migration."
 fi
+
+docker-compose up -d && sleep 5 && open "http://localhost:3000/pages/1?user_api_token=quickstart_api_token&chat_message=Make%20my%20website%20design%20dark%20mode..."

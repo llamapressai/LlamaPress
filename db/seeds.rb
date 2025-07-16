@@ -28,7 +28,8 @@ user = User.create!(
   last_name: "Kendall",
   organization: organization,
   email: "kody@llamapress.ai",
-  password: "123456"
+  password: "123456",
+  api_token: "quickstart_api_token"
 )
 
 # Create Site
