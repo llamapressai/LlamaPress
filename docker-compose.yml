@@ -22,7 +22,7 @@ services:
       - redis_data:/data
 
   web:
-    image: kody06/llamapress:latest
+    image: kody06/llamapress:0.1.13
     # build:
     #   context: .
     #   dockerfile: Dockerfile.dev

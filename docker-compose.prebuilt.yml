@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    image: kody06/llamapress:latest
+    image: kody06/llamapress:0.1.13
     ports:
       - "3000:3000"
     environment:

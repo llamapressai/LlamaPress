@@ -65,5 +65,7 @@ EXPOSE 3000
 # Default command for development
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"] 
 
-# to test: docker-compose down -v --remove-orphans && docker system prune -a --volumes   
-# to build & push: docker buildx build --file Dockerfile.prebuilt --platform linux/amd64,linux/arm64 --tag kody06/llamapress:latest --push .
+# to test: 
+    #   docker-compose down -v --remove-orphans && docker system prune -a --volumes   
+# to build & push: 
+    #   docker buildx build --file Dockerfile.prebuilt --platform linux/amd64,linux/arm64 --tag kody06/llamapress:latest --push .
