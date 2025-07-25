@@ -1,7 +1,7 @@
 PATH
   remote: vendor/gems/llama_bot_rails
   specs:
-    llama_bot_rails (0.1.11)
+    llama_bot_rails (0.1.13)
       actioncable (>= 6.0, < 9.0)
       async
       async-http
