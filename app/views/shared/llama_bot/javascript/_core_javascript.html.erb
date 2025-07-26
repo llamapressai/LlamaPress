@@ -303,7 +303,7 @@
       timeline.className = "mr-4 flex flex-col items-center";
       
       const dot = document.createElement("div");
-      dot.className = `w-3 h-3 rounded-full ${sender === "bot" ? "bg-blue-500" : "bg-green-500"}`;
+      dot.className = `w-3 h-3 rounded-full ${sender === "ai" ? "bg-blue-500" : "bg-green-500"}`;
       
       const line = document.createElement("div");
       line.className = "w-0.5 h-full bg-gray-300 -mt-2";
@@ -323,7 +323,7 @@
 
       const label = document.createElement("span");
       label.className = "text-xs text-gray-700 font-semibold";
-      label.textContent = sender === "bot" ? "Llama Bot" : "<%=current_user&.email%>";
+      label.textContent = sender === "bot" ? "Leonardo" : "<%=current_user&.email%>";
 
       labelContainer.appendChild(timestamp);
       labelContainer.appendChild(label);
@@ -334,7 +334,7 @@
                 // We need to DRY up this code
                 // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb
       messageDiv.className = `p-2 rounded ${
-        sender === "bot" ? "bg-blue-100" : 
+        sender === "ai" ? "bg-blue-100" : 
         sender === "user" ? "bg-green-100" : 
         sender === "error" ? "bg-red-100" : 
         sender === "system" ? "bg-yellow-100" : 
@@ -443,66 +443,55 @@
     let hasMorePagesOfHistory = true;
 
     /**
-     * Loads the chat history for the current web page and puts it into the modal history drawer.
+     * Loads the chat history for the given webPageId and puts it into the chat window.
      */
-    function loadChatHistory(page = 1) {
+    async function loadChatHistory() {
       let webPageId = "<%=@page&.id%>";
-      if (webPageId && !isLoadingMoreHistory && hasMorePagesOfHistory) {
-        isLoadingMoreHistory = true;
+      currentThreadId = webPageId;
+      const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');
+      chatbotMessagesContainer.innerHTML = '';
+      try {
+        const response = await fetch(`/llama_bot/agent/chat-history/${webPageId}`);
+        const threadState = await response.json();
         
-        fetch(`/pages/${webPageId}/histories.json?page=${page}`)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
+        if (Array.isArray(threadState) && threadState.length > 0) {
+          // Get the messages array from the first state object
+          const messages = threadState[0].messages || [];
+          messages.forEach(message => {
+            if (message) {
+              //have to map the type to "bot" if it's the ai.
+              let is_created_at_saved = message.response_metadata.created_at ? true : false;
+              let createdAt = is_created_at_saved ? message.response_metadata.created_at : null;
+              addMessage(message.content, message.type, false, false, createdAt);
             }
-            return response.json();
-          })
-          .then((data) => {
-            const histories = data.history_items;
-            
-            // Update pagination state
-            currentPageOfHistory = data.meta.current_page;
-            hasMorePagesOfHistory = currentPageOfHistory < data.meta.total_pages;
-            
-            // For first page, reverse to show newest at bottom
-            // For subsequent pages (older messages), maintain order
-            const orderedHistories = page === 1 ? histories.reverse() : histories;
-          
-            orderedHistories.forEach((history) => {
-              if (history.type === "page_history") {
-                addPageHistoryToMessagesArea(history, page !== 1);
-              } else {
-                addMessage(history.content, history.role, null, true, history.created_at); //append to top
-              }
-            });
-
-            if (page === 1) {
-              // Only do these for initial load
-              const chatbotMessagesContainer = document.getElementById('chatbotMessagesContainer');            
-              chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
-              addMessage("What do you want to change?", "bot");
-              document.dispatchEvent(new CustomEvent('llamaChatHistoryLoaded'));
-            }
-          })
-          .catch(error => {
-            console.error('Error loading chat history:', error);
-          })
-          .finally(() => {
-            isLoadingMoreHistory = false;
           });
+        }
+        // Update active thread in sidebar if present
+        document.querySelectorAll('.thread-item').forEach(item => {
+          item.classList.remove('active');
+          if (item.dataset.threadId === webPageId) {
+            item.classList.add('active');
+          }
+        });
+      } catch (error) {
+
+        console.error('Error loading chat history:', error);
+        addMessage('Error loading chat history', 'error');
       }
     }
 
     // Add scroll event listener to load more message history when user scrolls near the top
-    document.getElementById('chatbotMessagesContainer').addEventListener('scroll', function(e) {
-      const element = e.target;
+    //document.getElementById('chatbotMessagesContainer').addEventListener('scroll', function(e) {
+      //const element = e.target;
+
+      //loadChatHistory(); //load chat history just once, not on every top scroll event. (only helpful for paginated history.)
       // Load more when user scrolls near the top (for older messages)
-      if (element.scrollTop <= element.clientHeight * 0.05) { // when user is at least 5% from top, load more history
-        if (!isLoadingMoreHistory && hasMorePagesOfHistory) {
-          loadChatHistory(currentPageOfHistory + 1);
-        }
-      }
-    });
+      //if (element.scrollTop <= element.clientHeight * 0.05) { // when user is at least 5% from top, load more history
+        //if (!isLoadingMoreHistory && hasMorePagesOfHistory) {
+          //loadChatHistory();
+        //}
+      //}
+    //});
 
     /**
      * Creates a history in the chat window so user can see their page changes & restore if needed
@@ -700,9 +689,7 @@
       return summary;
     }
 
-
-
-    // Initial bot message
+    // Initial bot message & page history
     loadChatHistory();
 
     const textarea = document.getElementById('userInput');
@@ -1172,9 +1159,6 @@
   function toggleDebugContainer() {
     const debugContainer = document.getElementById('debugContainer');
     const relevantErrorsList = document.getElementById('relevantErrorsList');
-    //debugger;
-    //debugContainer.classList.toggle('hidden');
-    //relevantErrorsList.classList.toggle('hidden');
 
     if (debugContainer.classList.contains('hidden')) {
         debugContainer.classList.remove('hidden');
