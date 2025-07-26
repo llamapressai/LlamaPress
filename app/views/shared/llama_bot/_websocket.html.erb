@@ -128,6 +128,10 @@
     connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
 
     sessionId = "<%= @page&.id %>"; // This groups our convo message history by page id automatically using by relying on langgraph's psql checkpointer
+
+    let htmlFragmentBuffer = ''; // to save when HTML doc is getting streamed back to us.
+    let htmlChunksStartedStreaming = false;
+    let htmlChunksEndedStreaming = false;
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
       chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
@@ -198,7 +202,7 @@
                   parsedData.content = "🧠: " + titleized_tool_name + " called with arguments: " + parsedData.additional_kwargs["tool_calls"][0]["function"]["arguments"]
                 }
 
-                const messageElement = addMessage(parsedData.content, "bot");
+                const messageElement = addMessage(parsedData.content, "ai");
                 
                 // Store trace info if available
                 if (parsedData.langsmith_trace) {
@@ -243,6 +247,41 @@
                 break;
               case 'error':
                 addMessage(parsedData.content, "error");
+                break;
+              case 'AIMessageChunk':
+                if (parsedData.content == '' || parsedData.content == null) { // if the parsedData.content is empty or null, it means we're likely getting a tool call chunk back.
+                  let tool_call_data = parsedData.base_message.tool_call_chunks[0].args; //get tool call data.
+                  htmlFragmentBuffer += tool_call_data;
+
+                  //search for <!doctype in the htmlFragmentBuffer
+                  let htmlTagIndex = htmlFragmentBuffer.indexOf('<html');
+                  if (htmlTagIndex != -1) {
+                    htmlChunksStartedStreaming = true;
+                    htmlFragmentBuffer = htmlFragmentBuffer.substring(htmlTagIndex); // remove everything before the <!doctype
+                    //handleFragment(htmlFragmentBuffer);
+                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
+                    //htmlFragmentBuffer = '';
+                  }
+
+                  let endingHtmlTagIndex = htmlFragmentBuffer.indexOf('</html>');
+                  if (endingHtmlTagIndex != -1) {
+                    htmlChunksEndedStreaming = true;
+                    htmlFragmentBuffer = htmlFragmentBuffer.substring(0, endingHtmlTagIndex + 7); // remove everything after the </html>
+                    //handleFragment(htmlFragmentBuffer);
+                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
+
+                    //htmlFragmentBuffer = '';
+                  }
+
+                  if (htmlChunksStartedStreaming && !htmlChunksEndedStreaming) {
+                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer);
+                    handleFragment(htmlFragmentBuffer);
+                    htmlFragmentBuffer = '';
+                  }
+                }
+                else {
+                  addMessage(parsedData.content, "AIMessageChunk");
+                }
                 break;
               default:
                 console.warn("Unknown message type:", parsedData.type);
@@ -366,6 +405,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
     }
 
     function addMessage(text, sender) {
+      if (sender != "AIMessageChunk") { //AIMessageChunk is a special case, it's not a message, it's a chunk of a message.
       const messageDiv = document.createElement("div");
       messageDiv.className = `p-2 rounded ${
         sender === "bot" ? "bg-blue-100" : 
@@ -378,9 +418,23 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       
       const formattedContent = formatMessage(text, sender);
       messageDiv.innerHTML = formattedContent;
-      chatbotMessagesContainer.appendChild(messageDiv);
-      chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
-      return messageDiv;
+        chatbotMessagesContainer.appendChild(messageDiv);
+        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
+        return messageDiv;
+      }
+      else {
+        //create a message div for the chunk, if it doesn't exist.
+        const messageDiv = document.getElementById('chatbotMessagesContainer'); // TODO: How can I have a persistent message Div...
+        //if (!messageDiv) {
+        //  messageDiv = document.createElement('div');
+        //  messageDiv.id = 'messageDiv';
+        //  chatbotMessagesContainer.appendChild(messageDiv);
+        //  messageDiv.innerHtml += text;
+        //}
+        //add the chunk to the message div
+        messageDiv.innerHTML += text;
+        return messageDiv;
+      }
     }
 
     /**
@@ -592,6 +646,8 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       // Parse the markdown
       if (sender == "user") {
         return marked.parse(escapeHtml(text));
+      } else if (sender == "AIMessageChunk") {
+        return text;
       } else {
         return marked.parse(text);
       }
