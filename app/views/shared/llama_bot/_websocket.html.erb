@@ -140,8 +140,8 @@
          * Receives message responses from LlamaBot Backend.
          */
         received(data) {
-          console.log("Received response from LlamaBot Backend:", data);
-          console.log("Data type:", typeof data);
+          //console.log("Received response from LlamaBot Backend:", data);
+          //console.log("Data type:", typeof data);
 
           try {
             // Parse the incoming data - simplify the parsing chain
@@ -152,7 +152,7 @@
               parsed = data;
             }
             
-            console.log("Parsed data:", parsed);
+            //console.log("Parsed data:", parsed);
 
             // Handle pong messages that might be objects
             if (parsed.message && typeof parsed.message === 'object' && (parsed.message.type === "external_ws_pong" || parsed.message.type === "pong")) {
@@ -167,7 +167,7 @@
               parsedData = parsed.message;
             }
             
-            console.log("Parsed message data:", parsedData);
+            //console.log("Parsed message data:", parsedData);
 
             // This will run regardless of success or failure
             if (parsedData.type !== 'think_message') {
@@ -243,7 +243,7 @@
               case 'external_ws_pong':
               case 'pong': // New gem format
                 lastPongTime = Date.now();
-                console.log("Received pong response from LlamaBot Backend, which means we're connected");
+                //console.log("Received pong response from LlamaBot Backend, which means we're connected");
                 break;
               case 'error':
                 addMessage(parsedData.content, "error");
@@ -259,7 +259,7 @@
                     htmlChunksStartedStreaming = true;
                     htmlFragmentBuffer = htmlFragmentBuffer.substring(htmlTagIndex); // remove everything before the <!doctype
                     //handleFragment(htmlFragmentBuffer);
-                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
+                    //console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
                     //htmlFragmentBuffer = '';
                   }
 
@@ -268,15 +268,19 @@
                     htmlChunksEndedStreaming = true;
                     htmlFragmentBuffer = htmlFragmentBuffer.substring(0, endingHtmlTagIndex + 7); // remove everything after the </html>
                     //handleFragment(htmlFragmentBuffer);
-                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
+                    //console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
 
                     //htmlFragmentBuffer = '';
                   }
 
                   if (htmlChunksStartedStreaming && !htmlChunksEndedStreaming) {
                     console.log("htmlFragmentBuffer:", htmlFragmentBuffer);
-                    handleFragment(htmlFragmentBuffer);
-                    htmlFragmentBuffer = '';
+                    //convert escaped newlines to actual newlines and unescape quotes
+                    console.log("Before cleaning:", JSON.stringify(htmlFragmentBuffer));
+                    let cleanedFragment = htmlFragmentBuffer.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+                    console.log("After cleaning:", JSON.stringify(cleanedFragment));
+                    handleFragment(cleanedFragment);
+                    htmlFragmentBuffer = ''; // clear buffer for next chunk.
                   }
                 }
                 else {
@@ -552,6 +556,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       if (typeof text === 'string') {
         // Append the new fragment to our buffer
         modal.htmlBuffer += text;
+        console.log("modal.htmlBuffer:", modal.htmlBuffer);
         
         try {
           const parser = new DOMParser();
