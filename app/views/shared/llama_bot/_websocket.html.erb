@@ -275,9 +275,13 @@
 
                   if (htmlChunksStartedStreaming && !htmlChunksEndedStreaming) {
                     console.log("htmlFragmentBuffer:", htmlFragmentBuffer);
-                    //convert escaped newlines to actual newlines and unescape quotes
+                    //convert literal \n characters to actual newlines and unescape quotes
                     console.log("Before cleaning:", JSON.stringify(htmlFragmentBuffer));
-                    let cleanedFragment = htmlFragmentBuffer.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+                    // Handle both \\n (double escaped) and literal \n in the string
+                    let cleanedFragment = htmlFragmentBuffer
+                      .replace(/\\n/g, '\n')  // Convert \n to actual newlines
+                      .replace(/\\"/g, '"')   // Convert \" to actual quotes
+                      .replace(/\\t/g, '\t'); // Convert \t to actual tabs
                     console.log("After cleaning:", JSON.stringify(cleanedFragment));
                     handleFragment(cleanedFragment);
                     htmlFragmentBuffer = ''; // clear buffer for next chunk.
@@ -559,12 +563,19 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         console.log("modal.htmlBuffer:", modal.htmlBuffer);
         
         try {
+          // Clean the HTML buffer before writing to iframe
+          const cleanedHTML = modal.htmlBuffer
+            .replace(/\\n/g, '\n')    // Convert \n to actual newlines
+            .replace(/\\"/g, '"')     // Convert \" to actual quotes
+            .replace(/\\t/g, '\t')    // Convert \t to actual tabs
+            .replace(/\\r/g, '\r');   // Convert \r to actual carriage returns
+          
           const parser = new DOMParser();
-          const doc = parser.parseFromString(modal.htmlBuffer, 'text/html');
+          const doc = parser.parseFromString(cleanedHTML, 'text/html');
           
           const iframeDoc = iframe.contentDocument;
           iframeDoc.open();
-          iframeDoc.write(modal.htmlBuffer);
+          iframeDoc.write(cleanedHTML);
           iframeDoc.close();
 
           // Improved iframe height and scroll handling
