@@ -130,6 +130,7 @@
     sessionId = "<%= @page&.id %>"; // This groups our convo message history by page id automatically using by relying on langgraph's psql checkpointer
 
     let htmlFragmentBuffer = ''; // to save when HTML doc is getting streamed back to us.
+    let fullMessageBuffer = ''; // Save this entirely for accurate parsing.
     let htmlChunksStartedStreaming = false;
     let htmlChunksEndedStreaming = false;
     
@@ -201,6 +202,9 @@
 
                   parsedData.content = "🧠: " + titleized_tool_name + " called with arguments: " + parsedData.additional_kwargs["tool_calls"][0]["function"]["arguments"]
                 }
+                else { //return early -- since we're listening to AIMessageChunks, we don't want to add this ai message to the chat if it's not a tool call.
+                  break;
+                }
 
                 const messageElement = addMessage(parsedData.content, "ai");
                 
@@ -250,8 +254,14 @@
                 break;
               case 'AIMessageChunk':
                 if (parsedData.content == '' || parsedData.content == null) { // if the parsedData.content is empty or null, it means we're likely getting a tool call chunk back.
+                  //tool call.?
+                  if (parsedData.base_message.tool_call_chunks == undefined) {
+                    break;
+                  }
+
                   let tool_call_data = parsedData.base_message.tool_call_chunks[0].args; //get tool call data.
                   htmlFragmentBuffer += tool_call_data;
+                  fullMessageBuffer += tool_call_data;
 
                   //search for <!doctype in the htmlFragmentBuffer
                   let htmlTagIndex = htmlFragmentBuffer.indexOf('<html');
@@ -263,12 +273,13 @@
                     //htmlFragmentBuffer = '';
                   }
 
-                  let endingHtmlTagIndex = htmlFragmentBuffer.indexOf('</html>');
+                  let endingHtmlTagIndex = fullMessageBuffer.indexOf('</html>');
                   if (endingHtmlTagIndex != -1) {
                     htmlChunksEndedStreaming = true;
-                    htmlFragmentBuffer = htmlFragmentBuffer.substring(0, endingHtmlTagIndex + 7); // remove everything after the </html>
-                    //handleFragment(htmlFragmentBuffer);
-                    //console.log("htmlFragmentBuffer:", htmlFragmentBuffer); 
+                    window.location.reload();
+                    //fullMessageBuffer = fullMessageBuffer.substring(0, endingHtmlTagIndex + 7); // remove everything after the </html>
+                    //handleFragment(fullMessageBuffer);
+                    //console.log("fullMessageBuffer:", fullMessageBuffer); 
 
                     //htmlFragmentBuffer = '';
                   }
@@ -297,7 +308,7 @@
             }
           } catch (error) {
             console.error("Error parsing or processing received data:", error);
-            addMessage(`Error: ${error.message}`, "bot");
+            addMessage(`Error: ${error.message}`, "error");
                         // This will run regardless of success or failure
             isLoading = false;
 
