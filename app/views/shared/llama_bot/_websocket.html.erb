@@ -190,6 +190,9 @@
             switch (parsedData.type) {
               case 'ai_message':
               case 'ai': // New gem format
+                // Finish any streaming message when we get a complete AI message
+                finishStreamingMessage();
+                
                 //TODO: This is a hacky way to format our message to add a brain for tool-calling. We need to refactor this.
                 // We need to DRY up this code somehow by making the formatting be handled in a single place. 
                 // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb, chat_channel.rb, and pages_controller.rb.
@@ -226,12 +229,15 @@
                 }
                 break;
               case 'tool': // New gem format for tool messages
+                finishStreamingMessage();
                 addMessage(parsedData.content, "tool");
                 break;
               case 'system_message':
+                finishStreamingMessage();
                 addMessage(parsedData.content, "system");
                 break;
               case 'think_message':
+                finishStreamingMessage();
                 addMessage(parsedData.content, "system");
                 break;
               case 'fragment_from_html_stream_message':
@@ -303,6 +309,8 @@
                 }
                 break;
               default:
+                // Finish any streaming message when we get a different message type
+                finishStreamingMessage();
                 console.warn("Unknown message type:", parsedData.type);
                 addMessage(`Unknown message type: ${parsedData.type}`, "system");
             }
@@ -423,38 +431,92 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       chatbotContainer.classList.toggle("hidden", !isOpen);
     }
 
+    // Global variable to track the current streaming message
+    let currentStreamingMessage = null;
+    let streamingMessageBuffer = '';
+
     function addMessage(text, sender) {
       if (sender != "AIMessageChunk") { //AIMessageChunk is a special case, it's not a message, it's a chunk of a message.
-      const messageDiv = document.createElement("div");
-      messageDiv.className = `p-2 rounded ${
-        sender === "bot" ? "bg-blue-100" : 
-        sender === "user" ? "bg-green-100" : 
-        sender === "error" ? "bg-red-100" : 
-        sender === "system" ? "bg-gray-100 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
-        sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
-        "bg-gray-100"
-      }`;
-      
-      const formattedContent = formatMessage(text, sender);
-      messageDiv.innerHTML = formattedContent;
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `p-2 rounded ${
+          sender === "bot" ? "bg-blue-100" : 
+          sender === "user" ? "bg-green-100" : 
+          sender === "error" ? "bg-red-100" : 
+          sender === "system" ? "bg-gray-100 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+          sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+          "bg-gray-100"
+        }`;
+        
+        const formattedContent = formatMessage(text, sender);
+        messageDiv.innerHTML = formattedContent;
         chatbotMessagesContainer.appendChild(messageDiv);
         chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
         return messageDiv;
       }
       else {
-        //create a message div for the chunk, if it doesn't exist.
-        const messageDiv = document.getElementById('chatbotMessagesContainer'); // TODO: How can I have a persistent message Div...
-        //if (!messageDiv) {
-        //  messageDiv = document.createElement('div');
-        //  messageDiv.id = 'messageDiv';
-        //  chatbotMessagesContainer.appendChild(messageDiv);
-        //  messageDiv.innerHtml += text;
-        //}
-        //add the chunk to the message div
-        messageDiv.innerHTML += text;
-        return messageDiv;
+        // Handle streaming AIMessageChunk with markdown rendering
+        // If this is the first chunk, create a new message bubble
+        if (!currentStreamingMessage) {
+          currentStreamingMessage = document.createElement("div");
+          currentStreamingMessage.className = "p-3 rounded-lg bg-gray-50 border border-gray-200 shadow-sm";
+          currentStreamingMessage.innerHTML = `
+            <div class="streaming-content"></div>
+            <div class="typing-indicator inline-block w-1 h-4 bg-gray-400 animate-pulse ml-1"></div>
+          `;
+          chatbotMessagesContainer.appendChild(currentStreamingMessage);
+          streamingMessageBuffer = '';
+        }
+        
+        // Add the chunk to our buffer
+        streamingMessageBuffer += text;
+        
+        // Update the message content using the existing formatMessage logic
+        const contentDiv = currentStreamingMessage.querySelector('.streaming-content');
+        const formattedContent = formatMessage(streamingMessageBuffer, "ai");
+        contentDiv.innerHTML = formattedContent;
+        
+        // Auto-scroll to keep the message in view
+        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
+        return currentStreamingMessage;
       }
     }
+
+    function finishStreamingMessage() {
+      if (currentStreamingMessage) {
+        // Remove typing indicator
+        const typingIndicator = currentStreamingMessage.querySelector('.typing-indicator');
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+        
+        // Ensure Tailwind styles are applied to the final content
+        ensureTailwindStyles();
+        
+        currentStreamingMessage = null;
+        streamingMessageBuffer = '';
+      }
+    }
+
+
+
+    // Force Tailwind to process dynamic content
+    function ensureTailwindStyles() {
+      // Method 1: Refresh Tailwind if available
+      if (window.tailwind && window.tailwind.refresh) {
+        window.tailwind.refresh();
+      }
+      
+      // Method 2: Trigger a style recalculation
+      const chatContainer = document.getElementById('chatbotMessagesContainer');
+      if (chatContainer) {
+        // Force browser to recalculate styles
+        chatContainer.style.display = 'none';
+        chatContainer.offsetHeight; // Trigger reflow
+        chatContainer.style.display = '';
+      }
+    }
+
+         
 
     /**
     * This function handles the fragment from the html stream and constructs the modal that displays it to the user.
@@ -667,15 +729,33 @@ console.log("ChatChannel created:", chatChannel); // Add this line
           textarea.style.height = '24px';
         }
     }
-
-
+    /**
+     * WARNING: This is duplicated code in _websocket.html.erb. This is really ugly. Formats the message to display code blocks properly
+     * This was used to format code blocks so that the user could see formatted code when the chatbot responds.
+     */
     function formatMessage(text, sender) {
+      // Custom renderer to handle code blocks
+      const renderer = new marked.Renderer();
+      renderer.code = (code) => {
+        return code;
+      };
+
+      // Configure marked options
+      marked.setOptions({
+        renderer: renderer,
+        highlight: (code, lang) => {
+          const language = Prism.languages[lang] ? lang : 'markup';
+          return Prism.highlight(code, Prism.languages[language], language);
+        },
+        breaks: true,
+        gfm: true
+      });
+
       // Parse the markdown
       if (sender == "user") {
         return marked.parse(escapeHtml(text));
-      } else if (sender == "AIMessageChunk") {
-        return text;
-      } else {
+      }
+      else {
         return marked.parse(text);
       }
     }
