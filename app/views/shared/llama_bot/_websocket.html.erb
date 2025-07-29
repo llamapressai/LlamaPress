@@ -282,7 +282,11 @@
                   let endingHtmlTagIndex = fullMessageBuffer.indexOf('</html>');
                   if (endingHtmlTagIndex != -1) {
                     htmlChunksEndedStreaming = true;
-                    window.location.reload();
+                    let finishedHtml = document.getElementById('fragmentModal').htmlBuffer;
+                    document.getElementById('fragmentModal').remove();
+                    // addMessage("Generated Page: " + `\`\`\`html ${finishedHtml} \`\`\``, "system");
+                    // debugger;
+                    // window.location.reload();
                     //fullMessageBuffer = fullMessageBuffer.substring(0, endingHtmlTagIndex + 7); // remove everything after the </html>
                     //handleFragment(fullMessageBuffer);
                     //console.log("fullMessageBuffer:", fullMessageBuffer); 
