@@ -523,6 +523,27 @@ console.log("ChatChannel created:", chatChannel); // Add this line
          
 
     /**
+    * Sanitizes HTML content for safe preview in iframe during streaming.
+    * Removes or modifies potentially problematic JavaScript that might execute before DOM is ready.
+    */
+    function sanitizeHtmlForPreview(html) {
+      // Replace script tags with a safe placeholder that won't execute
+      html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '<!-- Script removed for preview -->');
+      
+      // Remove inline event handlers that might cause issues
+      html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
+      
+      // Wrap any remaining inline scripts in try-catch
+      html = html.replace(/(<script[^>]*>)([\s\S]*?)(<\/script>)/gi, function(match, openTag, content, closeTag) {
+        return openTag + 
+          'try { ' + content + ' } catch(e) { console.log("Preview script error (safe to ignore):", e); }' + 
+          closeTag;
+      });
+      
+      return html;
+    }
+
+    /**
     * This function handles the fragment from the html stream and constructs the modal that displays it to the user.
     */
     function handleFragment(text) {
@@ -641,60 +662,78 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         
         try {
           // Clean the HTML buffer before writing to iframe
-          const cleanedHTML = modal.htmlBuffer
+          let cleanedHTML = modal.htmlBuffer
             .replace(/\\n/g, '\n')    // Convert \n to actual newlines
             .replace(/\\"/g, '"')     // Convert \" to actual quotes
             .replace(/\\t/g, '\t')    // Convert \t to actual tabs
             .replace(/\\r/g, '\r');   // Convert \r to actual carriage returns
           
+          // Sanitize JavaScript to prevent execution errors during streaming
+          // This removes potentially problematic scripts that might execute before DOM is ready
+          cleanedHTML = sanitizeHtmlForPreview(cleanedHTML);
+          
           const parser = new DOMParser();
           const doc = parser.parseFromString(cleanedHTML, 'text/html');
           
           const iframeDoc = iframe.contentDocument;
-          iframeDoc.open();
-          iframeDoc.write(cleanedHTML);
-          iframeDoc.close();
+          if (iframeDoc) {
+            iframeDoc.open();
+            iframeDoc.write(cleanedHTML);
+            iframeDoc.close();
+          } else {
+            console.warn('Iframe document not accessible');
+          }
 
-          // Improved iframe height and scroll handling
+          // Improved iframe height and scroll handling with error protection
           let scrollTimeout;
           clearTimeout(scrollTimeout);
           scrollTimeout = setTimeout(() => {
-            // Get the iframe container
-            const iframeContainer = iframe.parentElement;
-            
-            // Calculate the maximum available height (80% of viewport height as per the container style)
-            const maxHeight = window.innerHeight * 0.8;
-            
-            // Get the content height
-            const contentHeight = Math.max(
-              iframeDoc.documentElement.scrollHeight,
-              iframeDoc.documentElement.offsetHeight,
-              iframeDoc.documentElement.clientHeight,
-              iframeDoc.body.scrollHeight,
-              iframeDoc.body.offsetHeight
-            );
+            try {
+              // Get the iframe container
+              const iframeContainer = iframe.parentElement;
+              
+              // Calculate the maximum available height (80% of viewport height as per the container style)
+              const maxHeight = window.innerHeight * 0.8;
+              
+              // Safely get the content height with null checks
+              let contentHeight = 300; // Default fallback height
+              if (iframeDoc && iframeDoc.documentElement && iframeDoc.body) {
+                contentHeight = Math.max(
+                  iframeDoc.documentElement.scrollHeight || 0,
+                  iframeDoc.documentElement.offsetHeight || 0,
+                  iframeDoc.documentElement.clientHeight || 0,
+                  iframeDoc.body.scrollHeight || 0,
+                  iframeDoc.body.offsetHeight || 0
+                );
+              }
 
-            // Set iframe height to either content height or max height, whichever is smaller
-            iframe.style.height = Math.min(contentHeight, maxHeight) + 'px';
-            
-            // Enable scrolling if content is taller than available space
-            iframe.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
-            
-            // Ensure the iframe container doesn't exceed viewport
-            iframeContainer.style.maxHeight = '80vh';
-            iframeContainer.style.overflowY = 'hidden';
-            
-            // Scroll to bottom
-            if (iframeDoc.documentElement) {
-              iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
-            }
-            if (iframeDoc.body) {
-              iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
+              // Set iframe height to either content height or max height, whichever is smaller
+              iframe.style.height = Math.min(contentHeight, maxHeight) + 'px';
+              
+              // Enable scrolling if content is taller than available space
+              iframe.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
+              
+              // Ensure the iframe container doesn't exceed viewport
+              if (iframeContainer) {
+                iframeContainer.style.maxHeight = '80vh';
+                iframeContainer.style.overflowY = 'hidden';
+              }
+              
+              // Safely scroll to bottom
+              if (iframeDoc && iframeDoc.documentElement) {
+                iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
+              }
+              if (iframeDoc && iframeDoc.body) {
+                iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
+              }
+            } catch (scrollError) {
+              console.log('Error adjusting iframe height/scroll (safe to ignore):', scrollError);
             }
           }, 600);
           
         } catch (e) {
-          console.log('Still building HTML document:', e);
+          console.log('Error processing HTML fragment (this is normal during streaming):', e);
+          // Don't throw the error, just log it as this is expected during streaming
         }
       } else {
         console.error('Unexpected content type:', text);
