@@ -613,13 +613,50 @@ console.log("ChatChannel created:", chatChannel); // Add this line
           sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
           "bg-gray-100"
         }`;
-        
-        const formattedContent = formatMessage(text, sender);
-        messageDiv.innerHTML = formattedContent;
-        chatbotMessagesContainer.appendChild(messageDiv);
-        chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
-        return messageDiv;
+
+        // The below code is important for visual display (dependent on the tool name and arguments.)
+        // Tool calls are where we have freedom for interesting UI/UX visualization beyond just the chat messages.
+        // Example: write_html_page tool call will show the full html page in a modal.
+        // Example 2: ChatGPT uses tool calls like Canvas to display their generated document/code.
+        // Example 3: Rails Console Agent formats the terminal input commands and makes it look like a terminal.
+        if (sender === "tool") {
+          let formattedContent = formatMessage(text, sender);
+          try {
+            let json_payload = JSON.parse(text)
+            let tool_name = json_payload.tool_name
+            let tool_args = json_payload.tool_args
+            
+            if (tool_name == "write_html_page") {
+              let full_html_page = tool_args['full_html_document']
+              //TODO: set a minimal iFrame wrapper around the html page before inserting it.
+              formattedContent = `
+                <iframe src="data:text/html;charset=utf-8,${encodeURIComponent(full_html_page)}" width="100%" height="100%"></iframe>
+                <div class="mt-4 text-center">
+                  <button onclick="window.open(window.location.href + '/preview', '_blank'); window.location.reload();" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    View Changes
+                  </button>
+                </div>
+              `;
+            }
+
+            else {
+              formattedContent = formatMessage(text, sender);
+            }
+          } catch (error) {
+            console.error("Error parsing tool payload:", error);
+            formattedContent = formatMessage(text, sender);
+          }
+
+          messageDiv.innerHTML = formattedContent;
+          chatbotMessagesContainer.appendChild(messageDiv);
+          chatbotMessagesContainer.scrollTop = chatbotMessagesContainer.scrollHeight;
+          return messageDiv;
+        }
       }
+
       else {
         // Handle streaming AIMessageChunk with markdown rendering
         // If this is the first chunk, create a new message bubble

@@ -342,9 +342,35 @@
         "bg-gray-100"
       }`;
       
-      const formattedContent = formatMessage(text, sender);
+      let formattedContent = formatMessage(text, sender);
+      // The below code is important for visual display (dependent on the tool name and arguments.)
+      // Tool calls are where we have freedom for interesting UI/UX visualization beyond just the chat messages.
+      // Example: write_html_page tool call will show the full html page in a modal.
+      // Example 2: ChatGPT uses tool calls like Canvas to display their generated document/code.
+      // Example 3: Rails Console Agent formats the terminal input commands and makes it look like a terminal.
+      if (sender === "tool") {
+        formattedContent = formatMessage(text, sender);
+        try {
+          let json_payload = JSON.parse(text)
+          let tool_name = json_payload.tool_name
+          let tool_args = json_payload.tool_args
+          
+          if (tool_name == "write_html_page") {
+            let full_html_page = tool_args['full_html_document']
+            //TODO: set a minimal iFrame wrapper around the html page before inserting it.
+            formattedContent = `<iframe src="data:text/html;charset=utf-8,${encodeURIComponent(full_html_page)}" width="100%" height="100%"></iframe>`;
+          }
+
+          else {
+            formattedContent = formatMessage(text, sender);
+          }
+        } catch (error) {
+          console.error("Error parsing tool payload:", error);
+          formattedContent = formatMessage(text, sender);
+        }
+      }
+    
       messageDiv.innerHTML = formattedContent;
-      
       contentWrapper.appendChild(messageDiv);
       wrapper.appendChild(timeline);
       wrapper.appendChild(contentWrapper);
