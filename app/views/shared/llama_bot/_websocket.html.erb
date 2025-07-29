@@ -983,6 +983,15 @@ console.log("ChatChannel created:", chatChannel); // Add this line
     */
     function handleFragment(text) {
       let modal = document.getElementById('fragmentModal');
+      
+      // Declare timers outside the modal creation block so they persist across calls
+      if (!window.fragmentTimers) {
+        window.fragmentTimers = {
+          flushTimer: null,
+          scrollTimeout: null
+        };
+      }
+      
       if (!modal) {
         // Create modal container with basic styles
         modal = document.createElement('div');
@@ -1243,8 +1252,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       modal.style.display = 'flex';
       const iframe = document.getElementById('fragmentIframe');
       const REFRESH_MS      = 2000;          // adjust to taste (100 ms ≈ 10 fps)
-      let flushTimer = null; // holds setTimeout id
-      let scrollTimeout = null; // holds scroll timeout id
+
       modal.htmlBuffer = modal.htmlBuffer || '';
 
       function streamToken(text) {
@@ -1252,15 +1260,13 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         addToTerminal(text);               // your existing terminal output
 
         // schedule a single flush if none is queued
-        if (!flushTimer) {
-          flushTimer = setTimeout(flushIframe, REFRESH_MS);
+        if (!window.fragmentTimers.flushTimer) {
+          window.fragmentTimers.flushTimer = setTimeout(flushIframe, REFRESH_MS);
         }
       }
 
 
       function flushIframe() {
-        flushTimer = null; // allow next schedule
-
         try {
           const cleanedHTML = sanitizeHtmlForPreview(
             modal.htmlBuffer
@@ -1277,8 +1283,8 @@ console.log("ChatChannel created:", chatChannel); // Add this line
             iframeDoc.close();
 
             // Improved iframe height and scroll handling with error protection
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
+            clearTimeout(window.fragmentTimers.scrollTimeout);
+            window.fragmentTimers.scrollTimeout = setTimeout(() => {
               try {
                 // Get the iframe container
                 const iframeContainer = iframe.parentElement;
@@ -1328,6 +1334,9 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         } catch (e) {
           console.log('Error processing HTML fragment (this is normal during streaming):', e);
           // Don't throw the error, just log it as this is expected during streaming
+        } finally {
+          // Clear the timer at the very end to allow next schedule
+          window.fragmentTimers.flushTimer = null;
         }
       }
       
