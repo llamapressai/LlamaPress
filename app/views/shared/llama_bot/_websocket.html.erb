@@ -137,6 +137,8 @@
     let currentCodeExplanationFromLLM = '';
     let codeExplanationStartedStreaming = false;
     let codeExplanationEndedStreaming = false;
+    let lastProcessedExplanationIndex = -1; // Track the last explanation we processed
+    let completedExplanations = []; // Store all completed explanations
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
       chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
@@ -200,7 +202,7 @@
                 //TODO: This is a hacky way to format our message to add a brain for tool-calling. We need to refactor this.
                 // We need to DRY up this code somehow by making the formatting be handled in a single place. 
                 // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb, chat_channel.rb, and pages_controller.rb.
-                if (!parsedData.content && "tool_calls" in parsedData.additional_kwargs){
+                if (!parsedData.content && parsedData.additional_kwargs && "tool_calls" in parsedData.additional_kwargs){
                   //sorry for using this quick & dirty way to titleize the tool name.
                   let titleized_tool_name = parsedData.additional_kwargs["tool_calls"][0]["function"]["name"].replace( //https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
                       /\w\S*/g,
@@ -274,23 +276,160 @@
                   htmlFragmentBuffer += tool_call_data;
                   fullMessageBuffer += tool_call_data;
                   
-                  if (codeExplanationStartedStreaming) {
-                    currentCodeExplanationFromLLM += tool_call_data;
-                    let codeExplanationTagIndex = currentCodeExplanationFromLLM.indexOf('</code_explanation>');
-                    if (codeExplanationTagIndex != -1) {
-                      codeExplanationEndedStreaming = true;
-                      currentCodeExplanationFromLLM = currentCodeExplanationFromLLM.substring(0, codeExplanationTagIndex);
-                      codeExplanationStartedStreaming = false;
-                      console.log("Code explanation from LLM:", currentCodeExplanationFromLLM);
-                    }
-                  }
+                    if (codeExplanationStartedStreaming) {
+                     console.log("Processing chunk during explanation streaming:", JSON.stringify(tool_call_data));
+                     
+                     // Handle case where opening tag might be in this chunk
+                     let chunkToProcess = tool_call_data;
+                     let openingTagIndex = chunkToProcess.indexOf('<code_explanation>');
+                     if (openingTagIndex !== -1) {
+                       // Opening tag is in this chunk, skip everything before and including the tag
+                       chunkToProcess = chunkToProcess.substring(openingTagIndex + 18);
+                       console.log("Found opening tag in chunk, processing content after tag:", JSON.stringify(chunkToProcess));
+                     }
+                     
+                     // Check for multiple possible closing tag formats (escaped and unescaped)
+                     let closingTagIndex = -1;
+                     let closingTagLength = 0;
+                     
+                     // Try different closing tag formats
+                     const closingTags = ['</code_explanation>', '<\\/code_explanation>', '&lt;/code_explanation&gt;'];
+                     for (let tag of closingTags) {
+                       let index = chunkToProcess.indexOf(tag);
+                       if (index !== -1) {
+                         closingTagIndex = index;
+                         closingTagLength = tag.length;
+                         console.log(`Found closing tag "${tag}" at index ${index} in processed chunk`);
+                         break;
+                       }
+                     }
+                     
+                     console.log("Closing tag index in processed chunk:", closingTagIndex);
+                     
+                     if (closingTagIndex != -1) {
+                       // Found closing tag in this chunk - add only the part before it
+                       let finalPart = chunkToProcess.substring(0, closingTagIndex);
+                       console.log("Final part before closing tag:", JSON.stringify(finalPart));
+                       currentCodeExplanationFromLLM += finalPart;
+                       
+                       // Mark as complete
+                       codeExplanationEndedStreaming = true;
+                       codeExplanationStartedStreaming = false;
+                       
+                       // Add to completed explanations history
+                       completedExplanations.push(currentCodeExplanationFromLLM);
+                       console.log("Added streamed explanation to completed list. Total:", completedExplanations.length);
+                       
+                       // Update global variable with final content
+                       window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
+                       window.completedExplanations = completedExplanations;
+                       console.log("Code explanation completed:", JSON.stringify(currentCodeExplanationFromLLM));
+                       // Final update to explanation display
+                       if (window.terminalMode === 'explanation') {
+                         updateExplanationDisplay();
+                       }
+                       currentCodeExplanationFromLLM = "";
+                     } else {
+                       // Check if closing tag is already in our accumulated content
+                       let accumulatedContent = currentCodeExplanationFromLLM + chunkToProcess;
+                       for (let tag of closingTags) {
+                         let index = accumulatedContent.indexOf(tag);
+                         if (index !== -1) {
+                           console.log(`Found closing tag "${tag}" in accumulated content, stopping`);
+                           currentCodeExplanationFromLLM = accumulatedContent.substring(0, index);
+                           
+                           // Add to completed explanations history
+                           completedExplanations.push(currentCodeExplanationFromLLM);
+                           console.log("Added accumulated explanation to completed list. Total:", completedExplanations.length);
+                           
+                           codeExplanationEndedStreaming = true;
+                           codeExplanationStartedStreaming = false;
+                           window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
+                           window.completedExplanations = completedExplanations;
+                           console.log("Code explanation completed from accumulated:", JSON.stringify(currentCodeExplanationFromLLM));
+                           if (window.terminalMode === 'explanation') {
+                             updateExplanationDisplay();
+                           }
+                           currentCodeExplanationFromLLM = "";
+                           return;
+                         }
+                       }
+                       
+                       // No closing tag yet, add the whole processed chunk
+                       console.log("No closing tag, adding whole processed chunk:", JSON.stringify(chunkToProcess));
+                       currentCodeExplanationFromLLM += chunkToProcess;
+                       
+                       // Update the global variable and refresh explanation display
+                       window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
+                       
+                       if (window.terminalMode === 'explanation') {
+                         updateExplanationDisplay();
+                       }
+                     }
+                   }
                   
-                                     // if there is a <code_explanation>: in the fullMessageBuffer, then we need to add it to the currentExplanationFromLLM
-                   let codeExplanationTagIndex = fullMessageBuffer.indexOf('<code_explanation>');
-                   if (codeExplanationTagIndex != -1) {
-                     codeExplanationStartedStreaming = true;
-                     // Skip past the opening tag by adding its length (18 characters)
-                     currentCodeExplanationFromLLM = fullMessageBuffer.substring(codeExplanationTagIndex + 18);
+                                     // Check if we should start processing code_explanation content
+                   // Find the LAST occurrence of the opening tag to handle multiple explanations
+                   let codeExplanationTagIndex = fullMessageBuffer.lastIndexOf('<code_explanation>');
+                   if (codeExplanationTagIndex != -1 && !codeExplanationStartedStreaming && codeExplanationTagIndex > lastProcessedExplanationIndex) {
+                     console.log("=== DEBUGGING INITIAL DETECTION ===");
+                     console.log("Full message buffer length:", fullMessageBuffer.length);
+                     console.log("Last opening tag index:", codeExplanationTagIndex);
+                     console.log("Last processed explanation index:", lastProcessedExplanationIndex);
+                     
+                     // Count how many explanation tags are in the buffer
+                     let tagCount = (fullMessageBuffer.match(/<code_explanation>/g) || []).length;
+                     console.log("Number of code_explanation tags found:", tagCount);
+                     
+                     // Update the last processed index
+                     lastProcessedExplanationIndex = codeExplanationTagIndex;
+                     
+                     // Reset flags for new explanation cycle
+                     codeExplanationEndedStreaming = false;
+                     codeExplanationStartedStreaming = false;
+                     
+                     // Check if the complete explanation is already in the buffer
+                     let contentAfterOpeningTag = fullMessageBuffer.substring(codeExplanationTagIndex + 18);
+                     console.log("Content after opening tag:", JSON.stringify(contentAfterOpeningTag));
+                     
+                     // Look for various closing tag formats
+                     const closingTags = ['</code_explanation>', '<\\/code_explanation>', '&lt;/code_explanation&gt;'];
+                     let closingTagIndex = -1;
+                     let foundClosingTag = '';
+                     
+                     for (let tag of closingTags) {
+                       let index = contentAfterOpeningTag.indexOf(tag);
+                       if (index !== -1) {
+                         closingTagIndex = index;
+                         foundClosingTag = tag;
+                         console.log(`Found complete explanation with closing tag "${tag}" at index ${index}`);
+                         break;
+                       }
+                     }
+                     
+                     if (closingTagIndex !== -1) {
+                       // Complete explanation is available right now
+                       currentCodeExplanationFromLLM = contentAfterOpeningTag.substring(0, closingTagIndex);
+                       console.log("Complete explanation extracted:", JSON.stringify(currentCodeExplanationFromLLM));
+                       
+                       // Add to completed explanations history
+                       completedExplanations.push(currentCodeExplanationFromLLM);
+                       console.log("Added to completed explanations. Total:", completedExplanations.length);
+                       
+                       window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
+                       window.completedExplanations = completedExplanations;
+                       codeExplanationEndedStreaming = true;
+                       // Don't set codeExplanationStartedStreaming = true since we're already done
+                       
+                       if (window.terminalMode === 'explanation') {
+                         updateExplanationDisplay();
+                       }
+                     } else {
+                       // Only partial content, start streaming mode
+                       console.log("Partial explanation, starting streaming mode");
+                       codeExplanationStartedStreaming = true;
+                       currentCodeExplanationFromLLM = '';
+                     }
                    }
 
                   //search for <!doctype in the htmlFragmentBuffer
@@ -307,18 +446,33 @@
                   if (endingHtmlTagIndex != -1) {
                     htmlChunksEndedStreaming = true;
                     
-                    // Add completion message to terminal
-                    const terminalContent = document.getElementById('terminalContent');
-                    const cursor = document.getElementById('terminalCursor');
-                    if (terminalContent && cursor) {
-                      cursor.remove();
-                      const completionText = '\n\n> HTML generation complete!\n> Ready for preview\n';
-                      terminalContent.appendChild(document.createTextNode(completionText));
-                      terminalContent.appendChild(cursor);
+                    // Add completion message to terminal based on mode
+                    if (window.terminalMode === 'raw') {
+                      const terminalContent = document.getElementById('terminalContent');
+                      const cursor = document.getElementById('terminalCursor');
+                      if (terminalContent && cursor) {
+                        cursor.remove();
+                        const completionText = '\n\n> HTML generation complete!\n> Ready for preview\n';
+                        terminalContent.appendChild(document.createTextNode(completionText));
+                        terminalContent.appendChild(cursor);
+                      }
+                    } else {
+                      // In explanation mode, update to completion state
+                      window.currentCodeExplanationFromLLM = 'HTML generation complete! Your page is ready for preview.';
+                      updateExplanationDisplay();
+                      
+                      // Stop dots animation
+                      if (window.dotsInterval) {
+                        clearInterval(window.dotsInterval);
+                      }
                     }
                     
-                    let finishedHtml = document.getElementById('fragmentModal').htmlBuffer;
-                    document.getElementById('fragmentModal').remove();
+                    // Safely handle modal cleanup
+                    const modal = document.getElementById('fragmentModal');
+                    if (modal) {
+                      let finishedHtml = modal.htmlBuffer || '';
+                      modal.remove();
+                    }
                     // addMessage("Generated Page: " + `\`\`\`html ${finishedHtml} \`\`\``, "system");
                     // debugger;
                     // window.location.reload();
@@ -593,6 +747,163 @@ console.log("ChatChannel created:", chatChannel); // Add this line
     }
 
     /**
+    * Updates the terminal display based on current mode
+    */
+    function updateTerminalModeDisplay() {
+      const toggleButton = document.getElementById('terminalModeToggle');
+      const terminalContent = document.getElementById('terminalContent');
+      let cursor = document.getElementById('terminalCursor');
+      
+      // Clear any existing dots animation
+      if (window.dotsInterval) {
+        clearInterval(window.dotsInterval);
+      }
+      
+      if (window.terminalMode === 'raw') {
+        toggleButton.textContent = 'Explanation';
+        toggleButton.title = 'Switch to Explanation Mode';
+        toggleButton.style.backgroundColor = '#065f46';
+        
+        // In raw mode, show accumulated raw data
+        if (terminalContent) {
+          terminalContent.textContent = '';
+          
+          const timestamp = new Date().toLocaleTimeString();
+          let rawContent = `> [${timestamp}] Raw Code Mode - Live HTML Generation\n> Bytes received: ${window.terminalBytesReceived || 0}\n\n`;
+          
+          // Show any accumulated raw data if available
+          if (window.terminalRawBuffer) {
+            rawContent += window.terminalRawBuffer;
+          } else {
+            rawContent += 'Waiting for raw code data...';
+          }
+          
+          terminalContent.appendChild(document.createTextNode(rawContent));
+          
+          // Create new cursor if it doesn't exist
+          if (!cursor) {
+            cursor = document.createElement('span');
+            cursor.id = 'terminalCursor';
+            cursor.textContent = '|';
+            cursor.style.animation = 'blink 1s infinite';
+            cursor.style.color = '#7c7c7c';
+            cursor.style.fontWeight = 'bold';
+            cursor.style.fontSize = '16px';
+          }
+          terminalContent.appendChild(cursor);
+          
+          // Auto-scroll to bottom if user hasn't manually scrolled
+          if (window.terminalAutoScroll) {
+            window.terminalAutoScroll();
+          }
+        }
+      } else {
+        toggleButton.textContent = 'Raw Code';
+        toggleButton.title = 'Switch to Raw Code Mode';
+        toggleButton.style.backgroundColor = '#4a5568';
+        
+        // In explanation mode, show the current explanation with animated dots
+        if (terminalContent && cursor) {
+          updateExplanationDisplay();
+        }
+      }
+    }
+
+    /**
+    * Updates the explanation display with animated dots
+    */
+    function updateExplanationDisplay() {
+      if (window.terminalMode !== 'explanation') return;
+      
+      const terminalContent = document.getElementById('terminalContent');
+      let cursor = document.getElementById('terminalCursor');
+      let modal = document.getElementById('fragmentModal');
+      if (modal) {
+        //
+        //debugger;
+      }
+      // Debug: console.log('updateExplanationDisplay called');
+      
+      if (terminalContent) {
+        // Clear any existing dots animation
+        if (window.dotsInterval) {
+          clearInterval(window.dotsInterval);
+        }
+        
+        // Clear content but preserve/recreate cursor
+        terminalContent.textContent = '';
+        
+        const timestamp = new Date().toLocaleTimeString();
+        let displayText = `> [${timestamp}] AI is thinking and coding...\n\n`;
+        
+        // Show completed tasks
+        if (window.completedExplanations && window.completedExplanations.length > 0) {
+          displayText += `Completed Tasks:\n`;
+          window.completedExplanations.forEach((explanation, index) => {
+            displayText += `✓ ${index + 1}. ${explanation.trim()}\n`;
+          });
+          displayText += '\n';
+        }
+        
+        // Show current task
+        if (window.currentCodeExplanationFromLLM && window.currentCodeExplanationFromLLM.trim()) {
+          displayText += `Current Task:\n⚡ ${window.currentCodeExplanationFromLLM.trim()}`;
+        } else if (!window.completedExplanations || window.completedExplanations.length === 0) {
+          displayText += 'Preparing to generate your page...';
+        } else {
+          displayText += 'Finalizing your page...';
+        }
+        
+        // Add animated dots
+        const textNode = document.createTextNode(displayText);
+        terminalContent.appendChild(textNode);
+        
+        const dotsSpan = document.createElement('span');
+        dotsSpan.id = 'animatedDots';
+        terminalContent.appendChild(dotsSpan);
+        
+        // Create new cursor if it doesn't exist
+        if (!cursor) {
+          cursor = document.createElement('span');
+          cursor.id = 'terminalCursor';
+          cursor.textContent = '█';
+          cursor.style.animation = 'blink 1s infinite';
+          cursor.style.color = '#00ff00';
+        }
+        terminalContent.appendChild(cursor);
+        
+        // Start dots animation
+        startDotsAnimation();
+        
+        // Auto-scroll to bottom if user hasn't manually scrolled
+        if (window.terminalAutoScroll) {
+          window.terminalAutoScroll();
+        }
+        
+        // Debug: console.log('Terminal updated');
+      }
+    }
+
+    /**
+    * Animates the dots (...) with cycling pattern
+    */
+    function startDotsAnimation() {
+      const dotsSpan = document.getElementById('animatedDots');
+      if (!dotsSpan) return;
+      
+      let dotCount = 0;
+      window.dotsInterval = setInterval(() => {
+        if (window.terminalMode !== 'explanation') {
+          clearInterval(window.dotsInterval);
+          return;
+        }
+        
+        dotCount = (dotCount + 1) % 4; // Cycle through 0, 1, 2, 3
+        dotsSpan.textContent = '.'.repeat(dotCount);
+      }, 500); // Change every 500ms
+    }
+
+    /**
     * Clears the terminal and shows startup message
     */
     function initializeTerminal() {
@@ -602,26 +913,46 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       if (terminalContent && cursor) {
         terminalContent.textContent = '';
         window.terminalBytesReceived = 0; // Reset byte counter
-        const timestamp = new Date().toLocaleTimeString();
-        const startupText = `> [${timestamp}] Starting HTML generation...\n> Streaming tokens in real-time\n> Watching for incoming data...\n\n`;
-        terminalContent.appendChild(document.createTextNode(startupText));
-        terminalContent.appendChild(cursor);
+        window.terminalRawBuffer = ''; // Reset raw data buffer
+        window.terminalMode = 'explanation'; // Default to explanation mode
+        window.currentCodeExplanationFromLLM = ''; // Reset explanation
+        window.completedExplanations = []; // Reset completed explanations history
+        
+        // Reset scroll state for auto-scroll
+        if (window.resetTerminalScroll) {
+          window.resetTerminalScroll();
+        }
+        
+        updateExplanationDisplay();
       }
     }
 
     /**
-    * Adds text to the streaming terminal window with typewriter effect
+    * Adds text to the streaming terminal window and accumulates raw data
     */
     function addToTerminal(text) {
-      const terminalContent = document.getElementById('terminalContent');
-      const cursor = document.getElementById('terminalCursor');
+      // Always accumulate raw data in buffer
+      window.terminalRawBuffer = (window.terminalRawBuffer || '') + text;
+      window.terminalBytesReceived = (window.terminalBytesReceived || 0) + text.length;
       
-      if (terminalContent && cursor) {
-        // Remove cursor temporarily
-        cursor.remove();
+      // Limit buffer size to prevent memory issues
+      if (window.terminalRawBuffer.length > 10000) {
+        window.terminalRawBuffer = '...[truncated]...\n' + window.terminalRawBuffer.slice(-8000);
+      }
+      
+      // Only show raw code in raw mode
+      if (window.terminalMode !== 'raw') return;
+      
+      const terminalContent = document.getElementById('terminalContent');
+      let cursor = document.getElementById('terminalCursor');
+      
+      if (terminalContent) {
+        // Remove cursor temporarily if it exists
+        if (cursor) {
+          cursor.remove();
+        }
         
         // Show bytes received indicator occasionally (every ~50 characters)
-        window.terminalBytesReceived = (window.terminalBytesReceived || 0) + text.length;
         if (window.terminalBytesReceived % 50 < text.length) {
           const bytesText = `\n> [RECV] ${window.terminalBytesReceived} bytes received...\n`;
           const bytesNode = document.createTextNode(bytesText);
@@ -632,11 +963,23 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         const textNode = document.createTextNode(text);
         terminalContent.appendChild(textNode);
         
+        // Create new cursor if it doesn't exist
+        if (!cursor) {
+          cursor = document.createElement('span');
+          cursor.id = 'terminalCursor';
+          cursor.textContent = '|';
+          cursor.style.animation = 'blink 1s infinite';
+          cursor.style.color = '#7c7c7c';
+          cursor.style.fontWeight = 'bold';
+          cursor.style.fontSize = '16px';
+        }
         // Re-add cursor
         terminalContent.appendChild(cursor);
         
-        // Auto-scroll to bottom
-        terminalContent.scrollTop = terminalContent.scrollHeight;
+        // Auto-scroll to bottom if user hasn't manually scrolled
+        if (window.terminalAutoScroll) {
+          window.terminalAutoScroll();
+        }
         
         // Limit terminal content to prevent memory issues
         const maxLines = 100;
@@ -645,6 +988,17 @@ console.log("ChatChannel created:", chatChannel); // Add this line
           const trimmedText = lines.slice(-maxLines).join('\n');
           terminalContent.textContent = '';
           terminalContent.appendChild(document.createTextNode(trimmedText));
+          
+          // Ensure cursor exists before adding
+          if (!cursor) {
+            cursor = document.createElement('span');
+            cursor.id = 'terminalCursor';
+            cursor.textContent = '|';
+            cursor.style.animation = 'blink 1s infinite';
+            cursor.style.color = '#7c7c7c';
+            cursor.style.fontWeight = 'bold';
+            cursor.style.fontSize = '16px';
+          }
           terminalContent.appendChild(cursor);
         }
       }
@@ -692,30 +1046,32 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         terminalWindow.style.position = 'absolute';
         terminalWindow.style.bottom = '20px';
         terminalWindow.style.right = '20px';
-        terminalWindow.style.width = '66.67%'; // 2/3 width
-        terminalWindow.style.height = '20%'; // 1/5 height
-        terminalWindow.style.backgroundColor = '#1a1a1a';
-        terminalWindow.style.border = '2px solid #333';
-        terminalWindow.style.borderRadius = '6px';
-        terminalWindow.style.fontFamily = 'Monaco, Consolas, "Courier New", monospace';
-        terminalWindow.style.fontSize = '11px';
-        terminalWindow.style.color = '#00ff00';
+        terminalWindow.style.width = '75%'; // Larger width
+        terminalWindow.style.height = '35%'; // Larger height
+        terminalWindow.style.backgroundColor = '#1e1e1e';
+        terminalWindow.style.border = '1px solid #404040';
+        terminalWindow.style.borderRadius = '12px';
+        terminalWindow.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+        terminalWindow.style.fontSize = '14px';
+        terminalWindow.style.color = '#e8e8e8';
         terminalWindow.style.zIndex = '10';
-        terminalWindow.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        terminalWindow.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
         terminalWindow.style.display = 'flex';
         terminalWindow.style.flexDirection = 'column';
+        terminalWindow.style.backdropFilter = 'blur(10px)';
 
         // Terminal header
         const terminalHeader = document.createElement('div');
-        terminalHeader.style.backgroundColor = '#2d2d2d';
-        terminalHeader.style.padding = '6px 12px';
-        terminalHeader.style.borderBottom = '1px solid #444';
-        terminalHeader.style.borderTopLeftRadius = '4px';
-        terminalHeader.style.borderTopRightRadius = '4px';
+        terminalHeader.style.backgroundColor = '#2a2a2a';
+        terminalHeader.style.padding = '12px 16px';
+        terminalHeader.style.borderBottom = '1px solid #404040';
+        terminalHeader.style.borderTopLeftRadius = '12px';
+        terminalHeader.style.borderTopRightRadius = '12px';
         terminalHeader.style.display = 'flex';
         terminalHeader.style.alignItems = 'center';
-        terminalHeader.style.fontSize = '10px';
-        terminalHeader.style.color = '#ccc';
+        terminalHeader.style.fontSize = '13px';
+        terminalHeader.style.color = '#b8b8b8';
+        terminalHeader.style.fontWeight = '500';
 
         // Terminal dots (like macOS window controls)
         const terminalDots = document.createElement('div');
@@ -729,26 +1085,86 @@ console.log("ChatChannel created:", chatChannel); // Add this line
 
         // Terminal title
         const terminalTitle = document.createElement('div');
-        terminalTitle.textContent = 'Live Stream';
-        terminalTitle.style.marginLeft = '8px';
-        terminalTitle.style.fontWeight = 'bold';
+        terminalTitle.textContent = 'AI Progress Monitor';
+        terminalTitle.style.marginLeft = '12px';
+        terminalTitle.style.fontWeight = '600';
+        terminalTitle.style.flex = '1';
+        terminalTitle.style.fontSize = '14px';
+        terminalTitle.style.color = '#f0f0f0';
+
+        // Toggle button for switching modes
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'terminalModeToggle';
+        toggleButton.textContent = 'Raw Code';
+        toggleButton.style.backgroundColor = '#4a5568';
+        toggleButton.style.color = '#e8e8e8';
+        toggleButton.style.border = '1px solid #6a7280';
+        toggleButton.style.borderRadius = '6px';
+        toggleButton.style.padding = '6px 12px';
+        toggleButton.style.fontSize = '12px';
+        toggleButton.style.cursor = 'pointer';
+        toggleButton.style.fontFamily = 'inherit';
+        toggleButton.style.fontWeight = '500';
+        toggleButton.style.transition = 'all 0.2s ease';
+        toggleButton.title = 'Switch to Raw Code Mode';
+        
+        toggleButton.addEventListener('mouseenter', function() {
+          this.style.backgroundColor = '#5a6478';
+        });
+        
+        toggleButton.addEventListener('mouseleave', function() {
+          this.style.backgroundColor = '#4a5568';
+        });
+        
+        toggleButton.addEventListener('click', function() {
+          window.terminalMode = window.terminalMode === 'explanation' ? 'raw' : 'explanation';
+          updateTerminalModeDisplay();
+        });
 
         // Terminal content area
         const terminalContent = document.createElement('div');
         terminalContent.id = 'terminalContent';
         terminalContent.style.flex = '1';
-        terminalContent.style.padding = '8px';
+        terminalContent.style.padding = '16px 20px';
         terminalContent.style.overflow = 'auto';
         terminalContent.style.whiteSpace = 'pre-wrap';
-        terminalContent.style.wordBreak = 'break-all';
-        terminalContent.style.lineHeight = '1.3';
+        terminalContent.style.wordBreak = 'break-word';
+        terminalContent.style.lineHeight = '1.5';
+        terminalContent.style.scrollBehavior = 'smooth';
+        
+        // Add scroll tracking for auto-scroll functionality
+        let userHasScrolled = false;
+        let isAutoScrolling = false;
+        
+        terminalContent.addEventListener('scroll', function() {
+          if (isAutoScrolling) return; // Ignore auto-scroll events
+          
+          const { scrollTop, scrollHeight, clientHeight } = this;
+          const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
+          userHasScrolled = !isAtBottom;
+        });
 
         // Cursor
         const cursor = document.createElement('span');
         cursor.id = 'terminalCursor';
-        cursor.textContent = '█';
+        cursor.textContent = '|';
         cursor.style.animation = 'blink 1s infinite';
-        cursor.style.color = '#00ff00';
+        cursor.style.color = '#7c7c7c';
+        cursor.style.fontWeight = 'bold';
+        cursor.style.fontSize = '16px';
+        
+        // Store references for auto-scroll functionality
+        window.terminalAutoScroll = function() {
+          if (!userHasScrolled) {
+            isAutoScrolling = true;
+            terminalContent.scrollTop = terminalContent.scrollHeight;
+            setTimeout(() => { isAutoScrolling = false; }, 100);
+          }
+        };
+        
+        window.resetTerminalScroll = function() {
+          userHasScrolled = false;
+        };
 
         // Add blinking animation
         if (!document.querySelector('#terminal-blink-style')) {
@@ -766,6 +1182,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         // Assemble terminal
         terminalHeader.appendChild(terminalDots);
         terminalHeader.appendChild(terminalTitle);
+        terminalHeader.appendChild(toggleButton);
         terminalWindow.appendChild(terminalHeader);
         terminalWindow.appendChild(terminalContent);
         terminalContent.appendChild(cursor);
@@ -843,8 +1260,10 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         // Add a buffer property to the modal
         modal.htmlBuffer = '';
         
-        // Initialize the terminal with startup message
-        setTimeout(() => initializeTerminal(), 100);
+        // Initialize the terminal with startup message (wait for DOM to be ready)
+        setTimeout(() => {
+          initializeTerminal();
+        }, 200);
       }
 
       modal.style.display = 'flex';
