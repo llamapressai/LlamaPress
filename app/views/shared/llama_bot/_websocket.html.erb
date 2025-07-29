@@ -734,24 +734,36 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       }
       
       if (window.terminalMode === 'raw') {
-        toggleButton.textContent = 'Explanation';
-        toggleButton.title = 'Switch to Explanation Mode';
-        toggleButton.style.backgroundColor = '#065f46';
+        toggleButton.style.backgroundColor = '#ddd6fe';
+        toggleButton.style.color = '#7c3aed';
         
-        // In raw mode, show accumulated raw data
+        // Show character counter in raw mode
+        const charCounter = document.getElementById('characterCounter');
+        if (charCounter) {
+          charCounter.style.display = 'block';
+        }
+        
+        // In raw mode, show accumulated raw data with scrolling
         if (terminalContent) {
           terminalContent.textContent = '';
           
-          const timestamp = new Date().toLocaleTimeString();
-          let rawContent = `> [${timestamp}] Raw Code Mode - Live HTML Generation\n> Bytes received: ${window.terminalBytesReceived || 0}\n\n`;
+          let rawLines = [];
           
-          // Show any accumulated raw data if available
+          // Show last bits of raw data if available
           if (window.terminalRawBuffer) {
-            rawContent += window.terminalRawBuffer;
+            const lines = window.terminalRawBuffer.split('\n');
+            const recentLines = lines.slice(-3).filter(line => line.trim()); // Last 3 non-empty lines
+            recentLines.forEach(line => {
+              if (line.length > 65) {
+                line = line.substring(0, 62) + '...';
+              }
+              rawLines.push('💻 ' + line);
+            });
           } else {
-            rawContent += 'Waiting for raw code data...';
+            rawLines.push('⏳ Waiting for code generation...');
           }
           
+          const rawContent = rawLines.join('\n');
           terminalContent.appendChild(document.createTextNode(rawContent));
           
           // Create new cursor if it doesn't exist
@@ -760,23 +772,27 @@ console.log("ChatChannel created:", chatChannel); // Add this line
             cursor.id = 'terminalCursor';
             cursor.textContent = '|';
             cursor.style.animation = 'blink 1s infinite';
-            cursor.style.color = '#7c7c7c';
-            cursor.style.fontWeight = 'bold';
-            cursor.style.fontSize = '16px';
+            cursor.style.color = '#9ca3af';
+            cursor.style.fontSize = '14px';
           }
           terminalContent.appendChild(cursor);
           
-          // Auto-scroll to bottom if user hasn't manually scrolled
+          // Auto-scroll to bottom
           if (window.terminalAutoScroll) {
             window.terminalAutoScroll();
           }
         }
       } else {
-        toggleButton.textContent = 'Raw Code';
-        toggleButton.title = 'Switch to Raw Code Mode';
-        toggleButton.style.backgroundColor = '#4a5568';
+        toggleButton.style.backgroundColor = '#e5e7eb';
+        toggleButton.style.color = '#6b7280';
         
-        // In explanation mode, show the current explanation with animated dots
+        // Hide character counter in explanation mode
+        const charCounter = document.getElementById('characterCounter');
+        if (charCounter) {
+          charCounter.style.display = 'none';
+        }
+        
+        // In explanation mode, show the current explanation
         if (terminalContent && cursor) {
           updateExplanationDisplay();
         }
@@ -791,12 +807,6 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       
       const terminalContent = document.getElementById('terminalContent');
       let cursor = document.getElementById('terminalCursor');
-      let modal = document.getElementById('fragmentModal');
-      if (modal) {
-        //
-        //debugger;
-      }
-      // Debug: console.log('updateExplanationDisplay called');
       
       if (terminalContent) {
         // Clear any existing dots animation
@@ -807,28 +817,44 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         // Clear content but preserve/recreate cursor
         terminalContent.textContent = '';
         
-        const timestamp = new Date().toLocaleTimeString();
-        let displayText = `> [${timestamp}] AI is thinking and coding...\n\n`;
+        let displayLines = [];
         
-        // Show completed tasks
+        // Show last few completed tasks
         if (window.completedExplanations && window.completedExplanations.length > 0) {
-          displayText += `Completed Tasks:\n`;
-          window.completedExplanations.forEach((explanation, index) => {
-            displayText += `✓ ${index + 1}. ${explanation.trim()}\n`;
+          const recentCompleted = window.completedExplanations.slice(-4, -1); // Last 3 completed tasks, excluding the most recent
+          recentCompleted.forEach(explanation => {
+            let line = '✅ ' + explanation.trim();
+            if (line.length > 65) {
+              line = line.substring(0, 62) + '...';
+            }
+            displayLines.push(line);
           });
-          displayText += '\n';
         }
         
-        // Show current task
-        if (window.currentCodeExplanationFromLLM && window.currentCodeExplanationFromLLM.trim()) {
-          displayText += `Current Task:\n⚡ ${window.currentCodeExplanationFromLLM.trim()}`;
-        } else if (!window.completedExplanations || window.completedExplanations.length === 0) {
-          displayText += 'Preparing to generate your page...';
-        } else {
-          displayText += 'Finalizing your page...';
+        // Show current task (but avoid showing the same task as both completed and current)
+        let currentLine = '';
+        let currentTask = window.currentCodeExplanationFromLLM && window.currentCodeExplanationFromLLM.trim();
+        
+        // Check if current task is already in completed list (avoid duplicates)
+        let isAlreadyCompleted = false;
+        if (currentTask && window.completedExplanations) {
+          isAlreadyCompleted = window.completedExplanations.some(completed => 
+            completed.trim() === currentTask
+          );
         }
         
-        // Add animated dots
+        if (currentTask) {
+          currentLine = '⚡ ' + currentTask;
+        }
+
+        
+        if (currentLine.length > 65) {
+          currentLine = currentLine.substring(0, 62) + '...';
+        }
+        displayLines.push(currentLine);
+        
+        // Join lines and add to terminal
+        const displayText = displayLines.join('\n');
         const textNode = document.createTextNode(displayText);
         terminalContent.appendChild(textNode);
         
@@ -840,21 +866,20 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         if (!cursor) {
           cursor = document.createElement('span');
           cursor.id = 'terminalCursor';
-          cursor.textContent = '█';
+          cursor.textContent = '|';
           cursor.style.animation = 'blink 1s infinite';
-          cursor.style.color = '#00ff00';
+          cursor.style.color = '#9ca3af';
+          cursor.style.fontSize = '14px';
         }
         terminalContent.appendChild(cursor);
         
         // Start dots animation
         startDotsAnimation();
         
-        // Auto-scroll to bottom if user hasn't manually scrolled
+        // Auto-scroll to bottom
         if (window.terminalAutoScroll) {
           window.terminalAutoScroll();
         }
-        
-        // Debug: console.log('Terminal updated');
       }
     }
 
@@ -892,9 +917,9 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         window.currentCodeExplanationFromLLM = ''; // Reset explanation
         window.completedExplanations = []; // Reset completed explanations history
         
-        // Reset scroll state for auto-scroll
-        if (window.resetTerminalScroll) {
-          window.resetTerminalScroll();
+        // Initialize character counter
+        if (window.updateCharacterCounter) {
+          window.updateCharacterCounter();
         }
         
         updateExplanationDisplay();
@@ -909,72 +934,19 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       window.terminalRawBuffer = (window.terminalRawBuffer || '') + text;
       window.terminalBytesReceived = (window.terminalBytesReceived || 0) + text.length;
       
+      // Update character counter
+      if (window.updateCharacterCounter) {
+        window.updateCharacterCounter();
+      }
+      
       // Limit buffer size to prevent memory issues
       if (window.terminalRawBuffer.length > 10000) {
         window.terminalRawBuffer = '...[truncated]...\n' + window.terminalRawBuffer.slice(-8000);
       }
       
-      // Only show raw code in raw mode
-      if (window.terminalMode !== 'raw') return;
-      
-      const terminalContent = document.getElementById('terminalContent');
-      let cursor = document.getElementById('terminalCursor');
-      
-      if (terminalContent) {
-        // Remove cursor temporarily if it exists
-        if (cursor) {
-          cursor.remove();
-        }
-        
-        // Show bytes received indicator occasionally (every ~50 characters)
-        if (window.terminalBytesReceived % 50 < text.length) {
-          const bytesText = `\n> [RECV] ${window.terminalBytesReceived} bytes received...\n`;
-          const bytesNode = document.createTextNode(bytesText);
-          terminalContent.appendChild(bytesNode);
-        }
-        
-        // Add the new text
-        const textNode = document.createTextNode(text);
-        terminalContent.appendChild(textNode);
-        
-        // Create new cursor if it doesn't exist
-        if (!cursor) {
-          cursor = document.createElement('span');
-          cursor.id = 'terminalCursor';
-          cursor.textContent = '|';
-          cursor.style.animation = 'blink 1s infinite';
-          cursor.style.color = '#7c7c7c';
-          cursor.style.fontWeight = 'bold';
-          cursor.style.fontSize = '16px';
-        }
-        // Re-add cursor
-        terminalContent.appendChild(cursor);
-        
-        // Auto-scroll to bottom if user hasn't manually scrolled
-        if (window.terminalAutoScroll) {
-          window.terminalAutoScroll();
-        }
-        
-        // Limit terminal content to prevent memory issues
-        const maxLines = 100;
-        const lines = terminalContent.textContent.split('\n');
-        if (lines.length > maxLines) {
-          const trimmedText = lines.slice(-maxLines).join('\n');
-          terminalContent.textContent = '';
-          terminalContent.appendChild(document.createTextNode(trimmedText));
-          
-          // Ensure cursor exists before adding
-          if (!cursor) {
-            cursor = document.createElement('span');
-            cursor.id = 'terminalCursor';
-            cursor.textContent = '|';
-            cursor.style.animation = 'blink 1s infinite';
-            cursor.style.color = '#7c7c7c';
-            cursor.style.fontWeight = 'bold';
-            cursor.style.fontSize = '16px';
-          }
-          terminalContent.appendChild(cursor);
-        }
+      // Only show raw code in raw mode, and update the simple display
+      if (window.terminalMode === 'raw') {
+        updateTerminalModeDisplay();
       }
     }
 
@@ -1023,80 +995,51 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         iframe.style.border = 'none';
         iframe.style.borderRadius = '8px';
 
-        // Create terminal window overlay
+        // Create simple terminal window
         const terminalWindow = document.createElement('div');
         terminalWindow.id = 'streamingTerminal';
         terminalWindow.style.position = 'absolute';
         terminalWindow.style.bottom = '20px';
         terminalWindow.style.right = '20px';
-        terminalWindow.style.width = '75%'; // Larger width
-        terminalWindow.style.height = '35%'; // Larger height
-        terminalWindow.style.backgroundColor = '#1e1e1e';
-        terminalWindow.style.border = '1px solid #404040';
+        terminalWindow.style.width = '420px';
+        terminalWindow.style.height = '90px';
+        terminalWindow.style.backgroundColor = '#f8f9fa';
+        terminalWindow.style.border = '1px solid #e1e5e9';
         terminalWindow.style.borderRadius = '12px';
-        terminalWindow.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+        terminalWindow.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
         terminalWindow.style.fontSize = '14px';
-        terminalWindow.style.color = '#e8e8e8';
+        terminalWindow.style.color = '#374151';
         terminalWindow.style.zIndex = '10';
-        terminalWindow.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
+        terminalWindow.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
         terminalWindow.style.display = 'flex';
         terminalWindow.style.flexDirection = 'column';
-        terminalWindow.style.backdropFilter = 'blur(10px)';
-
-        // Terminal header
-        const terminalHeader = document.createElement('div');
-        terminalHeader.style.backgroundColor = '#2a2a2a';
-        terminalHeader.style.padding = '12px 16px';
-        terminalHeader.style.borderBottom = '1px solid #404040';
-        terminalHeader.style.borderTopLeftRadius = '12px';
-        terminalHeader.style.borderTopRightRadius = '12px';
-        terminalHeader.style.display = 'flex';
-        terminalHeader.style.alignItems = 'center';
-        terminalHeader.style.fontSize = '13px';
-        terminalHeader.style.color = '#b8b8b8';
-        terminalHeader.style.fontWeight = '500';
-
-        // Terminal dots (like macOS window controls)
-        const terminalDots = document.createElement('div');
-        terminalDots.style.display = 'flex';
-        terminalDots.style.gap = '4px';
-        terminalDots.innerHTML = `
-          <div style="width: 8px; height: 8px; background: #ff5f56; border-radius: 50%;"></div>
-          <div style="width: 8px; height: 8px; background: #ffbd2e; border-radius: 50%;"></div>
-          <div style="width: 8px; height: 8px; background: #27ca3f; border-radius: 50%;"></div>
-        `;
-
-        // Terminal title
-        const terminalTitle = document.createElement('div');
-        terminalTitle.textContent = 'AI Progress Monitor';
-        terminalTitle.style.marginLeft = '12px';
-        terminalTitle.style.fontWeight = '600';
-        terminalTitle.style.flex = '1';
-        terminalTitle.style.fontSize = '14px';
-        terminalTitle.style.color = '#f0f0f0';
+        terminalWindow.style.padding = '12px 16px';
+        terminalWindow.style.gap = '8px';
 
         // Toggle button for switching modes
         const toggleButton = document.createElement('button');
         toggleButton.id = 'terminalModeToggle';
-        toggleButton.textContent = 'Raw Code';
-        toggleButton.style.backgroundColor = '#4a5568';
-        toggleButton.style.color = '#e8e8e8';
-        toggleButton.style.border = '1px solid #6a7280';
-        toggleButton.style.borderRadius = '6px';
-        toggleButton.style.padding = '6px 12px';
+        toggleButton.textContent = '{}';
+        toggleButton.style.backgroundColor = '#e5e7eb';
+        toggleButton.style.color = '#6b7280';
+        toggleButton.style.border = 'none';
+        toggleButton.style.borderRadius = '8px';
+        toggleButton.style.padding = '6px 8px';
         toggleButton.style.fontSize = '12px';
         toggleButton.style.cursor = 'pointer';
-        toggleButton.style.fontFamily = 'inherit';
-        toggleButton.style.fontWeight = '500';
+        toggleButton.style.fontFamily = 'monospace';
+        toggleButton.style.flexShrink = '0';
         toggleButton.style.transition = 'all 0.2s ease';
-        toggleButton.title = 'Switch to Raw Code Mode';
+        toggleButton.title = 'View code details';
         
         toggleButton.addEventListener('mouseenter', function() {
-          this.style.backgroundColor = '#5a6478';
+          this.style.backgroundColor = '#d1d5db';
+          this.style.transform = 'scale(1.05)';
         });
         
         toggleButton.addEventListener('mouseleave', function() {
-          this.style.backgroundColor = '#4a5568';
+          this.style.backgroundColor = '#e5e7eb';
+          this.style.transform = 'scale(1)';
         });
         
         toggleButton.addEventListener('click', function() {
@@ -1108,46 +1051,35 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         const terminalContent = document.createElement('div');
         terminalContent.id = 'terminalContent';
         terminalContent.style.flex = '1';
-        terminalContent.style.padding = '16px 20px';
         terminalContent.style.overflow = 'auto';
         terminalContent.style.whiteSpace = 'pre-wrap';
         terminalContent.style.wordBreak = 'break-word';
         terminalContent.style.lineHeight = '1.5';
-        terminalContent.style.scrollBehavior = 'smooth';
+        terminalContent.style.maxHeight = '66px'; // 3 lines at ~22px each
         
-        // Add scroll tracking for auto-scroll functionality
-        let userHasScrolled = false;
-        let isAutoScrolling = false;
+        // Auto-scroll function
+        window.terminalAutoScroll = function() {
+          if (terminalContent) {
+            terminalContent.scrollTop = terminalContent.scrollHeight;
+          }
+        };
         
-        terminalContent.addEventListener('scroll', function() {
-          if (isAutoScrolling) return; // Ignore auto-scroll events
-          
-          const { scrollTop, scrollHeight, clientHeight } = this;
-          const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10;
-          userHasScrolled = !isAtBottom;
-        });
-
+        // Character counter update function
+        window.updateCharacterCounter = function() {
+          const counter = document.getElementById('characterCounter');
+          if (counter) {
+            const count = window.terminalBytesReceived || 0;
+            counter.textContent = `${count.toLocaleString()} chars`;
+          }
+        };
+        
         // Cursor
         const cursor = document.createElement('span');
         cursor.id = 'terminalCursor';
         cursor.textContent = '|';
         cursor.style.animation = 'blink 1s infinite';
-        cursor.style.color = '#7c7c7c';
-        cursor.style.fontWeight = 'bold';
-        cursor.style.fontSize = '16px';
-        
-        // Store references for auto-scroll functionality
-        window.terminalAutoScroll = function() {
-          if (!userHasScrolled) {
-            isAutoScrolling = true;
-            terminalContent.scrollTop = terminalContent.scrollHeight;
-            setTimeout(() => { isAutoScrolling = false; }, 100);
-          }
-        };
-        
-        window.resetTerminalScroll = function() {
-          userHasScrolled = false;
-        };
+        cursor.style.color = '#9ca3af';
+        cursor.style.fontSize = '14px';
 
         // Add blinking animation
         if (!document.querySelector('#terminal-blink-style')) {
@@ -1162,12 +1094,36 @@ console.log("ChatChannel created:", chatChannel); // Add this line
           document.head.appendChild(style);
         }
 
+        // Create main content row (content + button)
+        const mainRow = document.createElement('div');
+        mainRow.style.display = 'flex';
+        mainRow.style.alignItems = 'center';
+        mainRow.style.gap = '12px';
+        mainRow.style.flex = '1';
+        
+        // Create character counter (will be positioned near toggle button)
+        const charCounter = document.createElement('div');
+        charCounter.id = 'characterCounter';
+        charCounter.style.fontSize = '10px';
+        charCounter.style.color = '#9ca3af';
+        charCounter.style.textAlign = 'center';
+        charCounter.style.marginTop = '4px';
+        charCounter.style.display = 'none'; // Hidden by default (starts in explanation mode)
+        charCounter.textContent = '0 chars';
+        
+        // Create right column for toggle button and counter
+        const rightColumn = document.createElement('div');
+        rightColumn.style.display = 'flex';
+        rightColumn.style.flexDirection = 'column';
+        rightColumn.style.alignItems = 'center';
+        rightColumn.style.gap = '4px';
+        
         // Assemble terminal
-        terminalHeader.appendChild(terminalDots);
-        terminalHeader.appendChild(terminalTitle);
-        terminalHeader.appendChild(toggleButton);
-        terminalWindow.appendChild(terminalHeader);
-        terminalWindow.appendChild(terminalContent);
+        rightColumn.appendChild(toggleButton);
+        rightColumn.appendChild(charCounter);
+        mainRow.appendChild(terminalContent);
+        mainRow.appendChild(rightColumn);
+        terminalWindow.appendChild(mainRow);
         terminalContent.appendChild(cursor);
 
         // Create overlay div
@@ -1251,7 +1207,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
 
       modal.style.display = 'flex';
       const iframe = document.getElementById('fragmentIframe');
-      const REFRESH_MS      = 2000;          // adjust to taste (100 ms ≈ 10 fps)
+      const REFRESH_MS      = 500;          // adjust to taste (500ms ≈ 2 fps)
 
       modal.htmlBuffer = modal.htmlBuffer || '';
 
