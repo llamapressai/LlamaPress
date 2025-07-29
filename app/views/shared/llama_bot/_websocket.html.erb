@@ -277,7 +277,6 @@
                   fullMessageBuffer += tool_call_data;
                   
                     if (codeExplanationStartedStreaming) {
-                     console.log("Processing chunk during explanation streaming:", JSON.stringify(tool_call_data));
                      
                      // Handle case where opening tag might be in this chunk
                      let chunkToProcess = tool_call_data;
@@ -285,7 +284,6 @@
                      if (openingTagIndex !== -1) {
                        // Opening tag is in this chunk, skip everything before and including the tag
                        chunkToProcess = chunkToProcess.substring(openingTagIndex + 18);
-                       console.log("Found opening tag in chunk, processing content after tag:", JSON.stringify(chunkToProcess));
                      }
                      
                      // Check for multiple possible closing tag formats (escaped and unescaped)
@@ -299,17 +297,13 @@
                        if (index !== -1) {
                          closingTagIndex = index;
                          closingTagLength = tag.length;
-                         console.log(`Found closing tag "${tag}" at index ${index} in processed chunk`);
                          break;
                        }
                      }
                      
-                     console.log("Closing tag index in processed chunk:", closingTagIndex);
-                     
                      if (closingTagIndex != -1) {
                        // Found closing tag in this chunk - add only the part before it
                        let finalPart = chunkToProcess.substring(0, closingTagIndex);
-                       console.log("Final part before closing tag:", JSON.stringify(finalPart));
                        currentCodeExplanationFromLLM += finalPart;
                        
                        // Mark as complete
@@ -318,12 +312,11 @@
                        
                        // Add to completed explanations history
                        completedExplanations.push(currentCodeExplanationFromLLM);
-                       console.log("Added streamed explanation to completed list. Total:", completedExplanations.length);
                        
                        // Update global variable with final content
                        window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
                        window.completedExplanations = completedExplanations;
-                       console.log("Code explanation completed:", JSON.stringify(currentCodeExplanationFromLLM));
+                       console.log("Code explanation:", JSON.stringify(currentCodeExplanationFromLLM));
                        // Final update to explanation display
                        if (window.terminalMode === 'explanation') {
                          updateExplanationDisplay();
@@ -335,18 +328,15 @@
                        for (let tag of closingTags) {
                          let index = accumulatedContent.indexOf(tag);
                          if (index !== -1) {
-                           console.log(`Found closing tag "${tag}" in accumulated content, stopping`);
                            currentCodeExplanationFromLLM = accumulatedContent.substring(0, index);
                            
                            // Add to completed explanations history
                            completedExplanations.push(currentCodeExplanationFromLLM);
-                           console.log("Added accumulated explanation to completed list. Total:", completedExplanations.length);
                            
                            codeExplanationEndedStreaming = true;
                            codeExplanationStartedStreaming = false;
                            window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
                            window.completedExplanations = completedExplanations;
-                           console.log("Code explanation completed from accumulated:", JSON.stringify(currentCodeExplanationFromLLM));
                            if (window.terminalMode === 'explanation') {
                              updateExplanationDisplay();
                            }
@@ -356,7 +346,6 @@
                        }
                        
                        // No closing tag yet, add the whole processed chunk
-                       console.log("No closing tag, adding whole processed chunk:", JSON.stringify(chunkToProcess));
                        currentCodeExplanationFromLLM += chunkToProcess;
                        
                        // Update the global variable and refresh explanation display
@@ -372,14 +361,8 @@
                    // Find the LAST occurrence of the opening tag to handle multiple explanations
                    let codeExplanationTagIndex = fullMessageBuffer.lastIndexOf('<code_explanation>');
                    if (codeExplanationTagIndex != -1 && !codeExplanationStartedStreaming && codeExplanationTagIndex > lastProcessedExplanationIndex) {
-                     console.log("=== DEBUGGING INITIAL DETECTION ===");
-                     console.log("Full message buffer length:", fullMessageBuffer.length);
-                     console.log("Last opening tag index:", codeExplanationTagIndex);
-                     console.log("Last processed explanation index:", lastProcessedExplanationIndex);
-                     
                      // Count how many explanation tags are in the buffer
                      let tagCount = (fullMessageBuffer.match(/<code_explanation>/g) || []).length;
-                     console.log("Number of code_explanation tags found:", tagCount);
                      
                      // Update the last processed index
                      lastProcessedExplanationIndex = codeExplanationTagIndex;
@@ -390,7 +373,6 @@
                      
                      // Check if the complete explanation is already in the buffer
                      let contentAfterOpeningTag = fullMessageBuffer.substring(codeExplanationTagIndex + 18);
-                     console.log("Content after opening tag:", JSON.stringify(contentAfterOpeningTag));
                      
                      // Look for various closing tag formats
                      const closingTags = ['</code_explanation>', '<\\/code_explanation>', '&lt;/code_explanation&gt;'];
@@ -402,7 +384,6 @@
                        if (index !== -1) {
                          closingTagIndex = index;
                          foundClosingTag = tag;
-                         console.log(`Found complete explanation with closing tag "${tag}" at index ${index}`);
                          break;
                        }
                      }
@@ -410,11 +391,9 @@
                      if (closingTagIndex !== -1) {
                        // Complete explanation is available right now
                        currentCodeExplanationFromLLM = contentAfterOpeningTag.substring(0, closingTagIndex);
-                       console.log("Complete explanation extracted:", JSON.stringify(currentCodeExplanationFromLLM));
                        
                        // Add to completed explanations history
                        completedExplanations.push(currentCodeExplanationFromLLM);
-                       console.log("Added to completed explanations. Total:", completedExplanations.length);
                        
                        window.currentCodeExplanationFromLLM = currentCodeExplanationFromLLM;
                        window.completedExplanations = completedExplanations;
@@ -426,7 +405,6 @@
                        }
                      } else {
                        // Only partial content, start streaming mode
-                       console.log("Partial explanation, starting streaming mode");
                        codeExplanationStartedStreaming = true;
                        currentCodeExplanationFromLLM = '';
                      }
@@ -484,15 +462,11 @@
                   }
 
                   if (htmlChunksStartedStreaming && !htmlChunksEndedStreaming) {
-                    console.log("htmlFragmentBuffer:", htmlFragmentBuffer);
-                    //convert literal \n characters to actual newlines and unescape quotes
-                    console.log("Before cleaning:", JSON.stringify(htmlFragmentBuffer));
                     // Handle both \\n (double escaped) and literal \n in the string
                     let cleanedFragment = htmlFragmentBuffer
                       .replace(/\\n/g, '\n')  // Convert \n to actual newlines
                       .replace(/\\"/g, '"')   // Convert \" to actual quotes
                       .replace(/\\t/g, '\t'); // Convert \t to actual tabs
-                    console.log("After cleaning:", JSON.stringify(cleanedFragment));
                     handleFragment(cleanedFragment);
                     htmlFragmentBuffer = ''; // clear buffer for next chunk.
                   }
@@ -1268,88 +1242,99 @@ console.log("ChatChannel created:", chatChannel); // Add this line
 
       modal.style.display = 'flex';
       const iframe = document.getElementById('fragmentIframe');
-      
-      if (typeof text === 'string') {
-        // Append the new fragment to our buffer
-        modal.htmlBuffer += text;
-        console.log("modal.htmlBuffer:", modal.htmlBuffer);
-        
-        // Stream the raw fragment to the terminal window
-        addToTerminal(text);
-        
+      const REFRESH_MS      = 2000;          // adjust to taste (100 ms ≈ 10 fps)
+      let flushTimer = null; // holds setTimeout id
+      let scrollTimeout = null; // holds scroll timeout id
+      modal.htmlBuffer = modal.htmlBuffer || '';
+
+      function streamToken(text) {
+        modal.htmlBuffer += text;          // keep buffering
+        addToTerminal(text);               // your existing terminal output
+
+        // schedule a single flush if none is queued
+        if (!flushTimer) {
+          flushTimer = setTimeout(flushIframe, REFRESH_MS);
+        }
+      }
+
+
+      function flushIframe() {
+        flushTimer = null; // allow next schedule
+
         try {
-          // Clean the HTML buffer before writing to iframe
-          let cleanedHTML = modal.htmlBuffer
-            .replace(/\\n/g, '\n')    // Convert \n to actual newlines
-            .replace(/\\"/g, '"')     // Convert \" to actual quotes
-            .replace(/\\t/g, '\t')    // Convert \t to actual tabs
-            .replace(/\\r/g, '\r');   // Convert \r to actual carriage returns
-          
-          cleanedHTML = sanitizeHtmlForPreview(cleanedHTML);
-          
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(cleanedHTML, 'text/html');
-          
+          const cleanedHTML = sanitizeHtmlForPreview(
+            modal.htmlBuffer
+              .replace(/\\n/g, '\n')
+              .replace(/\\"/g, '"')
+              .replace(/\\t/g, '\t')
+              .replace(/\\r/g, '\r')
+          );
+
           const iframeDoc = iframe.contentDocument;
           if (iframeDoc) {
             iframeDoc.open();
             iframeDoc.write(cleanedHTML);
             iframeDoc.close();
+
+            // Improved iframe height and scroll handling with error protection
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+              try {
+                // Get the iframe container
+                const iframeContainer = iframe.parentElement;
+                
+                // Calculate the maximum available height (80% of viewport height as per the container style)
+                const maxHeight = window.innerHeight * 0.8;
+                
+                // Safely get the content height with null checks
+                let contentHeight = 300; // Default fallback height
+                if (iframeDoc && iframeDoc.documentElement && iframeDoc.body) {
+                  contentHeight = Math.max(
+                    iframeDoc.documentElement.scrollHeight || 0,
+                    iframeDoc.documentElement.offsetHeight || 0,
+                    iframeDoc.documentElement.clientHeight || 0,
+                    iframeDoc.body.scrollHeight || 0,
+                    iframeDoc.body.offsetHeight || 0
+                  );
+                }
+
+                // Set iframe height to either content height or max height, whichever is smaller
+                iframe.style.height = Math.min(contentHeight, maxHeight) + 'px';
+                
+                // Enable scrolling if content is taller than available space
+                iframe.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
+                
+                // Ensure the iframe container doesn't exceed viewport
+                if (iframeContainer) {
+                  iframeContainer.style.maxHeight = '80vh';
+                  iframeContainer.style.overflowY = 'hidden';
+                }
+                
+                // Safely scroll to bottom
+                if (iframeDoc && iframeDoc.documentElement) {
+                  iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
+                }
+                if (iframeDoc && iframeDoc.body) {
+                  iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
+                }
+              } catch (scrollError) {
+                console.log('Error adjusting iframe height/scroll (safe to ignore):', scrollError);
+              }
+            }, 600);
+            
           } else {
             console.warn('Iframe document not accessible');
           }
-
-          // Improved iframe height and scroll handling with error protection
-          let scrollTimeout;
-          clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            try {
-              // Get the iframe container
-              const iframeContainer = iframe.parentElement;
-              
-              // Calculate the maximum available height (80% of viewport height as per the container style)
-              const maxHeight = window.innerHeight * 0.8;
-              
-              // Safely get the content height with null checks
-              let contentHeight = 300; // Default fallback height
-              if (iframeDoc && iframeDoc.documentElement && iframeDoc.body) {
-                contentHeight = Math.max(
-                  iframeDoc.documentElement.scrollHeight || 0,
-                  iframeDoc.documentElement.offsetHeight || 0,
-                  iframeDoc.documentElement.clientHeight || 0,
-                  iframeDoc.body.scrollHeight || 0,
-                  iframeDoc.body.offsetHeight || 0
-                );
-              }
-
-              // Set iframe height to either content height or max height, whichever is smaller
-              iframe.style.height = Math.min(contentHeight, maxHeight) + 'px';
-              
-              // Enable scrolling if content is taller than available space
-              iframe.style.overflowY = contentHeight > maxHeight ? 'auto' : 'hidden';
-              
-              // Ensure the iframe container doesn't exceed viewport
-              if (iframeContainer) {
-                iframeContainer.style.maxHeight = '80vh';
-                iframeContainer.style.overflowY = 'hidden';
-              }
-              
-              // Safely scroll to bottom
-              if (iframeDoc && iframeDoc.documentElement) {
-                iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
-              }
-              if (iframeDoc && iframeDoc.body) {
-                iframeDoc.body.scrollTop = iframeDoc.body.scrollHeight;
-              }
-            } catch (scrollError) {
-              console.log('Error adjusting iframe height/scroll (safe to ignore):', scrollError);
-            }
-          }, 600);
-          
         } catch (e) {
           console.log('Error processing HTML fragment (this is normal during streaming):', e);
           // Don't throw the error, just log it as this is expected during streaming
         }
+      }
+      
+      if (typeof text === 'string') {
+        
+        // Use the buffered approach for better performance
+        streamToken(text);
       } else {
         console.error('Unexpected content type:', text);
       }
