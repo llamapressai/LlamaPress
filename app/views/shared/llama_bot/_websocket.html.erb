@@ -282,6 +282,17 @@
                   let endingHtmlTagIndex = fullMessageBuffer.indexOf('</html>');
                   if (endingHtmlTagIndex != -1) {
                     htmlChunksEndedStreaming = true;
+                    
+                    // Add completion message to terminal
+                    const terminalContent = document.getElementById('terminalContent');
+                    const cursor = document.getElementById('terminalCursor');
+                    if (terminalContent && cursor) {
+                      cursor.remove();
+                      const completionText = '\n\n> HTML generation complete!\n> Ready for preview\n';
+                      terminalContent.appendChild(document.createTextNode(completionText));
+                      terminalContent.appendChild(cursor);
+                    }
+                    
                     let finishedHtml = document.getElementById('fragmentModal').htmlBuffer;
                     document.getElementById('fragmentModal').remove();
                     // addMessage("Generated Page: " + `\`\`\`html ${finishedHtml} \`\`\``, "system");
@@ -544,6 +555,64 @@ console.log("ChatChannel created:", chatChannel); // Add this line
     }
 
     /**
+    * Clears the terminal and shows startup message
+    */
+    function initializeTerminal() {
+      const terminalContent = document.getElementById('terminalContent');
+      const cursor = document.getElementById('terminalCursor');
+      
+      if (terminalContent && cursor) {
+        terminalContent.textContent = '';
+        window.terminalBytesReceived = 0; // Reset byte counter
+        const timestamp = new Date().toLocaleTimeString();
+        const startupText = `> [${timestamp}] Starting HTML generation...\n> Streaming tokens in real-time\n> Watching for incoming data...\n\n`;
+        terminalContent.appendChild(document.createTextNode(startupText));
+        terminalContent.appendChild(cursor);
+      }
+    }
+
+    /**
+    * Adds text to the streaming terminal window with typewriter effect
+    */
+    function addToTerminal(text) {
+      const terminalContent = document.getElementById('terminalContent');
+      const cursor = document.getElementById('terminalCursor');
+      
+      if (terminalContent && cursor) {
+        // Remove cursor temporarily
+        cursor.remove();
+        
+        // Show bytes received indicator occasionally (every ~50 characters)
+        window.terminalBytesReceived = (window.terminalBytesReceived || 0) + text.length;
+        if (window.terminalBytesReceived % 50 < text.length) {
+          const bytesText = `\n> [RECV] ${window.terminalBytesReceived} bytes received...\n`;
+          const bytesNode = document.createTextNode(bytesText);
+          terminalContent.appendChild(bytesNode);
+        }
+        
+        // Add the new text
+        const textNode = document.createTextNode(text);
+        terminalContent.appendChild(textNode);
+        
+        // Re-add cursor
+        terminalContent.appendChild(cursor);
+        
+        // Auto-scroll to bottom
+        terminalContent.scrollTop = terminalContent.scrollHeight;
+        
+        // Limit terminal content to prevent memory issues
+        const maxLines = 100;
+        const lines = terminalContent.textContent.split('\n');
+        if (lines.length > maxLines) {
+          const trimmedText = lines.slice(-maxLines).join('\n');
+          terminalContent.textContent = '';
+          terminalContent.appendChild(document.createTextNode(trimmedText));
+          terminalContent.appendChild(cursor);
+        }
+      }
+    }
+
+    /**
     * This function handles the fragment from the html stream and constructs the modal that displays it to the user.
     */
     function handleFragment(text) {
@@ -578,6 +647,90 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         iframe.style.height = '100%';
         iframe.style.border = 'none';
         iframe.style.borderRadius = '8px';
+
+        // Create terminal window overlay
+        const terminalWindow = document.createElement('div');
+        terminalWindow.id = 'streamingTerminal';
+        terminalWindow.style.position = 'absolute';
+        terminalWindow.style.bottom = '20px';
+        terminalWindow.style.right = '20px';
+        terminalWindow.style.width = '66.67%'; // 2/3 width
+        terminalWindow.style.height = '20%'; // 1/5 height
+        terminalWindow.style.backgroundColor = '#1a1a1a';
+        terminalWindow.style.border = '2px solid #333';
+        terminalWindow.style.borderRadius = '6px';
+        terminalWindow.style.fontFamily = 'Monaco, Consolas, "Courier New", monospace';
+        terminalWindow.style.fontSize = '11px';
+        terminalWindow.style.color = '#00ff00';
+        terminalWindow.style.zIndex = '10';
+        terminalWindow.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        terminalWindow.style.display = 'flex';
+        terminalWindow.style.flexDirection = 'column';
+
+        // Terminal header
+        const terminalHeader = document.createElement('div');
+        terminalHeader.style.backgroundColor = '#2d2d2d';
+        terminalHeader.style.padding = '6px 12px';
+        terminalHeader.style.borderBottom = '1px solid #444';
+        terminalHeader.style.borderTopLeftRadius = '4px';
+        terminalHeader.style.borderTopRightRadius = '4px';
+        terminalHeader.style.display = 'flex';
+        terminalHeader.style.alignItems = 'center';
+        terminalHeader.style.fontSize = '10px';
+        terminalHeader.style.color = '#ccc';
+
+        // Terminal dots (like macOS window controls)
+        const terminalDots = document.createElement('div');
+        terminalDots.style.display = 'flex';
+        terminalDots.style.gap = '4px';
+        terminalDots.innerHTML = `
+          <div style="width: 8px; height: 8px; background: #ff5f56; border-radius: 50%;"></div>
+          <div style="width: 8px; height: 8px; background: #ffbd2e; border-radius: 50%;"></div>
+          <div style="width: 8px; height: 8px; background: #27ca3f; border-radius: 50%;"></div>
+        `;
+
+        // Terminal title
+        const terminalTitle = document.createElement('div');
+        terminalTitle.textContent = 'Live Stream';
+        terminalTitle.style.marginLeft = '8px';
+        terminalTitle.style.fontWeight = 'bold';
+
+        // Terminal content area
+        const terminalContent = document.createElement('div');
+        terminalContent.id = 'terminalContent';
+        terminalContent.style.flex = '1';
+        terminalContent.style.padding = '8px';
+        terminalContent.style.overflow = 'auto';
+        terminalContent.style.whiteSpace = 'pre-wrap';
+        terminalContent.style.wordBreak = 'break-all';
+        terminalContent.style.lineHeight = '1.3';
+
+        // Cursor
+        const cursor = document.createElement('span');
+        cursor.id = 'terminalCursor';
+        cursor.textContent = '█';
+        cursor.style.animation = 'blink 1s infinite';
+        cursor.style.color = '#00ff00';
+
+        // Add blinking animation
+        if (!document.querySelector('#terminal-blink-style')) {
+          const style = document.createElement('style');
+          style.id = 'terminal-blink-style';
+          style.textContent = `
+            @keyframes blink {
+              0%, 50% { opacity: 1; }
+              51%, 100% { opacity: 0; }
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        // Assemble terminal
+        terminalHeader.appendChild(terminalDots);
+        terminalHeader.appendChild(terminalTitle);
+        terminalWindow.appendChild(terminalHeader);
+        terminalWindow.appendChild(terminalContent);
+        terminalContent.appendChild(cursor);
 
         // Create overlay div
         const overlay = document.createElement('div');
@@ -645,11 +798,15 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         overlay.appendChild(lottieContainer);
         iframeContainer.appendChild(overlay);
         iframeContainer.appendChild(iframe);
+        iframeContainer.appendChild(terminalWindow);
         modal.appendChild(iframeContainer);
         document.body.appendChild(modal);
 
         // Add a buffer property to the modal
         modal.htmlBuffer = '';
+        
+        // Initialize the terminal with startup message
+        setTimeout(() => initializeTerminal(), 100);
       }
 
       modal.style.display = 'flex';
@@ -659,6 +816,9 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         // Append the new fragment to our buffer
         modal.htmlBuffer += text;
         console.log("modal.htmlBuffer:", modal.htmlBuffer);
+        
+        // Stream the raw fragment to the terminal window
+        addToTerminal(text);
         
         try {
           // Clean the HTML buffer before writing to iframe
