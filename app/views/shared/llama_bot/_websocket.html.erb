@@ -133,6 +133,10 @@
     let fullMessageBuffer = ''; // Save this entirely for accurate parsing.
     let htmlChunksStartedStreaming = false;
     let htmlChunksEndedStreaming = false;
+
+    let currentCodeExplanationFromLLM = '';
+    let codeExplanationStartedStreaming = false;
+    let codeExplanationEndedStreaming = false;
     
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
       chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
@@ -266,8 +270,28 @@
                   }
 
                   let tool_call_data = parsedData.base_message.tool_call_chunks[0].args; //get tool call data.
+
                   htmlFragmentBuffer += tool_call_data;
                   fullMessageBuffer += tool_call_data;
+                  
+                  if (codeExplanationStartedStreaming) {
+                    currentCodeExplanationFromLLM += tool_call_data;
+                    let codeExplanationTagIndex = currentCodeExplanationFromLLM.indexOf('</code_explanation>');
+                    if (codeExplanationTagIndex != -1) {
+                      codeExplanationEndedStreaming = true;
+                      currentCodeExplanationFromLLM = currentCodeExplanationFromLLM.substring(0, codeExplanationTagIndex);
+                      codeExplanationStartedStreaming = false;
+                      console.log("Code explanation from LLM:", currentCodeExplanationFromLLM);
+                    }
+                  }
+                  
+                                     // if there is a <code_explanation>: in the fullMessageBuffer, then we need to add it to the currentExplanationFromLLM
+                   let codeExplanationTagIndex = fullMessageBuffer.indexOf('<code_explanation>');
+                   if (codeExplanationTagIndex != -1) {
+                     codeExplanationStartedStreaming = true;
+                     // Skip past the opening tag by adding its length (18 characters)
+                     currentCodeExplanationFromLLM = fullMessageBuffer.substring(codeExplanationTagIndex + 18);
+                   }
 
                   //search for <!doctype in the htmlFragmentBuffer
                   let htmlTagIndex = htmlFragmentBuffer.indexOf('<html');
@@ -530,25 +554,39 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         chatContainer.style.display = '';
       }
     }
-
-         
-
     /**
     * Sanitizes HTML content for safe preview in iframe during streaming.
-    * Removes or modifies potentially problematic JavaScript that might execute before DOM is ready.
+    * Removes potentially problematic inline JavaScript that might execute before DOM is ready.
+    * Preserves all external scripts (CDNs, frameworks, etc.) which are generally safe and necessary.
     */
     function sanitizeHtmlForPreview(html) {
-      // Replace script tags with a safe placeholder that won't execute
-      html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '<!-- Script removed for preview -->');
+      // Preserve ALL external scripts (those with src attributes) - they're generally safe and necessary
+      const preservedScripts = [];
+      const externalScriptPattern = /<script\b[^>]*src\s*=\s*["'][^"']*["'][^>]*><\/script>/gi;
       
-      // Remove inline event handlers that might cause issues
+      // Extract and preserve external scripts
+      html = html.replace(externalScriptPattern, function(match) {
+        preservedScripts.push(match);
+        return `<!--PRESERVED_SCRIPT_${preservedScripts.length - 1}-->`;
+      });
+      
+      // Only remove inline scripts (those without src) that might have DOM access issues
+      html = html.replace(/<script\b(?![^>]*src\s*=)[^>]*>[\s\S]*?<\/script>/gi, function(match) {
+        // If it's a simple script that doesn't seem to access DOM, keep it but wrap in try-catch
+        if (match.length < 200 && !match.includes('document.') && !match.includes('getElementById') && !match.includes('querySelector')) {
+          return match.replace(/(<script[^>]*>)([\s\S]*?)(<\/script>)/gi, function(full, openTag, content, closeTag) {
+            return openTag + 'try { ' + content + ' } catch(e) { console.log("Preview script error:", e); }' + closeTag;
+          });
+        }
+        return '<!-- Potentially problematic inline script removed for preview -->';
+      });
+      
+      // Remove inline event handlers that might cause issues  
       html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
       
-      // Wrap any remaining inline scripts in try-catch
-      html = html.replace(/(<script[^>]*>)([\s\S]*?)(<\/script>)/gi, function(match, openTag, content, closeTag) {
-        return openTag + 
-          'try { ' + content + ' } catch(e) { console.log("Preview script error (safe to ignore):", e); }' + 
-          closeTag;
+      // Restore preserved external scripts
+      preservedScripts.forEach((script, index) => {
+        html = html.replace(`<!--PRESERVED_SCRIPT_${index}-->`, script);
       });
       
       return html;
@@ -828,8 +866,6 @@ console.log("ChatChannel created:", chatChannel); // Add this line
             .replace(/\\t/g, '\t')    // Convert \t to actual tabs
             .replace(/\\r/g, '\r');   // Convert \r to actual carriage returns
           
-          // Sanitize JavaScript to prevent execution errors during streaming
-          // This removes potentially problematic scripts that might execute before DOM is ready
           cleanedHTML = sanitizeHtmlForPreview(cleanedHTML);
           
           const parser = new DOMParser();
