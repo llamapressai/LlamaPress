@@ -1,0 +1,9 @@
+07/26/25, 7:51AM: Fixed realtime HTML Streaming in _websocket.html.erb file that's responsible for the user's interactions with the Leonardo (LlamaPress) agent.
+- We're relying on LangGraph's stream_mode 
+
+07/31/2025: 
+- UX: Drastically improve user experience when streaming in HTML from the LLM.
+- Fix: iframe buffer overwhelmed when streaming HTML, added buffer and refresh iframe to once every 500 ms
+
+0.1.14 Release:
+- Realtime HTML streaming as the page is being created by LlamaBot.
