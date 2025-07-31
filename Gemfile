@@ -82,8 +82,8 @@ gem 'builder'
 gem 'google-cloud-logging'
 gem 'ostruct'
 
-# gem 'llama_bot_rails', '0.1.10'
-gem 'llama_bot_rails', path: "vendor/gems/llama_bot_rails"
+gem 'llama_bot_rails', '0.1.14'
+# gem 'llama_bot_rails', path: "vendor/gems/llama_bot_rails"
 # gem 'llama_bot_rails', github: "kodykendall/llama_bot_rails"
 
 gem "dockerfile-rails", ">= 1.7", :group => :development

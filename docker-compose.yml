@@ -52,7 +52,7 @@ services:
       - redis
 
   llamabot-backend:
-    image: kody06/llamabot:0.1.12
+    image: kody06/llamabot:0.1.14
     env_file:
       - .env
     environment:
