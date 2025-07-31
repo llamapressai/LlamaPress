@@ -3,9 +3,14 @@ test:
   root: <%= Rails.root.join("tmp/storage") %>
 
 local:
-  service: Disk
-  root: <%= Rails.root.join("storage") %>
-
+  service: S3
+  access_key_id: <%= ENV["AWS_KEY"] %>  
+  secret_access_key: <%= ENV["AWS_PASS"] %>
+  region: <%= ENV["AWS_REGION"] %>
+  bucket: <%= ENV["AWS_BUCKET"] %>
+  http_open_timeout: 10
+  http_read_timeout: 300
+  retry_limit: 10
 
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 amazon:
