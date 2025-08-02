@@ -5,6 +5,9 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
+# curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/1f87d34/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1f87d34/install_llamapress.sh" | bash
+
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
 
@@ -17,8 +20,7 @@ set -e
 if ! command -v docker >/dev/null 2>&1; then
     # Silence all interactive prompts and keep local config files
     export DEBIAN_FRONTEND=noninteractive
-    APT_OPTS='-y -q -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
-
+    APT_OPTS='-y -q'
     # 1-a  Update package index & apply security upgrades
     sudo apt-get update
 
