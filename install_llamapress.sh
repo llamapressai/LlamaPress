@@ -4,10 +4,8 @@
 # This script installs Docker, Docker Compose, and LlamaPress on a 
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
-# curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/0edfc87/install_llamapress.sh" | bash
-
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/142a771/install_llamapress.sh" -o install_llamapress.sh
+# bash install_llamapress.sh
 # ---------------------------------------------------------------------
 
 #!/usr/bin/env bash
@@ -53,7 +51,6 @@ if ! command -v docker >/dev/null 2>&1; then
 
     # 1-d  (Optional) Allow current user to run Docker without sudo
     sudo usermod -aG docker "$USER"
-    sudo newgrp docker   # re-evaluate group membership for this shell
 fi
 
 # 2. Clone (or curl) config files
