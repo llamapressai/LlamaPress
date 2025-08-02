@@ -77,7 +77,6 @@ AWS_REGION='your-region'
 
 # A Record Domain to this specific LlamaPress, Needed for pages#home controller method if you want multi-site routing.
 # HOSTED_DOMAIN="llamapress.ai" 
-HOSTED_DOMAIN=${HOSTED_DOMAIN}
 OPENAI_API_KEY=${OPENAI_API_KEY}
 
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -102,7 +101,11 @@ services:
     ports:
       - "8080:3000"                            # http://server_ip/
     restart: unless-stopped
-    depends_on: [db, redis]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - llama-network
 
@@ -113,7 +116,9 @@ services:
     command: bash -c "python init_pg_checkpointer.py --uri $$DB_URI && uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
-    depends_on: [db]
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - llama-network
 
@@ -128,6 +133,11 @@ services:
     restart: unless-stopped
     networks:
       - llama-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d llamapress_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
