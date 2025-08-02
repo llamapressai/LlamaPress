@@ -1,3 +1,12 @@
+##
+# LlamaPress Installation Script
+# ---------------------------------------------------------------------
+# This script installs Docker, Docker Compose, and LlamaPress on a 
+# fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
+# To run:
+# curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh | bash
+# ---------------------------------------------------------------------
+
 #!/usr/bin/env bash
 set -e
 
@@ -7,9 +16,7 @@ set -e
 if ! command -v docker >/dev/null 2>&1; then
     # Silence all interactive prompts and keep local config files
     export DEBIAN_FRONTEND=noninteractive
-    APT_OPTS='-y -q \
-              -o Dpkg::Options::="--force-confdef" \
-              -o Dpkg::Options::="--force-confold"'
+    APT_OPTS='-y -q -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
 
     # 1-a  Update package index & apply security upgrades
     sudo apt-get update
