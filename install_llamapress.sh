@@ -5,7 +5,7 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1aa5607/install_llamapress.sh" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1a57a22/install_llamapress.sh" | bash
 
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
@@ -158,8 +158,8 @@ fi
 
 sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
 ${SERVER_NAME} {
-    reverse_proxy 127.0.0.1:8080
     encode gzip
+    reverse_proxy 127.0.0.1:8080
 }
 EOF
 
@@ -173,9 +173,11 @@ sudo systemctl reload caddy
 # 7. Pull images & launch everything
 sudo docker compose pull          # fetch images
 sudo docker compose up -d         # start in the background
-sudo docker compose logs -f llamapress   # watch until you see:
+# sudo docker compose logs -f llamapress   # watch until you see:
+
+sudo docker compose exec llamapress bundle exec rails db:migrate && sudo docker compose exec llamapress bundle exec rails db:seed
 
 curl -I http://localhost:8080/health
 
 # 8. Print URL
-echo "LlamaPress deployed! Visit http://$(curl -s ifconfig.me) to finish setup."
+echo "LlamaPress deployed! Visit http://$(curl -4 ifconfig.me) to finish setup."
