@@ -5,7 +5,7 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/508f37f/install_llamapress.sh" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/211d7ed/install_llamapress.sh" | bash
 
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
@@ -64,11 +64,10 @@ REDIS_URL="redis://redis:6379/1"
 LLAMABOT_WEBSOCKET_URL="ws://llamabot:8000/ws"
 LLAMAPRESS_API_URL="http://llamapress:3000"
 
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_BUCKET=your-bucket-name
-ACTIVE_STORAGE_SERVICE=s3
+AWS_KEY='your-access-key'
+AWS_PASS='your-secret-key'
+AWS_BUCKET='your-bucket-name'
+AWS_REGION='your-region'
 
 # A Record Domain to this specific LlamaPress, Needed for pages#home controller method if you want multi-site routing.
 # HOSTED_DOMAIN="llamapress.ai" 
