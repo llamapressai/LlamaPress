@@ -5,6 +5,7 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
 
 #!/usr/bin/env bash
@@ -16,34 +17,30 @@ set -e
 if ! command -v docker >/dev/null 2>&1; then
     # Silence all interactive prompts and keep local config files
     export DEBIAN_FRONTEND=noninteractive
-    APT_OPTS='-y -q -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"'
+    # 1-a  Update the package index & upgrade any security patches
+    sudo apt-get update && sudo apt-get -y dist-upgrade
 
-    # 1-a  Update package index & apply security upgrades
-    sudo apt-get update
-    sudo apt-get $APT_OPTS dist-upgrade
-
-    # 1-b  Install Docker prerequisites & add Docker’s APT repo
-    sudo apt-get $APT_OPTS install ca-certificates curl gnupg
+    # 1-b  Install the official Docker engine (adds the Docker APT repo first)
+    sudo apt-get install -y ca-certificates curl gnupg
     sudo install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-         sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
     echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-      https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
-      sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+    https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     sudo apt-get update
-    sudo apt-get $APT_OPTS install docker-ce docker-ce-cli \
-                                   containerd.io docker-buildx-plugin \
-                                   docker-compose-plugin
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     # 1-c  Enable & start Docker daemon
     sudo systemctl enable --now docker
 
-    # 1-d  (Optional) Allow current user to run Docker without sudo
-    sudo usermod -aG docker "$USER"
-    sudo newgrp docker   # re-evaluate group membership for this shell
+    # 1-d  (Optional) Let the current user run Docker without sudo
+    sudo usermod -aG docker $USER
+# Log out & back in (or run 'newgrp docker') for group change to take effect
+    # sudo newgrp docker   # re-evaluate group membership for this shell
 fi
 
 # 2. Clone (or curl) config files
