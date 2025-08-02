@@ -5,7 +5,7 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1982d64/install_llamapress.sh" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1aa5607/install_llamapress.sh" | bash
 
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
@@ -52,7 +52,7 @@ mkdir -p llamapress && cd llamapress
 
 # 3. Generate secrets
 NEW_KEY=$(openssl rand -hex 64)
-PW=$(openssl rand -hex 16)
+POSTGRES_PASSWORD=$(openssl rand -hex 16)
 
 # [Generate POSTGRES_PASSWORD, SECRET_KEY_BASE, etc...]
 
@@ -72,6 +72,7 @@ AWS_REGION='your-region'
 # A Record Domain to this specific LlamaPress, Needed for pages#home controller method if you want multi-site routing.
 # HOSTED_DOMAIN="llamapress.ai" 
 
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 DB_URI="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/llamapress_production"
 DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/llamapress_production"
 SECRET_KEY_BASE=${NEW_KEY}
