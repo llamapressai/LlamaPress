@@ -5,7 +5,7 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/211d7ed/install_llamapress.sh" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1982d64/install_llamapress.sh" | bash
 
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
@@ -71,6 +71,10 @@ AWS_REGION='your-region'
 
 # A Record Domain to this specific LlamaPress, Needed for pages#home controller method if you want multi-site routing.
 # HOSTED_DOMAIN="llamapress.ai" 
+
+DB_URI="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/llamapress_production"
+DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/llamapress_production"
+SECRET_KEY_BASE=${NEW_KEY}
 EOF
 
 # 5. Write docker-compose.yml
