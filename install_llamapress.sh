@@ -5,13 +5,22 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL https://raw.githubusercontent.com/llamapressai/LlamaPress/refs/heads/feat/5-min-install/install_llamapress.sh?$(date +%s) | bash
-# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/1a57a22/install_llamapress.sh" | bash
+# curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/0edfc87/install_llamapress.sh" | bash
 
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/feat/5-min-install/install_llamapress.sh?$(date +%s)" | bash
 # ---------------------------------------------------------------------
 
 #!/usr/bin/env bash
 set -e
+
+# Prompt for OpenAI API Key
+read -p "Enter your OpenAI API Key: " OPENAI_API_KEY
+export OPENAI_API_KEY
+
+# Prompt for Hosted Domain
+read -p "Enter your hosted domain (e.g., example.com): " HOSTED_DOMAIN
+export HOSTED_DOMAIN
+
 
 # ---------------------------------------------------------------------
 # 1. Install Docker & Compose if not present -- non-interactive
@@ -71,6 +80,8 @@ AWS_REGION='your-region'
 
 # A Record Domain to this specific LlamaPress, Needed for pages#home controller method if you want multi-site routing.
 # HOSTED_DOMAIN="llamapress.ai" 
+HOSTED_DOMAIN=${HOSTED_DOMAIN}
+OPENAI_API_KEY=${OPENAI_API_KEY}
 
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 DB_URI="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/llamapress_production"
