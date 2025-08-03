@@ -5,7 +5,6 @@
 # fresh Ubuntu 24.04 instance. It also sets up Caddy as a reverse proxy.
 # To run:
 # curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/35fa043/install_llamapress.sh" -o install_llamapress.sh && bash install_llamapress.sh
-# bash install_llamapress.sh
 # ---------------------------------------------------------------------
 
 #!/usr/bin/env bash

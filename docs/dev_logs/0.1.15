@@ -1,3 +1,7 @@
 08/02/2025: 
 - Add Tailwind application.css
 - Add Dockerfile.prod
+
+Feature: 
+- Added 5 minute install script! 
+- Easily deploy LlamaPress to production by running this command: curl -fsSL "https://raw.githubusercontent.com/llamapressai/LlamaPress/35fa043/install_llamapress.sh" -o install_llamapress.sh && bash install_llamapress.sh
