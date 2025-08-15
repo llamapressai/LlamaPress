@@ -95,7 +95,6 @@ services:
     environment:
       RAILS_ENV: production
     volumes:
-      - bundle_cache:/usr/local/bundle       # re-uses gems across image bumps
       - rails_storage:/rails/storage         # ActiveStorage local files
     ports:
       - "8080:3000"                            # http://server_ip/
@@ -122,7 +121,7 @@ services:
       - llama-network
 
   db:
-    image: postgres:15
+    image: postgres:16
     environment:
       POSTGRES_DB:      llamapress_production
       POSTGRES_USER:    postgres
@@ -148,7 +147,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  bundle_cache:
   rails_storage:
   
 # Declare the external network
