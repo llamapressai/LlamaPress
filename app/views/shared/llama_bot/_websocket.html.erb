@@ -127,7 +127,7 @@
     const consumer = ActionCable.createConsumer();
     connectionCheckInterval = setInterval(updateConnectionStatus, 1000);
 
-    sessionId = "<%= @page&.id %>"; // This groups our convo message history by page id automatically using by relying on langgraph's psql checkpointer
+    sessionId = "<%= @page&.id || 1 %>"; // This groups our convo message history by page id automatically using by relying on langgraph's psql checkpointer
 
     let htmlFragmentBuffer = ''; // to save when HTML doc is getting streamed back to us.
     let fullMessageBuffer = ''; // Save this entirely for accurate parsing.
@@ -139,9 +139,16 @@
     let codeExplanationEndedStreaming = false;
     let lastProcessedExplanationIndex = -1; // Track the last explanation we processed
     let completedExplanations = []; // Store all completed explanations
-    
+      
+      // This is a placeholder example of how to route to a different Agent State Builder based on current page we're viewing. Google Ads Agent isn't available in OSS yet, reach out to Kody if you want access.
+    <%# if request&.path&.include?("ads_dashboard") || request&.path&.include?("keywords") %>
+      <%# agent_state_builder = "AdsAgentStateBuilder" %>
+    <%# else %>
+      <%# agent_state_builder = nil %>
+    <%# end %>
+
     // Initialize ActionCable Consumer (this is the channel we're subscribing to in chat_channel.rb)
-      chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId},
+      chatChannel = consumer.subscriptions.create({channel: 'LlamaBotRails::ChatChannel', session_id: sessionId, agent_state_builder_class: "<%= defined?(agent_state_builder) ? agent_state_builder : nil %>"},
       {
         /**
          * Receives message responses from LlamaBot Backend.
@@ -177,10 +184,6 @@
             //console.log("Parsed message data:", parsedData);
 
             // This will run regardless of success or failure
-            if (parsedData.type !== 'think_message') {
-              isLoading = false;
-              hideLoadingIndicator();
-            }
             
             // Reset send button state
             const sendButton = document.getElementById('sendButton');
@@ -198,20 +201,33 @@
               case 'ai': // New gem format
                 // Finish any streaming message when we get a complete AI message
                 finishStreamingMessage();
-                
+
                 //TODO: This is a hacky way to format our message to add a brain for tool-calling. We need to refactor this.
                 // We need to DRY up this code somehow by making the formatting be handled in a single place. 
                 // Right now, similar logic is happening in multiple places: _websocket.html.erb, _core_javascript.html.erb, chat_channel.rb, and pages_controller.rb.
-                if (!parsedData.content && parsedData.additional_kwargs && "tool_calls" in parsedData.additional_kwargs){
-                  //sorry for using this quick & dirty way to titleize the tool name.
-                  let titleized_tool_name = parsedData.additional_kwargs["tool_calls"][0]["function"]["name"].replace( //https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
-                      /\w\S*/g,
-                      text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
-                    );
+                if (!parsedData.content) {
+                  if(parsedData.additional_kwargs && "tool_calls" in parsedData.additional_kwargs){
+                    //sorry for using this quick & dirty way to titleize the tool name.
+                    let titleized_tool_name = parsedData.additional_kwargs["tool_calls"][0]["function"]["name"].replace( //https://stackoverflow.com/questions/196972/convert-string-to-title-case-with-javascript
+                        /\w\S*/g,
+                        text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase()
+                      );
 
-                  parsedData.content = "🧠: " + titleized_tool_name + " called with arguments: " + parsedData.additional_kwargs["tool_calls"][0]["function"]["arguments"]
+                    parsedData.content = "🧠: " + titleized_tool_name + " called with arguments: " + parsedData.additional_kwargs["tool_calls"][0]["function"]["arguments"]
+                  }
+                  else if (parsedData.base_message && parsedData.base_message.tool_calls && parsedData.base_message.tool_calls.length > 0){
+                    //tool call following this format.
+                    // This is the format of most tool calls now going forward. (LlamaBot standard)
+                      //parsedData.base_message.tool_calls[0]
+                      //{name: 'clone_image_tool', args: {…}, id: 'call_HO9yh30WUS1upFw0K1FgavZs', type: 'tool_call'}args: image_url: "https://llamapress-ai-image-uploads.s3.us-west-2.amazonaws.com/dfyabudvss9or33cwgc6pw6q5x54"[[Prototype]]: Objectid: "call_HO9yh30WUS1upFw0K1FgavZs"name: "clone_image_tool"type: "tool_call"[[Prototype]]: Object
+                      if (parsedData.base_message.tool_calls[0].name == "clone_image_tool"){
+                        parsedData.content = "🔍 I'm looking at your image now! This might take a minute or two..."
+                      }
+                  }
                 }
                 else { //return early -- since we're listening to AIMessageChunks, we don't want to add this ai message to the chat if it's not a tool call.
+                  isLoading = false;
+                  hideLoadingIndicator();
                   break;
                 }
 
@@ -598,6 +614,31 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       chatbotContainer.classList.toggle("hidden", !isOpen);
     }
 
+    function openPreview() {
+      const currentUrl = window.location.href;
+      const queryIndex = currentUrl.indexOf('?');
+      const hashIndex = currentUrl.indexOf('#');
+
+      let splitIndex = -1;
+      if (queryIndex !== -1 && hashIndex !== -1) {
+        splitIndex = Math.min(queryIndex, hashIndex);
+      } else if (queryIndex !== -1) {
+        splitIndex = queryIndex;
+      } else if (hashIndex !== -1) {
+        splitIndex = hashIndex;
+      }
+
+      const baseUrl = splitIndex !== -1 ? currentUrl.substring(0, splitIndex) : currentUrl;
+      const restOfUrl = splitIndex !== -1 ? currentUrl.substring(splitIndex) : '';
+
+      const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+      const newUrl = `${cleanBaseUrl}/preview${restOfUrl}`;
+
+      window.open(newUrl, '_blank');
+      window.location.reload();
+    }
+
     // Global variable to track the current streaming message
     let currentStreamingMessage = null;
     let streamingMessageBuffer = '';
@@ -606,11 +647,11 @@ console.log("ChatChannel created:", chatChannel); // Add this line
       if (sender != "AIMessageChunk") { //AIMessageChunk is a special case, it's not a message, it's a chunk of a message.
         const messageDiv = document.createElement("div");
         messageDiv.className = `p-2 rounded ${
-          sender === "bot" ? "bg-blue-100" : 
+          sender === "bot" || sender === "ai_message" ? "bg-blue-100" : 
           sender === "user" ? "bg-green-100" : 
           sender === "error" ? "bg-red-100" : 
           sender === "system" ? "bg-gray-100 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
-          sender === "tool" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
+          sender === "tool" || sender === "ai" ? "bg-gray-50 border border-gray-200 text-xs text-gray-600 px-3 py-1" : 
           "bg-gray-100"
         }`;
 
@@ -619,7 +660,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         // Example: write_html_page tool call will show the full html page in a modal.
         // Example 2: ChatGPT uses tool calls like Canvas to display their generated document/code.
         // Example 3: Rails Console Agent formats the terminal input commands and makes it look like a terminal.
-        if (sender === "tool") {
+        if (sender === "tool" || sender === "ai") {
           let formattedContent = formatMessage(text, sender);
           try {
             let json_payload = JSON.parse(text)
@@ -632,7 +673,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
               formattedContent = `
                 <iframe src="data:text/html;charset=utf-8,${encodeURIComponent(full_html_page)}" width="100%" height="100%"></iframe>
                 <div class="mt-4 text-center">
-                  <button onclick="window.open(window.location.href + '/preview', '_blank'); window.location.reload();" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                  <button onclick="openPreview()" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
@@ -641,7 +682,14 @@ console.log("ChatChannel created:", chatChannel); // Add this line
                 </div>
               `;
             }
-
+            else if (tool_name == "clone_image_tool"){
+              formattedContent = `
+                <img src="${tool_args['image_url']}" alt="Cloned Image" class="w-full h-auto">
+                <div class="mt-4 text-center">
+                <h1> I'm looking at your image now! This might take a minute or two..</h1>
+                </div>
+              `;
+            }
             else {
               formattedContent = formatMessage(text, sender);
             }
@@ -657,7 +705,7 @@ console.log("ChatChannel created:", chatChannel); // Add this line
         }
       }
 
-      else {
+      else { // this is an AIMessageChunk
         // Handle streaming AIMessageChunk with markdown rendering
         // If this is the first chunk, create a new message bubble
         if (!currentStreamingMessage) {
@@ -1470,8 +1518,6 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
         webPageId: "<%=@page&.id%>",
       });
       
-      sendButton.removeEventListener('click', cancelHandler);
-      
       setTimeout(() => {
         sendButton.disabled = false;
         sendButton.textContent = 'Send';
@@ -1480,8 +1526,6 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
       }, 1000);
     };
     
-    sendButton.addEventListener('click', cancelHandler);
-    
     if (!sessionId) {
       console.error("Session ID not available");
       errorCallback(new Error("Session ID not available"));
@@ -1489,6 +1533,7 @@ async function sendUserMessageOverSocket(userMessage, selectedElementInnerHtml, 
     }
 
     chatChannel.send({
+      raw_params: <%= raw params.to_json %>,
       message: userMessage,
       thread_id: sessionId, // Use session ID as thread ID for conversation tracking
       context: "<%=@view_path%>",

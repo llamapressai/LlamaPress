@@ -1,0 +1,10 @@
+08/15/2025 
+- Fix bundle caching issue in install script docker compose production.
+- Bump Gemfile version up to 0.1.16. 
+- In _websocket.html.erb, document how to use a different agent_state_builder with websocket parameters when initializing an active cable subscription. (0.1.16 functionality for multi-agent routing)
+    - This adds in ability to route to a different Agent State Builder based on current page we're viewing.
+    - Fix the spinning thinking indicator terminating early on tool-calls. Only terminate when we get AI message response.
+    - Fix issue with "View Changes" on write_html_page tool call, where it naively appended /preview, when it needs to put it before any query params. This fixes a broken user experience when viewing an outputted HTML page.
+    - Pass raw_params to agent_state_builder so it can set the correct context that the LLM will consume
+    - Fix broken cancel handler that is no longer working, and is confusing for end user. (Will need to add back later once we figure out the right approach to fix it).
+- UI/UX: Improved Clone Image Tool UI/UX experience (shows the image mid-clone).
