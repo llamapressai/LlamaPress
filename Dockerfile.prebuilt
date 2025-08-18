@@ -68,4 +68,4 @@ CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 # to test: 
     #   docker-compose down -v --remove-orphans && docker system prune -a --volumes   
 # to build & push: 
-    #   docker buildx build --file Dockerfile.prebuilt --platform linux/amd64,linux/arm64 --tag kody06/llamapress:latest --push .
+    #   docker buildx build --file Dockerfile.prebuilt --platform linux/amd64,linux/arm64 --tag kody06/llamapress:0.1.16 --push .

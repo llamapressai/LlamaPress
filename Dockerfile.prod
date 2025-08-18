@@ -37,7 +37,7 @@ RUN npm config set fund false --global
 WORKDIR /rails
 
 # Set ENV for bundler
-ENV RAILS_ENV="development" \
+ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BOOTSNAP_CACHE_DIR="/rails/tmp/cache/bootsnap"
 
@@ -62,7 +62,7 @@ COPY . .
 # Expose port 3000
 EXPOSE 3000
 
-ENV RAILS_ENV="production"
+# ENV RAILS_ENV="production"
 # Needed to compile assets, we swap this out for the real secret key base in the production environment
 ENV SECRET_KEY_BASE=dummydummydummydummydummydummydummydummydummydummydummydummydummydummydummydummydummydummydummy 
 RUN bundle exec rails assets:precompile
@@ -73,5 +73,5 @@ CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
 # to test: 
     #   docker-compose down -v --remove-orphans && docker system prune -a --volumes   
 # to build & push: 
-    #   docker buildx build --file Dockerfile.prod --platform linux/amd64,linux/arm64 --tag kody06/llamapress:latest --push .
-    #   docker buildx build --file Dockerfile.prod --platform linux/amd64 --tag kody06/llamapress:latest --push .
+    #   docker buildx build --file Dockerfile.prod --platform linux/amd64,linux/arm64 --tag kody06/llamapress:0.1.16 --push .
+    #   docker buildx build --file Dockerfile.prod --platform linux/amd64 --tag kody06/llamapress:0.1.16 --push .

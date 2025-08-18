@@ -21,8 +21,8 @@ services:
     volumes:
       - redis_data:/data
 
-  web:
-    image: kody06/llamapress:0.1.14
+  llamapress:
+    image: kody06/llamapress:0.1.16
     # build:
     #   context: .
     #   dockerfile: Dockerfile.dev
@@ -51,8 +51,8 @@ services:
       - db
       - redis
 
-  llamabot-backend:
-    image: kody06/llamabot:0.1.14
+  llamabot:
+    image: kody06/llamabot:0.1.16
     env_file:
       - .env
     environment:
