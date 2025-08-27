@@ -108,5 +108,11 @@ class ApplicationController < ActionController::Base
     
     # Add CSP header
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://* https://*;"
-  end  
+
+    if Rails.env.development?
+      response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://localhost:8000 http://127.0.0.1:8000 http://* https://*;"
+    else
+      response.headers['Content-Security-Policy'] = "frame-ancestors 'self' http://* https://*;"
+    end    
+  end
 end
