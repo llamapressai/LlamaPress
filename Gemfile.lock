@@ -354,7 +354,11 @@ GEM
     parser (3.3.5.0)
       ast (~> 2.4.1)
       racc
-    pg (1.5.7)
+    pg (1.6.3)
+    pg (1.6.3-aarch64-linux)
+    pg (1.6.3-arm64-darwin)
+    pg (1.6.3-x86_64-darwin)
+    pg (1.6.3-x86_64-linux)
     playwright-ruby-client (1.48.0)
       concurrent-ruby (>= 1.1.6)
       mime-types (>= 3.0)
@@ -558,7 +562,7 @@ DEPENDENCIES
   llama_bot_rails (= 0.1.16)
   mocha
   ostruct
-  pg (= 1.5.7)
+  pg (= 1.6.3)
   puma (>= 5.0)
   rails (~> 7.2.1)
   rails-controller-testing
